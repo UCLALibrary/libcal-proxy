@@ -1,0 +1,18 @@
+
+# Maven build artifacts
+target/
+src/main/generated
+dependency-reduced-pom.xml
+.flattened-pom.xml
+
+# Eclipse ID artifacts
+.settings/
+.project
+.classpath
+
+# Vert.x test artifacts
+file-uploads/
+vertx-start-process.id
+
+# Generated build artifacts
+src/main/tools/eclipse
