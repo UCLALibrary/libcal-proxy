@@ -25,6 +25,6 @@ Alternatively, the process can be put in the background with:
 
 ## Contact
 
-We use an internal ticketing system, but have left the GitHub [issues](https://github.com/UCLALibrary/fester/issues)
+We use an internal ticketing system, but have left the GitHub [issues](https://github.com/UCLALibrary/libcal-proxy/issues)
 open in case you'd like to file a ticket or make a suggestion. Thanks for checking the project out!
 
