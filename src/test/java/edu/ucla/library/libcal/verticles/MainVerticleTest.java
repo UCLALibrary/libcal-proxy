@@ -1,5 +1,5 @@
 
-package info.freelibrary.vertx.template.verticles;
+package edu.ucla.library.libcal.verticles;
 
 import static info.freelibrary.util.Constants.INADDR_ANY;
 
@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 
 import info.freelibrary.util.HTTP;
 
-import info.freelibrary.vertx.template.Config;
+import edu.ucla.library.libcal.Config;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;

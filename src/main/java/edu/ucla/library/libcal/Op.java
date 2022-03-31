@@ -1,13 +1,13 @@
 
-package info.freelibrary.vertx.template;
+package edu.ucla.library.libcal;
 
 /**
- * Template API operation IDs.
+ * LibCal-Proxy API operation IDs.
  */
 public final class Op {
 
     /**
-     * Mints a new ARK namespace.
+     * Defines a status operation.
      */
     public static final String GET_STATUS = "getStatus";
 
@@ -15,6 +15,7 @@ public final class Op {
      * Constant class constructors should be private.
      */
     private Op() {
+        // This is intentionally left empty
     }
 
 }

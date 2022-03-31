@@ -1,11 +1,11 @@
 
-package info.freelibrary.vertx.template.handlers;
+package edu.ucla.library.libcal.handlers;
 
-import static info.freelibrary.vertx.template.MediaType.APPLICATION_JSON;
+import static edu.ucla.library.libcal.MediaType.APPLICATION_JSON;
 
 import info.freelibrary.util.HTTP;
 
-import info.freelibrary.vertx.template.JsonKeys;
+import edu.ucla.library.libcal.JsonKeys;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;

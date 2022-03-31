@@ -1,6 +1,6 @@
-# Vert.x Template
+# LibCal-Proxy
 
-This is a Vert.x template that can be customized for a new project.
+The LibCal-Proxy is ...
 
 ## Running in Development
 

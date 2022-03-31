@@ -1,5 +1,5 @@
 
-package info.freelibrary.vertx.template.verticles;
+package edu.ucla.library.libcal.verticles;
 
 import static info.freelibrary.util.Constants.INADDR_ANY;
 
@@ -8,10 +8,10 @@ import java.io.File;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
-import info.freelibrary.vertx.template.Config;
-import info.freelibrary.vertx.template.MessageCodes;
-import info.freelibrary.vertx.template.Op;
-import info.freelibrary.vertx.template.handlers.StatusHandler;
+import edu.ucla.library.libcal.Config;
+import edu.ucla.library.libcal.MessageCodes;
+import edu.ucla.library.libcal.Op;
+import edu.ucla.library.libcal.handlers.StatusHandler;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
@@ -35,7 +35,7 @@ public class MainVerticle extends AbstractVerticle {
     /**
      * An OpenAPI definition that the main verticle users to route requests.
      */
-    private static final String API_SPEC = "src/main/resources/template.yaml";
+    private static final String API_SPEC = "src/main/resources/libcal-proxy.yaml";
 
     /**
      * The main verticle's HTTP server.
@@ -71,7 +71,7 @@ public class MainVerticle extends AbstractVerticle {
 
             myServer = getVertx().createHttpServer(serverOptions).requestHandler(routeBuilder.createRouter());
             myServer.listen().onFailure(aPromise::fail).onSuccess(result -> {
-                LOGGER.info(MessageCodes.CODE_001, port);
+                LOGGER.info(MessageCodes.LCP_001, port);
                 aPromise.complete();
             });
         });

@@ -1,5 +1,5 @@
 
-package info.freelibrary.vertx.template;
+package edu.ucla.library.libcal;
 
 /**
  * Properties that are used to configure the application.
@@ -20,6 +20,7 @@ public final class Config {
      * Constant classes should have private constructors.
      */
     private Config() {
+        // This is intentionally left empty
     }
 
 }

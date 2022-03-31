@@ -1,30 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>vertx-template</artifactId>
+  <artifactId>libcal-proxy</artifactId>
   <version>${revision}</version>
-  <name>Vert.x Template</name>
-  <description></description>
-  <url>https://github.com/ksclarke/vertx-template</url>
+  <name>LibCal-Proxy</name>
+  <description>A proxy that handles LibCal's OAuth authorization</description>
+  <url>https://github.com/uclalibrary/libcal-proxy</url>
 
   <licenses>
     <license>
-      <name>Mozilla Public License 2.0</name>
-      <url>https://opensource.org/licenses/MPL-2.0</url>
+      <name>The 3-Clause BSD License</name>
+      <url>https://opensource.org/licenses/BSD-3-clause</url>
     </license>
   </licenses>
 
   <scm>
-    <connection>scm:git:git@github.com:ksclarke/vertx-template.git</connection>
-    <developerConnection>scm:git:git@github.com:ksclarke/vertx-template.git</developerConnection>
-    <url>git@github.com:ksclarke/vertx-template.git</url>
+    <connection>scm:git:git@github.com:uclalibrary/libcal-proxy.git</connection>
+    <developerConnection>scm:git:git@github.com:uclalibrary/libcal-proxy.git</developerConnection>
+    <url>git@github.com:uclalibrary/libcal-proxy.git</url>
   </scm>
 
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/ksclarke/vertx-template/issues</url>
+    <url>https://github.com/uclalibrary/libcal-proxy/issues</url>
   </issueManagement>
 
   <properties>
@@ -33,8 +32,8 @@
     <freelib.maven.version>0.3.1</freelib.maven.version>
 
     <!-- Security update overrides -->
-    <jackson.databind.version>2.13.2.1</jackson.databind.version>
     <slf4j.ext.version>1.7.36</slf4j.ext.version>
+    <jackson.databind.version>2.13.2.1</jackson.databind.version>
 
     <!-- Build plugin versions -->
     <vertx.plugin.version>1.0.27</vertx.plugin.version>
@@ -42,19 +41,12 @@
     <docker.plugin.version>0.39.1</docker.plugin.version>
     <deploy.plugin.version>2.8.2</deploy.plugin.version>
     <jar.plugin.version>3.2.2</jar.plugin.version>
-    <graalvm.plugin.version>0.9.11</graalvm.plugin.version>
-
-    <!-- Test dependency versions -->
-    <testcontainers.version>1.16.3</testcontainers.version>
 
     <!-- Docker component versions -->
-    <docker.builder.version>0.0.6</docker.builder.version>
-    <docker.alpine.version>3.14.3</docker.alpine.version>
+    <docker.alpine.version>3.15.3</docker.alpine.version>
 
     <!-- Name of the main Vert.x verticle -->
-    <mainClass>info.freelibrary.vertx.template.verticles.MainVerticle</mainClass>
-
-    <native.cfg.dir>src/main/resources/META-INF/native-image/${project.groupId}/${project.artifactId}</native.cfg.dir>
+    <mainClass>edu.ucla.library.libcal.verticles.MainVerticle</mainClass>
 
     <!-- The default logging level for the application -->
     <logLevel>ERROR</logLevel>
@@ -72,13 +64,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>testcontainers-bom</artifactId>
-        <version>${testcontainers.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-stack-depchain</artifactId>
         <version>${vertx.version}</version>
@@ -89,12 +74,6 @@
   </dependencyManagement>
 
   <dependencies>
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk15to18</artifactId>
-      <version>1.70</version>
-    </dependency>
-
     <dependency>
       <groupId>info.freelibrary</groupId>
       <artifactId>freelib-utils</artifactId>
@@ -197,6 +176,7 @@
       <plugin>
         <groupId>info.freelibrary</groupId>
         <artifactId>freelib-maven-plugins</artifactId>
+        <version>0.3.1</version>
         <executions>
           <execution>
             <id>generate-media-types</id>
@@ -205,7 +185,7 @@
               <goal>generate-mediatype</goal>
             </goals>
             <configuration>
-              <mediaTypePackage>info.freelibrary.vertx.template</mediaTypePackage>
+              <mediaTypePackage>edu.ucla.library.libcal</mediaTypePackage>
             </configuration>
           </execution>
         </executions>
@@ -269,8 +249,7 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
           <argLine>${jacoco.agent.arg}</argLine>
-          <environmentVariables>
-          </environmentVariables>
+          <environmentVariables></environmentVariables>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
           </systemPropertyVariables>
@@ -300,17 +279,14 @@
               <name>${docker.registry.account}${project.artifactId}:%l</name>
               <build>
                 <args>
-                  <BUILDER_TAG>${docker.builder.version}</BUILDER_TAG>
                   <ALPINE_TAG>${docker.alpine.version}</ALPINE_TAG>
                   <APP_VERSION>${project.version}</APP_VERSION>
                   <APP_NAME>${project.artifactId}</APP_NAME>
                 </args>
                 <dockerFile>${project.basedir}/src/main/docker/Dockerfile</dockerFile>
                 <assembly>
-                  <inline xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2
-                      http://maven.apache.org/xsd/assembly-1.1.2.xsd"
-                    xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2">
+                  <inline xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2
+                      http://maven.apache.org/xsd/assembly-1.1.2.xsd" xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2">
                     <id>builder-artifact-copy</id>
                     <fileSets>
                       <fileSet>
@@ -330,8 +306,7 @@
                   <!-- Start test container on an available host port -->
                   <port>${test.http.port}:8888</port>
                 </ports>
-                <env>
-                </env>
+                <env></env>
                 <!-- Test to make sure the server started as expected -->
                 <!-- <wait> <http> <url>http://localhost:${test.http.port}/status</url> <method>GET</method> <status>200</status> 
                   </http> </wait> -->
@@ -444,50 +419,6 @@
       </build>
     </profile>
 
-    <!-- A profile to use to do a native compile using GraalVM's native-image -->
-    <profile>
-      <id>native</id>
-      <build>
-        <plugins>
-          <!-- This packages the code so the native-image plugin can access it -->
-          <plugin>
-            <artifactId>maven-jar-plugin</artifactId>
-            <version>${jar.plugin.version}</version>
-          </plugin>
-          <!-- This creates a native binary from the packaged jar and its dependencies -->
-          <plugin>
-            <groupId>org.graalvm.buildtools</groupId>
-            <artifactId>native-maven-plugin</artifactId>
-            <version>${graalvm.plugin.version}</version>
-            <extensions>true</extensions>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>build</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <imageName>${project.artifactId}</imageName>
-              <mainClass>${mainClass}</mainClass>
-              <buildArgs>
-                <buildArg>--static</buildArg>
-                <buildArg>--libc=musl</buildArg>
-                <buildArg>--verbose</buildArg>
-                <buildArg>-H:+PrintAnalysisCallTree</buildArg>
-                <buildArg>--trace-class-initialization=ch.qos.logback.classic.Logger</buildArg>
-                <buildArg>--trace-object-instantiation=ch.qos.logback.classic.Logger</buildArg>
-              </buildArgs>
-              <skipNativeBuild>false</skipNativeBuild>
-              <classpath>
-                <param>${project.build.directory}/${project.artifactId}-${project.version}.jar</param>
-              </classpath>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
     <!-- A profile for running the server in a live test mode -->
     <profile>
       <id>live</id>
@@ -514,7 +445,7 @@
                       <directory>${basedir}/src/main/resources</directory>
                       <filtering>true</filtering>
                       <includes>
-                        <include>template.yaml</include>
+                        <include>libcal-proxy.yaml</include>
                       </includes>
                     </resource>
                     <resource>
@@ -576,12 +507,24 @@
                 <goals>
                   <goal>test</goal>
                 </goals>
+                <configuration>
+                  <args>
+                    <arg>--org=${env.UCLALIBRARY_SNYK_ORG}</arg>
+                    <arg>--fail-on=all</arg>
+                  </args>
+                </configuration>
               </execution>
               <execution>
                 <id>snyk-monitor</id>
                 <goals>
                   <goal>monitor</goal>
                 </goals>
+                <configuration>
+                  <args>
+                    <arg>--org=${env.UCLALIBRARY_SNYK_ORG}</arg>
+                    <arg>--fail-on=all</arg>
+                  </args>
+                </configuration>
               </execution>
             </executions>
           </plugin>

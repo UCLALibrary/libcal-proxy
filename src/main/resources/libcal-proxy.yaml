@@ -1,11 +1,11 @@
 openapi: "3.0.0"
 info:
   version: 1.0.0
-  title: Template API
+  title: LibCal-Proxy API
   license:
     name: The 3-Clause BSD License
 servers:
-  - url: http://github.com/ksclarke/template
+  - url: http://github.com/uclalibrary/libcal-proxy
 paths:
   /status:
     get:
