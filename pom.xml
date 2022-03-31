@@ -46,7 +46,11 @@
     <docker.alpine.version>3.15.3</docker.alpine.version>
 
     <!-- Name of the main Vert.x verticle -->
-    <mainClass>edu.ucla.library.libcal.verticles.MainVerticle</mainClass>
+    <vertx.verticle>edu.ucla.library.libcal.verticles.MainVerticle</vertx.verticle>
+
+    <!-- The default configs for the application; overridable via ENV -->
+    <http.port>8888</http.port>
+    <heap.size>2g</heap.size>
 
     <!-- The default logging level for the application -->
     <logLevel>ERROR</logLevel>
@@ -176,7 +180,6 @@
       <plugin>
         <groupId>info.freelibrary</groupId>
         <artifactId>freelib-maven-plugins</artifactId>
-        <version>0.3.1</version>
         <executions>
           <execution>
             <id>generate-media-types</id>
@@ -280,20 +283,19 @@
               <build>
                 <args>
                   <ALPINE_TAG>${docker.alpine.version}</ALPINE_TAG>
-                  <APP_VERSION>${project.version}</APP_VERSION>
-                  <APP_NAME>${project.artifactId}</APP_NAME>
                 </args>
                 <dockerFile>${project.basedir}/src/main/docker/Dockerfile</dockerFile>
+                <compression>gzip</compression>
                 <assembly>
-                  <inline xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2
-                      http://maven.apache.org/xsd/assembly-1.1.2.xsd" xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2">
-                    <id>builder-artifact-copy</id>
+                  <inline>
                     <fileSets>
                       <fileSet>
-                        <directory>.</directory>
+                        <!-- The directory where we can find our Maven-built artifact -->
+                        <directory>${project.basedir}/target/</directory>
+                        <!-- We don't want directory structure on output, just the artifact -->
+                        <outputDirectory>.</outputDirectory>
                         <includes>
-                          <include>pom.xml</include>
-                          <include>target/</include>
+                          <include>${project.artifactId}-${project.version}.jar</include>
                         </includes>
                       </fileSet>
                     </fileSets>
@@ -304,12 +306,17 @@
                 <containerNamePattern>${project.artifactId}</containerNamePattern>
                 <ports>
                   <!-- Start test container on an available host port -->
-                  <port>${test.http.port}:8888</port>
+                  <port>${test.http.port}:${http.port}</port>
                 </ports>
                 <env></env>
                 <!-- Test to make sure the server started as expected -->
-                <!-- <wait> <http> <url>http://localhost:${test.http.port}/status</url> <method>GET</method> <status>200</status> 
-                  </http> </wait> -->
+                <wait>
+                  <http>
+                    <url>http://localhost:${test.http.port}/status</url>
+                    <method>GET</method>
+                    <status>200</status>
+                  </http>
+                </wait>
               </run>
             </image>
           </imagesMap>
