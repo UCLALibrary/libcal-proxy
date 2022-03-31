@@ -1,6 +1,6 @@
 # LibCal-Proxy
 
-The LibCal-Proxy is a simple proxy-ish service that sits in front of LibCal and handles API authorization for other applications that do not know how to use OAuth. Instead, these other services' IP addresses are checked to confirm that they should have access to the LibCal APIs.
+The LibCal-Proxy is a simple proxy-ish service that sits in front of LibCal and handles API authorization for other applications that do not know how to use OAuth. Instead, these other applications' IP addresses are checked to confirm that they should have access to the LibCal APIs.
 
 ## Building the Project
 
