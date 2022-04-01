@@ -306,13 +306,13 @@
                 <containerNamePattern>${project.artifactId}</containerNamePattern>
                 <ports>
                   <!-- Start test container on an available host port -->
-                  <port>${test.http.port}:${http.port}</port>
+                  <port>${http.test.port}:${http.port}</port>
                 </ports>
                 <env></env>
                 <!-- Test to make sure the server started as expected -->
                 <wait>
                   <http>
-                    <url>http://localhost:${test.http.port}/status</url>
+                    <url>http://localhost:${http.test.port}/status</url>
                     <method>GET</method>
                     <status>200</status>
                   </http>
