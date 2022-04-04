@@ -18,7 +18,8 @@ If you want to run the appliction in its Docker container, you can also do that 
 
     mvn docker:run
 
-This will run the Docker image in the foreground, with the logs being displayed in the terminal.
+This will run the Docker image in the foreground, with the logs being displayed in the terminal. You can use Ctrl-C to
+stop it.
 
 If you'd like to run it in the background, use:
 
