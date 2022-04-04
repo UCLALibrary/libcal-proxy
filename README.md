@@ -10,18 +10,26 @@ To build the project, which includes running a bunch of tests, type:
 
 ## Running in Development
 
-The easiest way to run the service locally for testing is to use Maven:
+The easiest way to run the application locally for testing is to use Maven:
 
     mvn vertx:run
 
-An alternative route though is to run Docker manually. After running a build, the Docker image will be in your local
-Docker repository. To run it, just type the following:
+If you want to run the appliction in its Docker container, you can also do that through Maven:
 
-    docker run -p 8888:8888 libcal-proxy
+    mvn docker:run
 
-Alternatively, the process can be put in the background with:
+This will run the Docker image in the foreground, with the logs being displayed in the terminal.
 
-    docker run -d -p 8888:8888 libcal-proxy
+If you'd like to run it in the background, use:
+
+    mvn docker:start
+
+When you're ready to stop it, you can type:
+
+    mvn docker:stop
+
+The build will also create a Docker image in your local Docker image repository, so one could also, of course, run it
+from there using other Docker tooling. 
 
 ## Contact
 
