@@ -16,14 +16,14 @@ The easiest way to run the application locally for testing is to use Maven:
 
 If you want to run the appliction in its Docker container, you can also do that through Maven:
 
-    mvn docker:run
+    mvn initialize docker:run
 
 This will run the Docker image in the foreground, with the logs being displayed in the terminal. You can use Ctrl-C to
 stop it.
 
 If you'd like to run it in the background, use:
 
-    mvn docker:start
+    mvn initialize docker:start
 
 When you're ready to stop it, you can type:
 
