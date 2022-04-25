@@ -63,6 +63,11 @@
     <docker.registry.password />
     <!-- The Docker registry account, if supplied, must end with a slash (e.g. "account/") -->
     <docker.registry.account />
+
+    <!-- LibCal OAuth credentials and endpoint -->
+    <LIBCAL_CLIENT_ID>A_CLIENT_ID</LIBCAL_CLIENT_ID>
+    <LIBCAL_SECRET>A_CLIENT_SECRET</LIBCAL_SECRET>
+    <LIBCAL_TOKEN_ENDPOINT>A_TOKEN_ENDPOINT</LIBCAL_TOKEN_ENDPOINT>
   </properties>
 
   <dependencyManagement>
@@ -109,7 +114,20 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-config</artifactId>
     </dependency>
-
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-auth-oauth2</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-service-proxy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+       <artifactId>vertx-codegen</artifactId>
+       <classifier>processor</classifier>
+       <scope>provided</scope>
+    </dependency>
     <!-- Below is a dependency that needs updating due to security issue (may be able to remove in future) -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -243,6 +261,9 @@
           </systemPropertyVariables>
           <environmentVariables>
             <HTTP_PORT>${http.test.port}</HTTP_PORT>
+	    <LIBCAL_CLIENT_ID>${libcal.oauth.client.id}</LIBCAL_CLIENT_ID>
+	    <LIBCAL_SECRET>${libcal.oauth.client.secret}</LIBCAL_SECRET>
+	    <LIBCAL_TOKEN_ENDPOINT>${libcal.oauth.provider.url}</LIBCAL_TOKEN_ENDPOINT>
           </environmentVariables>
         </configuration>
       </plugin>
