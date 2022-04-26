@@ -33,7 +33,11 @@ public class TokenUtils {
       final Future<String> rawToken = handleRawToken(aClientInfo, aVertx);
 
       rawToken.onComplete(result->{
-        token.put(JsonKeys.ACCESS_TOKEN, rawToken.result());
+        if (result.succeeded()) {
+          token.put(JsonKeys.ACCESS_TOKEN, rawToken.result());
+	} else {
+          token.put(JsonKeys.TOKEN_ERROR, rawToken.result());
+	}
       });
 
       return token;
