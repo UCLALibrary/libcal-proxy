@@ -6,6 +6,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
@@ -32,13 +33,24 @@ public class TokenUtils {
       final JsonObject token = new JsonObject();
       final Future<String> rawToken = handleRawToken(aClientInfo, aVertx);
 
-      rawToken.onComplete(result->{
+      rawToken.onSuccess(result -> {
+          token.put(JsonKeys.ACCESS_TOKEN, rawToken.result());
+      });
+
+      rawToken.onFailure(cause -> {
+          token.put(JsonKeys.TOKEN_ERROR, rawToken.result());
+      });
+
+      /*return rawToken.compose(callback->{
+        token.put(JsonKeys.ACCESS_TOKEN, rawToken.result());
+	System.out.println("token : " + token.encodePrettily());
+	return Future.succeededFuture(token);
         if (result.succeeded()) {
           token.put(JsonKeys.ACCESS_TOKEN, rawToken.result());
 	} else {
           token.put(JsonKeys.TOKEN_ERROR, rawToken.result());
 	}
-      });
+      });*/
 
       return token;
     }
@@ -57,6 +69,8 @@ public class TokenUtils {
       JsonObject tokenConfig = new JsonObject();
       oauth2.authenticate(tokenConfig)
         .onSuccess(user -> {
+          System.out.println("attributes : " + user.attributes().encodePrettily() );
+          System.out.println("principal : " + user.principal().encodePrettily() );
           promise.complete(user.get("access_token").toString());
         }).onFailure(err -> {
           promise.fail(err.getMessage());

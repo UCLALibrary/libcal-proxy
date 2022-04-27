@@ -10,6 +10,7 @@ import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 
 import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.JsonKeys;
@@ -34,6 +35,7 @@ public class TokenUtilsTest {
                    .put(JsonKeys.CLIENT_SECRET, config.getString(Config.OAUTH_CLIENT_SECRET))
                    .put(JsonKeys.TOKEN_ENDPOINT, config.getString(Config.OAUTH_TOKEN_URL));
              final JsonObject accessToken = TokenUtils.getAccessToken(clientInfo,vertx);
+	     System.out.println("token : " + accessToken.encodePrettily());
              assertTrue(accessToken.containsKey(JsonKeys.ACCESS_TOKEN));
            }      
         });
