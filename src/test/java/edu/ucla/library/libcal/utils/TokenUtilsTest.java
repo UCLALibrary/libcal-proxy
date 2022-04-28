@@ -2,6 +2,7 @@ package edu.ucla.library.libcal.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
@@ -34,9 +35,8 @@ public class TokenUtilsTest {
                    .put(JsonKeys.CLIENT_ID, config.getString(Config.OAUTH_CLIENT_ID))
                    .put(JsonKeys.CLIENT_SECRET, config.getString(Config.OAUTH_CLIENT_SECRET))
                    .put(JsonKeys.TOKEN_ENDPOINT, config.getString(Config.OAUTH_TOKEN_URL));
-             final JsonObject accessToken = TokenUtils.getAccessToken(clientInfo,vertx);
-	     System.out.println("token : " + accessToken.encodePrettily());
-             assertTrue(accessToken.containsKey(JsonKeys.ACCESS_TOKEN));
+             final String accessToken = TokenUtils.getAccessToken(clientInfo,vertx).result();
+             assertNotNull(accessToken);
            }      
         });
     }
