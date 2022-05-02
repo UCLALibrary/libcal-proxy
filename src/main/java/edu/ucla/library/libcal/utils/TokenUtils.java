@@ -35,11 +35,18 @@ public class TokenUtils {
       * @param aVertx A Vertx object used to build token request
       * @return JSON object wrapping the access token
     */
-    public static Future<String> getAccessToken(final JsonObject aClientInfo, final Vertx aVertx) {
+    public static Future<JsonObject> getAccessToken(final JsonObject aClientInfo, final Vertx aVertx) {
       return handleRawToken(aClientInfo, aVertx).compose(rawToken -> {
-          final String accessToken = rawToken.getString(JsonKeys.ACCESS_TOKEN);
-	  LOGGER.info(MessageCodes.LCP_002, accessToken);
+          //final String accessToken = rawToken.getString(JsonKeys.ACCESS_TOKEN);
+	  final JsonObject accessToken = new JsonObject();
+          try {
+	      accessToken.put(JsonKeys.ACCESS_TOKEN, rawToken.getString(JsonKeys.ACCESS_TOKEN));
+	      LOGGER.info(MessageCodes.LCP_002, accessToken.encodePrettily());
 
+	  } catch (Exception details) {
+	      accessToken.put(JsonKeys.TOKEN_ERROR, rawToken.toString());
+	  }
+	      System.out.println(accessToken.encodePrettily());
           return Future.succeededFuture(accessToken);
       });
 
@@ -63,6 +70,7 @@ public class TokenUtils {
           promise.complete(user.principal());
         }).onFailure(err -> {
           promise.fail(err.getMessage());
+	      System.out.println(err.getMessage());
 	  LOGGER.error(MessageCodes.LCP_003, err.getMessage());
 	  err.printStackTrace();
       });

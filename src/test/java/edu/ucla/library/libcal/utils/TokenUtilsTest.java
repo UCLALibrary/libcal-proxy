@@ -35,8 +35,9 @@ public class TokenUtilsTest {
                    .put(JsonKeys.CLIENT_ID, config.getString(Config.OAUTH_CLIENT_ID))
                    .put(JsonKeys.CLIENT_SECRET, config.getString(Config.OAUTH_CLIENT_SECRET))
                    .put(JsonKeys.TOKEN_ENDPOINT, config.getString(Config.OAUTH_TOKEN_URL));
-             final String accessToken = TokenUtils.getAccessToken(clientInfo,vertx).result();
+             final JsonObject accessToken = TokenUtils.getAccessToken(clientInfo,vertx).result();
              assertNotNull(accessToken);
+	     assertTrue(accessToken.containsKey(JsonKeys.ACCESS_TOKEN));
            }      
         });
     }
