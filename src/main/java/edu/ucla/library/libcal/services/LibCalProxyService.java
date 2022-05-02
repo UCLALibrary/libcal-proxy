@@ -22,9 +22,9 @@ public interface LibCalProxyService {
         return new ServiceProxyBuilder(aVertx).setAddress(ADDRESS).build(LibCalProxyService.class);
     }
 
-    Future<JsonObject> getClientCredentials(final String aAppName, final JsonObject aConfig);
+    Future<JsonObject> getConfig();
 
-    Future<JsonObject> getAccessToken(final String aClientID, final String aClientSecret);
+    Future<JsonObject> getAccessToken(final String aClientID, final String aClientSecret, final String aTokenURL);
 
     Future<JsonObject> getLibCalOutput(final String aOUathToken, final String aBaseURL, final String aQuery);
 

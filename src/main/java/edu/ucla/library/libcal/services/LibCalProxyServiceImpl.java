@@ -1,7 +1,11 @@
 package edu.ucla.library.libcal.services;
 
 import edu.ucla.library.libcal.JsonKeys;
+import edu.ucla.library.libcal.utils.TokenUtils;
 
+import io.vertx.config.ConfigRetrieverOptions;
+import io.vertx.config.ConfigRetriever;
+import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -21,17 +25,32 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
     }
 
     @Override
-    public Future<JsonObject> getClientCredentials(final String aAppName, final JsonObject aConfig) {
-	final JsonObject credentials = new JsonObject();
-        credentials.put(JsonKeys.CLIENT_ID, aConfig.getString(JsonKeys.CLIENT_ID.concat(aAppName)));
-        credentials.put(JsonKeys.CLIENT_SECRET, aConfig.getString(JsonKeys.CLIENT_SECRET.concat(aAppName)));
-        return Future.succeededFuture(credentials);
+    public Future<JsonObject> getConfig() {
+        final Promise<JsonObject> promise = Promise.promise();
+        final ConfigStoreOptions envPropsStore = new ConfigStoreOptions().setType("env");
+        final ConfigStoreOptions sysPropsStore = new ConfigStoreOptions().setType("sys");
+        final ConfigRetrieverOptions options = new ConfigRetrieverOptions().addStore(envPropsStore).addStore(sysPropsStore);
+        final ConfigRetriever retriever = ConfigRetriever.create(myVertx, options);
+
+        retriever.getConfig(configResult -> {
+           if (configResult.succeeded()) {
+             promise.complete(configResult.result());
+           } else {
+             promise.fail(configResult.cause().getMessage());
+           }      
+        });
+
+	return promise.future();
     }
 
     @Override
-    public Future<JsonObject> getAccessToken(final String aClientID, final String aClientSecret) {
-	/* add call to TokenUtils here once code finalized */
-        return null;
+    public Future<JsonObject> getAccessToken(final String aClientID, final String aClientSecret, final String aTokenURL) {
+        final JsonObject clientInfo = new JsonObject()
+               .put(JsonKeys.CLIENT_ID, aClientID)
+               .put(JsonKeys.CLIENT_SECRET, aClientSecret)
+               .put(JsonKeys.TOKEN_ENDPOINT, aTokenURL);
+	//will update once SERV-400 is done
+        return Future.succeededFuture(TokenUtils.getAccessToken(clientInfo, myVertx));
     }
 
     @Override
