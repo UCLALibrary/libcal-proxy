@@ -37,6 +37,11 @@ public final class JsonKeys {
     public static final String TOKEN_ENDPOINT = "token_endpoint";
 
     /**
+     * An OAuth token endpoint URL key.
+     */
+    public static final String EXPIRES_AT = "expires_at";
+
+    /**
      * Creates a new JSON keys constants class.
      */
     private JsonKeys() {

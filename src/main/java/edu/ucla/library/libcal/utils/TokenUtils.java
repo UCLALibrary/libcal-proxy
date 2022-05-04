@@ -15,6 +15,9 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * Utility method for retrieving OAuth access tokens.
  */
@@ -22,6 +25,7 @@ public final class TokenUtils {
 
     /** The logger used by the token utilities. */
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenUtils.class, MessageCodes.BUNDLE);
+    private static long ONE_HOUR = 1;
 
     /**
      * Private constructor for TokenUtils class.
@@ -42,6 +46,7 @@ public final class TokenUtils {
             LOGGER.info(MessageCodes.LCP_002, accessToken.encodePrettily());
 	    if (rawToken.containsKey(JsonKeys.ACCESS_TOKEN)) {
                 accessToken.put(JsonKeys.ACCESS_TOKEN, rawToken.getString(JsonKeys.ACCESS_TOKEN));
+                accessToken.put(JsonKeys.EXPIRES_AT, formatExpiration());
 	    } else {
                 accessToken.put(JsonKeys.TOKEN_ERROR, rawToken.toString());
 	    }
@@ -74,5 +79,9 @@ public final class TokenUtils {
             promise.fail(err.getMessage());
         });
         return promise.future();
+    }
+
+    private static String formatExpiration() {
+        return DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(ONE_HOUR));
     }
 }
