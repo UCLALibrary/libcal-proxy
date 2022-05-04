@@ -6,7 +6,7 @@
   <entry key="message-class-name">edu.ucla.library.libcal.MessageCodes</entry>
 
   <entry key="LCP_001">Server started at port: {}</entry>
-  <entry key="LCP_002"></entry>
-  <entry key="LCP_003"></entry>
+  <entry key="LCP_002">Access token returned: {}</entry>
+  <entry key="LCP_003">Access token error: {}</entry>
 
 </properties>

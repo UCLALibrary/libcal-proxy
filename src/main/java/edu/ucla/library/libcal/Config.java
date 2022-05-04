@@ -17,6 +17,21 @@ public final class Config {
     public static final String HTTP_HOST = "HTTP_HOST";
 
     /**
+     * The configuration property for the LibCal client ID credential.
+     */
+    public static final String OAUTH_CLIENT_ID = "LIBCAL_CLIENT_ID";
+
+    /**
+     * The configuration property for the LibCal client secret credential.
+     */
+    public static final String OAUTH_CLIENT_SECRET = "LIBCAL_SECRET";
+
+    /**
+     * The configuration property for the LibCal access token provider endpoint.
+     */
+    public static final String OAUTH_TOKEN_URL = "LIBCAL_TOKEN_ENDPOINT";
+
+    /**
      * Constant classes should have private constructors.
      */
     private Config() {
