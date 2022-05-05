@@ -50,7 +50,7 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
                .put(JsonKeys.CLIENT_SECRET, aClientSecret)
                .put(JsonKeys.TOKEN_ENDPOINT, aTokenURL);
 	//will update once SERV-400 is done
-        return Future.succeededFuture(TokenUtils.getAccessToken(clientInfo, myVertx));
+        return TokenUtils.getAccessToken(clientInfo, myVertx);
     }
 
     @Override
