@@ -9,6 +9,7 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.libcal.Config;
+import edu.ucla.library.libcal.Constants;
 import edu.ucla.library.libcal.MessageCodes;
 import edu.ucla.library.libcal.Op;
 import edu.ucla.library.libcal.handlers.StatusHandler;
@@ -20,6 +21,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.shareddata.LocalMap;
 import io.vertx.ext.web.openapi.RouterBuilder;
 
 /**
@@ -95,6 +97,7 @@ public class MainVerticle extends AbstractVerticle {
      */
     @SuppressWarnings("UncommentedMain")
     public static void main(final String[] aArgsArray) {
+        final LocalMap<String, JsonObject> tokenMap = Vertx.vertx().sharedData().getLocalMap(Constants.SHARED_TOKEN);
         Vertx.vertx().deployVerticle(new MainVerticle());
     }
 }

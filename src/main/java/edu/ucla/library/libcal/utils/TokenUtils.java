@@ -44,12 +44,12 @@ public final class TokenUtils {
         return handleRawToken(aClientInfo, aVertx).compose(rawToken -> {
             final JsonObject accessToken = new JsonObject();
             LOGGER.info(MessageCodes.LCP_002, accessToken.encodePrettily());
-	    if (rawToken.containsKey(JsonKeys.ACCESS_TOKEN)) {
+            if (rawToken.containsKey(JsonKeys.ACCESS_TOKEN)) {
                 accessToken.put(JsonKeys.ACCESS_TOKEN, rawToken.getString(JsonKeys.ACCESS_TOKEN));
                 accessToken.put(JsonKeys.EXPIRES_AT, formatExpiration());
-	    } else {
+            } else {
                 accessToken.put(JsonKeys.TOKEN_ERROR, rawToken.toString());
-	    }
+            }
             return Future.succeededFuture(accessToken);
         });
     }

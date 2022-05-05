@@ -119,6 +119,16 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-auth-oauth2</artifactId>
     </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-service-proxy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen</artifactId>
+      <classifier>processor</classifier>
+      <scope>provided</scope>
+    </dependency>
 
     <!-- Below is a dependency that needs updating due to security issue (may be able to remove in future) -->
     <dependency>
