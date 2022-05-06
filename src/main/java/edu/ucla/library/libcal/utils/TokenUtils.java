@@ -23,9 +23,15 @@ import java.time.format.DateTimeFormatter;
  */
 public final class TokenUtils {
 
-    /** The logger used by the token utilities. */
+    /*
+     * The logger used by the token utilities.
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenUtils.class, MessageCodes.BUNDLE);
-    private static long ONE_HOUR = 1;
+
+    /*
+     * Expiration interval for new LibCal OAuth tokens.
+     */
+    private static final long ONE_HOUR = 1;
 
     /**
      * Private constructor for TokenUtils class.

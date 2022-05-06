@@ -25,9 +25,21 @@ import java.time.format.DateTimeFormatter;
  */
 public class LibCalProxyServiceImpl implements LibCalProxyService {
 
+    /**
+     * The name of the access token stored in shared data.
+     */
     private static final String CURRENT_TOKEN = "currentToken";
+
+    /**
+     * A Vert.x vertx instance used by various methods
+     */
     private final Vertx myVertx;
 
+    /**
+     * Creates an instance of the service.
+     *
+     * @param aVertx A Vert.x vertx instance
+     */
     LibCalProxyServiceImpl(final Vertx aVertx) {
         myVertx = aVertx;
     }
