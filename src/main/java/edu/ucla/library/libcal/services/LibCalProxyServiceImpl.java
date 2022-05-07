@@ -67,6 +67,12 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
     @Override
     public Future<JsonObject> getAccessToken(final String aClientID, final String aClientSecret,
                               final String aTokenURL) {
+        /* 
+	 * the sharedData map probably needs to be converted to an async map, 
+	 *   depending on how the app will be deployed
+	 * I assume the sharedData the map comes from needs to be created in the MainVerticle, 
+	 *   but didn;t figure out where therein
+	 */
         final LocalMap<String, JsonObject> tokenMap = myVertx.sharedData().getLocalMap(Constants.SHARED_TOKEN);
         if (tokenMap.containsValue(CURRENT_TOKEN)) {
             final JsonObject theToken = tokenMap.get(CURRENT_TOKEN);

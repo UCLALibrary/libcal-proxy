@@ -97,7 +97,6 @@ public class MainVerticle extends AbstractVerticle {
      */
     @SuppressWarnings("UncommentedMain")
     public static void main(final String[] aArgsArray) {
-        final LocalMap<String, JsonObject> tokenMap = Vertx.vertx().sharedData().getLocalMap(Constants.SHARED_TOKEN);
         Vertx.vertx().deployVerticle(new MainVerticle());
     }
 }

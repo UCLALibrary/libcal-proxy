@@ -8,5 +8,7 @@
   <entry key="LCP_001">Server started at port: {}</entry>
   <entry key="LCP_002">Access token returned: {}</entry>
   <entry key="LCP_003">Access token error: {}</entry>
+  <entry key="LCP_004">Request missing LibCal application/profile name</entry>
+  <entry key="LCP_005">Request missing LibCal API query string</entry>
 
 </properties>

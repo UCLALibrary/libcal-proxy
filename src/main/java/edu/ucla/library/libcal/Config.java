@@ -32,6 +32,11 @@ public final class Config {
     public static final String OAUTH_TOKEN_URL = "LIBCAL_TOKEN_ENDPOINT";
 
     /**
+     * The configuration property for the LibCal access token provider endpoint.
+     */
+    public static final String LIBCAL_BASE_URL = "LIBCAL_BASE_URL";
+
+    /**
      * Constant classes should have private constructors.
      */
     private Config() {
