@@ -45,9 +45,12 @@ public class TokenUtilsIT {
                         new JsonObject().put(JsonKeys.CLIENT_ID, config.getString(Config.OAUTH_CLIENT_ID))
                                 .put(JsonKeys.CLIENT_SECRET, config.getString(Config.OAUTH_CLIENT_SECRET))
                                 .put(JsonKeys.TOKEN_ENDPOINT, config.getString(Config.OAUTH_TOKEN_URL));
-                final JsonObject accessToken = TokenUtils.getAccessToken(clientInfo, aVertx).result();
-                assertNotNull(accessToken);
-                assertTrue(accessToken.containsKey(JsonKeys.ACCESS_TOKEN));
+
+                TokenUtils.getAccessToken(clientInfo, aVertx).onSuccess(accessToken -> {
+                    assertNotNull(accessToken);
+                    assertTrue(accessToken.containsKey(JsonKeys.ACCESS_TOKEN));
+                    aContext.completeNow();
+                }).onFailure(aContext::failNow);
             }
         });
     }
