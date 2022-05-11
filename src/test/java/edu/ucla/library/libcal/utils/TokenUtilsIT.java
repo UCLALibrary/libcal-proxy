@@ -18,7 +18,7 @@ import edu.ucla.library.libcal.JsonKeys;
 /**
  * Tests related to the TokenUtils class.
  */
-public class TokenUtilsTest {
+public class TokenUtilsIT {
 
     /**
      * Tests the <code>getAccessToken()</code> method.

@@ -253,9 +253,6 @@
           </systemPropertyVariables>
           <environmentVariables>
             <HTTP_PORT>${http.test.port}</HTTP_PORT>
-            <LIBCAL_CLIENT_ID>${LIBCAL_CLIENT_ID}</LIBCAL_CLIENT_ID>
-            <LIBCAL_SECRET>${LIBCAL_SECRET}</LIBCAL_SECRET>
-            <LIBCAL_TOKEN_ENDPOINT>${LIBCAL_TOKEN_ENDPOINT}</LIBCAL_TOKEN_ENDPOINT>
           </environmentVariables>
         </configuration>
       </plugin>
@@ -265,7 +262,11 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
           <argLine>${jacoco.agent.arg}</argLine>
-          <environmentVariables></environmentVariables>
+          <environmentVariables>
+            <LIBCAL_CLIENT_ID>${LIBCAL_CLIENT_ID}</LIBCAL_CLIENT_ID>
+            <LIBCAL_SECRET>${LIBCAL_SECRET}</LIBCAL_SECRET>
+            <LIBCAL_TOKEN_ENDPOINT>${LIBCAL_TOKEN_ENDPOINT}</LIBCAL_TOKEN_ENDPOINT>
+          </environmentVariables>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
           </systemPropertyVariables>
