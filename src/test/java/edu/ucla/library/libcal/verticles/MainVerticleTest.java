@@ -30,13 +30,19 @@ import io.vertx.junit5.VertxTestContext;
 public class MainVerticleTest {
 
     /**
+     * The default port that the application listens on.
+     */
+    private static String DEFAULT_PORT = "8888";
+
+    /**
      * Sets up the test.
      *
+     * @param aVertx A Vert.x instance
      * @param aContext A test context
      */
     @BeforeAll
     public void setUp(final Vertx aVertx, final VertxTestContext aContext) {
-        final int port = Integer.parseInt(System.getenv(Config.HTTP_PORT));
+        final int port = Integer.parseInt(System.getenv().getOrDefault(Config.HTTP_PORT, DEFAULT_PORT));
         final DeploymentOptions options = new DeploymentOptions();
 
         options.setConfig(new JsonObject().put(Config.HTTP_PORT, port));
@@ -48,11 +54,12 @@ public class MainVerticleTest {
     /**
      * Tests the server can start successfully.
      *
+     * @param aVertx A Vert.x instance
      * @param aContext A test context
      */
     @Test
     public void testThatTheServerIsStarted(final Vertx aVertx, final VertxTestContext aContext) {
-        final int port = Integer.parseInt(System.getenv(Config.HTTP_PORT));
+        final int port = Integer.parseInt(System.getenv().getOrDefault(Config.HTTP_PORT, DEFAULT_PORT));
         final WebClient client = WebClient.create(aVertx);
 
         client.get(port, INADDR_ANY, "/status").send().onSuccess(response -> {

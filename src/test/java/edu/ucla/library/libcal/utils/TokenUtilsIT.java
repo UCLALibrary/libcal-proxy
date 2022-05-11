@@ -2,20 +2,26 @@
 package edu.ucla.library.libcal.utils;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import io.vertx.config.ConfigRetrieverOptions;
-import io.vertx.config.ConfigRetriever;
-import io.vertx.config.ConfigStoreOptions;
+import edu.ucla.library.libcal.verticles.MainVerticle;
+import edu.ucla.library.libcal.MessageCodes;
+
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
+
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-
-import edu.ucla.library.libcal.Config;
-import edu.ucla.library.libcal.JsonKeys;
-
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 
@@ -23,35 +29,54 @@ import io.vertx.junit5.VertxTestContext;
  * Tests related to the TokenUtils class.
  */
 @ExtendWith(VertxExtension.class)
+@TestInstance(Lifecycle.PER_CLASS)
 public class TokenUtilsIT {
 
     /**
+     * The logger used by these tests.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(TokenUtilsIT.class, MessageCodes.BUNDLE);
+
+    /**
+     * Sets up the test.
+     *
+     * @param aVertx A Vert.x instance
+     * @param aContext A test context
+     */
+    @BeforeAll
+    public final void setUp(final Vertx aVertx, final VertxTestContext aContext) {
+        aVertx.deployVerticle(new MainVerticle()).onSuccess(deploymentID -> {
+            aContext.completeNow();
+        }).onFailure(aContext::failNow);
+    }
+
+    /**
+     * Tears down the test.
+     *
+     * @param aVertx A Vert.x instance
+     * @param aContext A test context
+     */
+    @AfterAll
+    public final void tearDown(final Vertx aVertx, final VertxTestContext aContext) {
+        final Stream<Future<Void>> undeployAll = aVertx.deploymentIDs().stream().map(id -> aVertx.undeploy(id));
+
+        CompositeFuture.all(undeployAll.collect(Collectors.toList())).onSuccess(result -> {
+            aContext.completeNow();
+        }).onFailure(aContext::failNow);
+    }
+
+    /**
      * Tests the <code>getAccessToken()</code> method.
+     *
+     * @param aVertx A Vert.x instance
+     * @param aContext A test context
      */
     @Test
     public final void testGetAccessToken(final Vertx aVertx, final VertxTestContext aContext) {
-        final ConfigStoreOptions envPropsStore = new ConfigStoreOptions().setType("env");
-        final ConfigStoreOptions sysPropsStore = new ConfigStoreOptions().setType("sys");
-        final ConfigRetrieverOptions options =
-                new ConfigRetrieverOptions().addStore(envPropsStore).addStore(sysPropsStore);
-        final ConfigRetriever retriever = ConfigRetriever.create(aVertx, options);
+        final String token = TokenUtils.getAccessToken(aVertx);
 
-        retriever.getConfig(ar -> {
-            if (ar.failed()) {
-                System.err.println(ar.cause().getMessage());
-            } else {
-                final JsonObject config = ar.result();
-                final JsonObject clientInfo =
-                        new JsonObject().put(JsonKeys.CLIENT_ID, config.getString(Config.OAUTH_CLIENT_ID))
-                                .put(JsonKeys.CLIENT_SECRET, config.getString(Config.OAUTH_CLIENT_SECRET))
-                                .put(JsonKeys.TOKEN_ENDPOINT, config.getString(Config.OAUTH_TOKEN_URL));
-
-                TokenUtils.getAccessToken(clientInfo, aVertx).onSuccess(accessToken -> {
-                    assertNotNull(accessToken);
-                    assertTrue(accessToken.containsKey(JsonKeys.ACCESS_TOKEN));
-                    aContext.completeNow();
-                }).onFailure(aContext::failNow);
-            }
-        });
+        assertTrue(token != null);
+        LOGGER.debug(MessageCodes.LCP_003, token);
+        aContext.completeNow();
     }
 }

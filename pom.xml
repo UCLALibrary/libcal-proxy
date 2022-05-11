@@ -262,7 +262,9 @@
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
           </systemPropertyVariables>
           <environmentVariables>
-            <HTTP_PORT>${http.test.port}</HTTP_PORT>
+            <LIBCAL_CLIENT_ID>${LIBCAL_CLIENT_ID}</LIBCAL_CLIENT_ID>
+            <LIBCAL_SECRET>${LIBCAL_SECRET}</LIBCAL_SECRET>
+            <LIBCAL_TOKEN_ENDPOINT>${LIBCAL_TOKEN_ENDPOINT}</LIBCAL_TOKEN_ENDPOINT>
           </environmentVariables>
         </configuration>
       </plugin>
@@ -330,7 +332,7 @@
                 <containerNamePattern>${project.artifactId}</containerNamePattern>
                 <ports>
                   <!-- Start test container on an available host port -->
-                  <port>${http.test.port}:${http.port}</port>
+                  <port>${http.test.port}:8888</port>
                 </ports>
                 <env></env>
                 <!-- Test to make sure the server started as expected -->
