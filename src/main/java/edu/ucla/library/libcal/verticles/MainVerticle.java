@@ -15,6 +15,7 @@ import edu.ucla.library.libcal.handlers.StatusHandler;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -44,8 +45,10 @@ public class MainVerticle extends AbstractVerticle {
 
     @Override
     public void start(final Promise<Void> aPromise) {
-        ConfigRetriever.create(vertx).getConfig().onFailure(aPromise::fail)
-                .onSuccess(config -> configureServer(config.mergeIn(config()), aPromise));
+        ConfigRetriever.create(vertx).getConfig().compose(config -> configureServer(config)).onSuccess(server -> {
+            LOGGER.info(MessageCodes.LCP_001, server.actualPort());
+            aPromise.complete();
+        }).onFailure(aPromise::fail);
     }
 
     @Override
@@ -57,23 +60,20 @@ public class MainVerticle extends AbstractVerticle {
      * Configure the application server.
      *
      * @param aConfig A JSON configuration
-     * @param aPromise A startup promise
      */
-    private void configureServer(final JsonObject aConfig, final Promise<Void> aPromise) {
+    private Future<HttpServer> configureServer(final JsonObject aConfig) {
         final String host = aConfig.getString(Config.HTTP_HOST, INADDR_ANY);
         final int port = aConfig.getInteger(Config.HTTP_PORT, 8888);
 
-        RouterBuilder.create(vertx, getRouterSpec()).onFailure(aPromise::fail).onSuccess(routeBuilder -> {
+        return RouterBuilder.create(vertx, getRouterSpec()).compose(routeBuilder -> {
             final HttpServerOptions serverOptions = new HttpServerOptions().setPort(port).setHost(host);
 
             // Associate handlers with operation IDs from the application's OpenAPI specification
             routeBuilder.operation(Op.GET_STATUS).handler(new StatusHandler(getVertx()));
 
             myServer = getVertx().createHttpServer(serverOptions).requestHandler(routeBuilder.createRouter());
-            myServer.listen().onFailure(aPromise::fail).onSuccess(result -> {
-                LOGGER.info(MessageCodes.LCP_001, port);
-                aPromise.complete();
-            });
+
+            return myServer.listen();
         });
     }
 
