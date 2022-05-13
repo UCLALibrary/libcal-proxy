@@ -262,6 +262,7 @@
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
           </systemPropertyVariables>
           <environmentVariables>
+            <HTTP_PORT>${http.port}</HTTP_PORT>
             <LIBCAL_CLIENT_ID>${libcal.client.id}</LIBCAL_CLIENT_ID>
             <LIBCAL_SECRET>${libcal.secret}</LIBCAL_SECRET>
             <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
@@ -275,6 +276,7 @@
         <configuration>
           <argLine>${jacoco.agent.arg}</argLine>
           <environmentVariables>
+            <HTTP_PORT>${http.port}</HTTP_PORT>
             <LIBCAL_CLIENT_ID>${libcal.client.id}</LIBCAL_CLIENT_ID>
             <LIBCAL_SECRET>${libcal.secret}</LIBCAL_SECRET>
             <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
@@ -332,9 +334,15 @@
                 <containerNamePattern>${project.artifactId}</containerNamePattern>
                 <ports>
                   <!-- Start test container on an available host port -->
-                  <port>${http.test.port}:8888</port>
+                  <port>${http.test.port}:${http.port}</port>
                 </ports>
-                <env></env>
+                <env>
+                  <JAVA_OPTS>-Xmx${heap.size}</JAVA_OPTS>
+                  <HTTP_PORT>${http.port}</HTTP_PORT>
+                  <LIBCAL_CLIENT_ID>${libcal.client.id}</LIBCAL_CLIENT_ID>
+                  <LIBCAL_SECRET>${libcal.secret}</LIBCAL_SECRET>
+                  <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
+                </env>
                 <!-- Test to make sure the server started as expected -->
                 <wait>
                   <http>
