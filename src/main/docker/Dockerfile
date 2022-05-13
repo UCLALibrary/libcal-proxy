@@ -27,9 +27,9 @@ USER ${project.artifactId}
 # Overridable ENV properties
 ENV HEAP_SIZE="${heap.size}"
 ENV HTTP_PORT="${http.port}"
-ENV LIBCAL_CLIENT_ID="${LIBCAL_CLIENT_ID}"
-ENV LIBCAL_SECRET="${LIBCAL_SECRET}"
-ENV LIBCAL_TOKEN_ENDPOINT="${LIBCAL_TOKEN_ENDPOINT}"
+ENV LIBCAL_CLIENT_ID="${libcal.client.id}"
+ENV LIBCAL_SECRET="${libcal.secret}"
+ENV LIBCAL_TOKEN_ENDPOINT="${libcal.token.endpoint}"
 
 # The service's exposed port
 EXPOSE ${HTTP_PORT}
