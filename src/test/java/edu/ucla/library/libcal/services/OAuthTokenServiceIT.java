@@ -4,9 +4,6 @@ package edu.ucla.library.libcal.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -117,17 +114,6 @@ public class OAuthTokenServiceIT {
     @Test
     public final void testRefreshTokenIfExpired(final Vertx aVertx, final VertxTestContext aContext) {
         final String tokenBeforeRefresh = OAuthTokenService.getBearerToken(aVertx);
-
-        try {
-            final long delaySeconds = 3600;
-
-            LOGGER.debug("Waiting until {} to try refreshing the token...",
-                    ZonedDateTime.now().plusSeconds(delaySeconds).format(DateTimeFormatter.RFC_1123_DATE_TIME));
-            Thread.sleep(delaySeconds * 1000);
-        } catch (final InterruptedException details) {
-            aContext.failNow(details);
-            return;
-        }
 
         myServiceProxy.refreshTokenIfExpired().compose(unused -> {
             final String tokenAfterRefresh = OAuthTokenService.getBearerToken(aVertx);
