@@ -44,16 +44,6 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
     }
 
     @Override
-    public Future<JsonObject> getAccessToken(final String aClientID, final String aClientSecret, final String aTokenURL) {
-        final JsonObject clientInfo = new JsonObject()
-               .put(JsonKeys.CLIENT_ID, aClientID)
-               .put(JsonKeys.CLIENT_SECRET, aClientSecret)
-               .put(JsonKeys.TOKEN_ENDPOINT, aTokenURL);
-	//will update once SERV-400 is done
-        return TokenUtils.getAccessToken(clientInfo, myVertx);
-    }
-
-    @Override
     public Future<JsonObject> getLibCalOutput(final String aOUathToken, final String aBaseURL, final String aQuery) {
         final Promise<JsonObject> promise = Promise.promise();
 	final HttpRequest<JsonObject> request;
@@ -74,6 +64,11 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
            }
         });
 
-	return promise.future(); //Future.succeededFuture(responseBody);
+	return promise.future();
+    }
+
+    @Override
+    public Future<Void> close() {
+        return Future.succeededFuture();
     }
 }
