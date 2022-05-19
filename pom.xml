@@ -42,6 +42,9 @@
     <deploy.plugin.version>2.8.2</deploy.plugin.version>
     <jar.plugin.version>3.2.2</jar.plugin.version>
 
+    <!-- Test dependency versions -->
+    <junit.version>5.8.0-M1</junit.version>
+
     <!-- Docker component versions -->
     <docker.alpine.version>3.15.3</docker.alpine.version>
 
@@ -65,9 +68,10 @@
     <docker.registry.account />
 
     <!-- LibCal OAuth credentials and endpoint -->
-    <LIBCAL_CLIENT_ID>A_CLIENT_ID</LIBCAL_CLIENT_ID>
-    <LIBCAL_SECRET>A_CLIENT_SECRET</LIBCAL_SECRET>
-    <LIBCAL_TOKEN_ENDPOINT>A_TOKEN_ENDPOINT</LIBCAL_TOKEN_ENDPOINT>
+    <libcal.client.id>A_CLIENT_ID</libcal.client.id>
+    <libcal.secret>A_CLIENT_SECRET</libcal.secret>
+    <libcal.token.endpoint>A_TOKEN_ENDPOINT</libcal.token.endpoint>
+
   </properties>
 
   <dependencyManagement>
@@ -76,6 +80,13 @@
         <groupId>io.vertx</groupId>
         <artifactId>vertx-stack-depchain</artifactId>
         <version>${vertx.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -104,6 +115,15 @@
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
+      <artifactId>vertx-service-proxy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen</artifactId>
+      <classifier>processor</classifier>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
       <artifactId>vertx-web-client</artifactId>
     </dependency>
     <dependency>
@@ -117,16 +137,6 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-auth-oauth2</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-service-proxy</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-codegen</artifactId>
-      <classifier>processor</classifier>
-      <scope>provided</scope>
     </dependency>
 
     <!-- Below is a dependency that needs updating due to security issue (may be able to remove in future) -->
@@ -143,13 +153,13 @@
 
     <!-- Below dependencies only used for testing -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-unit</artifactId>
+      <artifactId>vertx-junit5</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -261,10 +271,10 @@
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
           </systemPropertyVariables>
           <environmentVariables>
-            <HTTP_PORT>${http.test.port}</HTTP_PORT>
-	    <LIBCAL_CLIENT_ID>${LIBCAL_CLIENT_ID}</LIBCAL_CLIENT_ID>
-            <LIBCAL_SECRET>${LIBCAL_SECRET}</LIBCAL_SECRET>
-            <LIBCAL_TOKEN_ENDPOINT>${LIBCAL_TOKEN_ENDPOINT}</LIBCAL_TOKEN_ENDPOINT>
+            <HTTP_PORT>${http.port}</HTTP_PORT>
+            <LIBCAL_CLIENT_ID>${libcal.client.id}</LIBCAL_CLIENT_ID>
+            <LIBCAL_SECRET>${libcal.secret}</LIBCAL_SECRET>
+            <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
           </environmentVariables>
         </configuration>
       </plugin>
@@ -274,7 +284,12 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
           <argLine>${jacoco.agent.arg}</argLine>
-          <environmentVariables></environmentVariables>
+          <environmentVariables>
+            <HTTP_PORT>${http.port}</HTTP_PORT>
+            <LIBCAL_CLIENT_ID>${libcal.client.id}</LIBCAL_CLIENT_ID>
+            <LIBCAL_SECRET>${libcal.secret}</LIBCAL_SECRET>
+            <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
+          </environmentVariables>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
           </systemPropertyVariables>
@@ -330,7 +345,13 @@
                   <!-- Start test container on an available host port -->
                   <port>${http.test.port}:${http.port}</port>
                 </ports>
-                <env></env>
+                <env>
+                  <JAVA_OPTS>-Xmx${heap.size}</JAVA_OPTS>
+                  <HTTP_PORT>${http.port}</HTTP_PORT>
+                  <LIBCAL_CLIENT_ID>${libcal.client.id}</LIBCAL_CLIENT_ID>
+                  <LIBCAL_SECRET>${libcal.secret}</LIBCAL_SECRET>
+                  <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
+                </env>
                 <!-- Test to make sure the server started as expected -->
                 <wait>
                   <http>
