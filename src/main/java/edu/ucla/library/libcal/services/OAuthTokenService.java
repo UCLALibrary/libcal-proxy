@@ -2,9 +2,7 @@
 package edu.ucla.library.libcal.services;
 
 import edu.ucla.library.libcal.Config;
-import edu.ucla.library.libcal.Constants;
 
-import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyClose;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
@@ -42,8 +40,10 @@ public interface OAuthTokenService {
                 .setSite(aConfig.getString(Config.OAUTH_TOKEN_URL));
         final OAuth2Auth provider = OAuth2Auth.create(aVertx, options);
 
-        return provider.authenticate(new JsonObject()).map(token -> {
-            return new OAuthTokenServiceImpl(aVertx, aConfig, provider, token);
+        return provider.authenticate(new JsonObject()).compose(token -> {
+            final OAuthTokenService service = new OAuthTokenServiceImpl(aVertx, aConfig, provider, token);
+
+            return ((OAuthTokenServiceImpl) service).shareAccessToken(token).map(service);
         });
     }
 
@@ -60,21 +60,9 @@ public interface OAuthTokenService {
     /**
      * Gets the bearer token that LibCal API clients should send in the "Authorization" HTTP header.
      *
-     * @param aVertx A Vert.x instance
-     * @return The bearer token
+     * @return A Future that resolves to the value of the bearer token
      */
-    @GenIgnore
-    static String getBearerToken(final Vertx aVertx) {
-        return (String) aVertx.sharedData().getLocalMap(Constants.ACCESS_TOKEN_MAP).get(Constants.ACCESS_TOKEN);
-    }
-
-    /**
-     * Requests that the OAuth token managed by this service is refreshed.
-     *
-     * @return A Future that succeeds when a valid token is available via {@link #getBearerToken(Vertx)}, or fails if a
-     *         new token could not be obtained
-     */
-    Future<Void> refreshTokenIfExpired();
+    Future<String> getBearerToken();
 
     /**
      * Closes the underlying resources used by this service.
