@@ -93,7 +93,7 @@ public class OAuthTokenServiceIT {
     public final void testGetToken(final Vertx aVertx, final VertxTestContext aContext) {
         myServiceProxy.getBearerToken().compose(token -> {
             final HttpRequest<?> exampleApiRequest = myWebClient
-                    .getAbs("https://calendar.library.ucla.edu/1.1/hours/2572").bearerTokenAuthentication(token);
+                    .getAbs("https://calendar.library.ucla.edu/1.1/room_groups").bearerTokenAuthentication(token);
 
             assertTrue(token != null);
             LOGGER.debug(MessageCodes.LCP_003, token);
