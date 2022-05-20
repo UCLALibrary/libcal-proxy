@@ -23,7 +23,7 @@ jobs:
         uses: samuelmeuli/action-maven-publish@201a45a3f311b2ee888f252ba9f4194257545709 # v1.4.0
         with:
           maven_goals_phases: "clean verify"
-          maven_profiles: ""
+          maven_profiles: default
           maven_args: >
             -V -ntp -Ddocker.showLogs=true
             -Dlibcal.client.id=${{ secrets.LIBCAL_CLIENT_ID }}
