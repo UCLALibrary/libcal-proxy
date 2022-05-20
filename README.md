@@ -2,6 +2,10 @@
 
 The LibCal-Proxy is a simple proxy-ish service that sits in front of LibCal and handles API authorization for other applications that do not know how to use OAuth. Instead, these other applications' IP addresses are checked to confirm that they should have access to the LibCal APIs.
 
+## Client usage
+
+Clients are expected to send HTTP requests to this proxy service as if they were connecting to LibCal directly, except that the Authorization HTTP request header may be omitted. See the LibCal API [usage guide](https://calendar.library.ucla.edu/admin/api/usage-guide) and [API docs](https://calendar.library.ucla.edu/admin/api) for more information.
+
 ## Building the Project
 
 To build the project, which includes running a bunch of tests, type:
