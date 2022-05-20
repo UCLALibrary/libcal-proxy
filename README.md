@@ -6,24 +6,36 @@ The LibCal-Proxy is a simple proxy-ish service that sits in front of LibCal and 
 
 To build the project, which includes running a bunch of tests, type:
 
-    mvn verify
+    mvn verify \
+        -Dlibcal.client.id="123" \
+        -Dlibcal.secret="0123456789abcdef0123456789abcdef" \
+        -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token"
 
 ## Running in Development
 
 The easiest way to run the application locally for testing is to use Maven:
 
+    LIBCAL_CLIENT_ID=123 \
+    LIBCAL_SECRET=0123456789abcdef0123456789abcdef \
+    LIBCAL_TOKEN_ENDPOINT=https://calendar.library.ucla.edu/1.1/oauth/token \
     mvn vertx:run
 
 If you want to run the appliction in its Docker container, you can also do that through Maven:
 
-    mvn initialize docker:run
+    mvn initialize docker:run \
+        -Dlibcal.client.id="123" \
+        -Dlibcal.secret="0123456789abcdef0123456789abcdef" \
+        -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token"
 
 This will run the Docker image in the foreground, with the logs being displayed in the terminal. You can use Ctrl-C to
 stop it.
 
 If you'd like to run it in the background, use:
 
-    mvn initialize docker:start
+    mvn initialize docker:start \
+        -Dlibcal.client.id="123" \
+        -Dlibcal.secret="0123456789abcdef0123456789abcdef" \
+        -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token"
 
 When you're ready to stop it, you can type:
 
