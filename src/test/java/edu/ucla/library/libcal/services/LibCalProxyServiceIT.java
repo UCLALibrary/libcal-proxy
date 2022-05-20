@@ -68,8 +68,8 @@ public class LibCalProxyServiceIT {
         }).onSuccess(service -> {
             myToken = new ServiceBinder(aVertx).setAddress(OAuthTokenService.ADDRESS).register(OAuthTokenService.class,
                     service);
-            // myService = new ServiceBinder(aVertx).setAddress(LibCalProxyService.ADDRESS)
-            // .register(LibCalProxyService.class, proxyService);
+            myService = new ServiceBinder(aVertx).setAddress(LibCalProxyService.ADDRESS)
+                    .register(LibCalProxyService.class, myServiceProxy);
             myTokenProxy = OAuthTokenService.createProxy(aVertx);
             myServiceProxy = LibCalProxyService.createProxy(aVertx);
 
@@ -118,8 +118,10 @@ public class LibCalProxyServiceIT {
             myServiceProxy.getLibCalOutput(token, "https://calendar.library.ucla.edu/", "1.1/calendars")
                     .compose(output -> {
                         assertTrue(output != null);
+                        aContext.completeNow();
                         return null;
                     });
+            aContext.completeNow();
             return null;
         }).onSuccess(result -> {
             aContext.completeNow();
