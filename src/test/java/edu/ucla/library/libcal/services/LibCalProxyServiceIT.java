@@ -1,7 +1,6 @@
 
 package edu.ucla.library.libcal.services;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.AfterAll;
@@ -18,10 +17,9 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
 import io.vertx.config.ConfigRetriever;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.ext.web.client.HttpRequest;
-import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.serviceproxy.ServiceBinder;
@@ -100,7 +98,7 @@ public class LibCalProxyServiceIT {
             assertTrue(config != null);
             assertTrue(config.getString(Config.OAUTH_CLIENT_ID) != null);
 
-            return null;
+            return Future.succeededFuture(null);
         }).onSuccess(result -> {
             aContext.completeNow();
         }).onFailure(aContext::failNow);
@@ -119,10 +117,10 @@ public class LibCalProxyServiceIT {
                     .compose(output -> {
                         assertTrue(output != null);
                         aContext.completeNow();
-                        return null;
+                        return Future.succeededFuture(null);
                     });
             aContext.completeNow();
-            return null;
+            return Future.succeededFuture(null);
         }).onSuccess(result -> {
             aContext.completeNow();
         }).onFailure(aContext::failNow);

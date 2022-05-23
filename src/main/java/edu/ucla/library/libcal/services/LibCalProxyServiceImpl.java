@@ -1,8 +1,6 @@
 
 package edu.ucla.library.libcal.services;
 
-import edu.ucla.library.libcal.JsonKeys;
-
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigStoreOptions;
@@ -10,14 +8,19 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import io.vertx.ext.web.codec.BodyCodec;
 
+/**
+ * The implementation of LibCalProxyService.
+ */
 public class LibCalProxyServiceImpl implements LibCalProxyService {
 
+    /**
+     * A Vert.x instance.
+     */
     private final Vertx myVertx;
 
     LibCalProxyServiceImpl(final Vertx aVertx) {
