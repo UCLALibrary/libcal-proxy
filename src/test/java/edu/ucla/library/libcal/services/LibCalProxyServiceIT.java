@@ -29,7 +29,7 @@ import io.vertx.serviceproxy.ServiceBinder;
 @TestInstance(Lifecycle.PER_CLASS)
 public class LibCalProxyServiceIT {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LibCalProxyServiceTest.class, MessageCodes.BUNDLE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LibCalProxyServiceIT.class, MessageCodes.BUNDLE);
 
     /**
      * The service proxy for getting bearer token for API call
