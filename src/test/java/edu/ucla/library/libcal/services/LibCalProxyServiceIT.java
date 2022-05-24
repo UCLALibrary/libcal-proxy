@@ -66,10 +66,10 @@ public class LibCalProxyServiceIT {
         }).onSuccess(service -> {
             myToken = new ServiceBinder(aVertx).setAddress(OAuthTokenService.ADDRESS).register(OAuthTokenService.class,
                     service);
-            myService = new ServiceBinder(aVertx).setAddress(LibCalProxyService.ADDRESS)
-                    .register(LibCalProxyService.class, myServiceProxy);
             myTokenProxy = OAuthTokenService.createProxy(aVertx);
             myServiceProxy = LibCalProxyService.createProxy(aVertx);
+            myService = new ServiceBinder(aVertx).setAddress(LibCalProxyService.ADDRESS)
+                    .register(LibCalProxyService.class, myServiceProxy);
 
             aContext.completeNow();
         }).onFailure(aContext::failNow);
