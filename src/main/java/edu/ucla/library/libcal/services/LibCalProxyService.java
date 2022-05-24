@@ -25,10 +25,11 @@ public interface LibCalProxyService {
      * Creates an instance of the service proxy.
      *
      * @param aVertx A Vert.x instance
-     * @return A service instance
+     * @param aConfig Application config in Json format
+     * @return A Future that resolves to a service instance
      */
-    static LibCalProxyService create(Vertx aVertx) {
-        return new LibCalProxyServiceImpl(aVertx);
+    static Future<LibCalProxyService> create(Vertx aVertx, JsonObject aConfig) {
+        return Future.succeededFuture(new LibCalProxyServiceImpl(aVertx, aConfig));
     }
 
     /**
@@ -46,17 +47,16 @@ public interface LibCalProxyService {
      *
      * @return A Future that resolves to a config bundle
      */
-    Future<JsonObject> getConfig();
+    //Future<JsonObject> getConfig();
 
     /**
      * Retrieves the output of a LibCal API call.
      *
-     * @param aOAuthToken An OAuth bearer token
-     * @param aBaseURL The base URL for calling UCLA LibCal APIs
+     * @param anOAuthToken An OAuth bearer token
      * @param aQuery The query string passes to the LibCal API
      * @return A Future that resolves to the JSON response from LibCal
      */
-    Future<JsonObject> getLibCalOutput(String aOAuthToken, String aBaseURL, String aQuery);
+    Future<JsonObject> getLibCalOutput(String anOAuthToken, String aQuery);
 
     /**
      * Closes the underlying resources used by this service.

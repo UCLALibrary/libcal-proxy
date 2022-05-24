@@ -10,14 +10,12 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.MessageCodes;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
 import io.vertx.config.ConfigRetriever;
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.junit5.VertxExtension;
@@ -31,7 +29,7 @@ import io.vertx.serviceproxy.ServiceBinder;
 @TestInstance(Lifecycle.PER_CLASS)
 public class LibCalProxyServiceIT {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OAuthTokenServiceIT.class, MessageCodes.BUNDLE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LibCalProxyServiceTest.class, MessageCodes.BUNDLE);
 
     /**
      * The service proxy for getting bearer token for API call
@@ -62,14 +60,11 @@ public class LibCalProxyServiceIT {
     @BeforeAll
     public final void setUp(final Vertx aVertx, final VertxTestContext aContext) {
         ConfigRetriever.create(aVertx).getConfig().compose(config -> {
-            return OAuthTokenService.create(aVertx, config);
-        }).onSuccess(service -> {
-            myToken = new ServiceBinder(aVertx).setAddress(OAuthTokenService.ADDRESS).register(OAuthTokenService.class,
-                    service);
-            myTokenProxy = OAuthTokenService.createProxy(aVertx);
-            myServiceProxy = LibCalProxyService.createProxy(aVertx);
+            return LibCalProxyService.create(aVertx, config);
+        }).onSuccess(proxy -> {
             myService = new ServiceBinder(aVertx).setAddress(LibCalProxyService.ADDRESS)
-                    .register(LibCalProxyService.class, myServiceProxy);
+                    .register(LibCalProxyService.class, proxy);
+            myServiceProxy = LibCalProxyService.createProxy(aVertx);
 
             aContext.completeNow();
         }).onFailure(aContext::failNow);
@@ -88,41 +83,26 @@ public class LibCalProxyServiceIT {
     }
 
     /**
-     * Tests that {@link LibCalProxyService#getConfig()} returns application config.
+     * Tests that {@link LibCalProxyService#getLibCalOutput(String, String)} returns content from LibCal
+     * API calls.
      *
+     * @param aVertx A Vert.x instance
      * @param aContext A test context
      */
     @Test
-    public final void testGetConfig(final VertxTestContext aContext) {
-        myServiceProxy.getConfig().compose(config -> {
-            assertTrue(config != null);
-            assertTrue(config.getString(Config.OAUTH_CLIENT_ID) != null);
-
-            return Future.succeededFuture(null);
-        }).onSuccess(result -> {
-            aContext.completeNow();
-        }).onFailure(aContext::failNow);
-    }
-
-    /**
-     * Tests that {@link OAuthTokenService#getBearerToken(Vertx)} returns a bearer token that can be used to authorize
-     * LibCal API calls.
-     *
-     * @param aContext A test context
-     */
-    @Test
-    public final void testGetLibCalOutput(final VertxTestContext aContext) {
-        myTokenProxy.getBearerToken().compose(token -> {
-            myServiceProxy.getLibCalOutput(token, "https://calendar.library.ucla.edu/", "1.1/calendars")
-                    .compose(output -> {
-                        assertTrue(output != null);
-                        aContext.completeNow();
-                        return Future.succeededFuture(null);
-                    });
-            aContext.completeNow();
-            return Future.succeededFuture(null);
-        }).onSuccess(result -> {
-            aContext.completeNow();
+    public final void testGetLibCalOutput(final Vertx aVertx, final VertxTestContext aContext) {
+        ConfigRetriever.create(aVertx).getConfig().compose(config -> {
+            return OAuthTokenService.create(aVertx, config);
+        }).onSuccess(service -> {
+            final MessageConsumer<?> myTokenService = new ServiceBinder(aVertx).setAddress(OAuthTokenService.ADDRESS)
+                    .register(OAuthTokenService.class, service);
+            myTokenProxy = OAuthTokenService.createProxy(aVertx);
+            myTokenProxy.getBearerToken().compose(token -> {
+                return myServiceProxy.getLibCalOutput(token, "1.1/calendars");
+            }).onSuccess(output -> {
+                assertTrue(output != null);
+                aContext.completeNow();
+            }).onFailure(aContext::failNow);
         }).onFailure(aContext::failNow);
     }
 }

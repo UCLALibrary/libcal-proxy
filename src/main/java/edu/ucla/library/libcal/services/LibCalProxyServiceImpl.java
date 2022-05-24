@@ -1,9 +1,8 @@
 
 package edu.ucla.library.libcal.services;
 
-import io.vertx.config.ConfigRetrieverOptions;
-import io.vertx.config.ConfigRetriever;
-import io.vertx.config.ConfigStoreOptions;
+import edu.ucla.library.libcal.Config;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -23,43 +22,29 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
      */
     private final Vertx myVertx;
 
-    LibCalProxyServiceImpl(final Vertx aVertx) {
+    /**
+     * App config in Json format.
+     */
+    private final JsonObject myConfig;
+
+    LibCalProxyServiceImpl(final Vertx aVertx, final JsonObject aConfig) {
         myVertx = aVertx;
+        myConfig = aConfig;
     }
 
     @Override
-    public Future<JsonObject> getConfig() {
-        final Promise<JsonObject> promise = Promise.promise();
-        final ConfigStoreOptions envPropsStore = new ConfigStoreOptions().setType("env");
-        final ConfigStoreOptions sysPropsStore = new ConfigStoreOptions().setType("sys");
-        final ConfigRetrieverOptions options =
-                new ConfigRetrieverOptions().addStore(envPropsStore).addStore(sysPropsStore);
-        final ConfigRetriever retriever = ConfigRetriever.create(myVertx, options);
-
-        retriever.getConfig(configResult -> {
-            if (configResult.succeeded()) {
-                promise.complete(configResult.result());
-            } else {
-                promise.fail(configResult.cause().getMessage());
-            }
-        });
-
-        return promise.future();
-    }
-
-    @Override
-    public Future<JsonObject> getLibCalOutput(final String aOUathToken, final String aBaseURL, final String aQuery) {
+    public Future<JsonObject> getLibCalOutput(final String anOAuthToken, final String aQuery) {
         final Promise<JsonObject> promise = Promise.promise();
         final HttpRequest<JsonObject> request;
         final JsonObject responseBody = new JsonObject();
+        final String baseURL = myConfig.getString(Config.LIBCAL_BASE_URL);
 
-        request = WebClient.create(myVertx).getAbs(aBaseURL.concat(aQuery)).bearerTokenAuthentication(aOUathToken)
+        request = WebClient.create(myVertx).getAbs(baseURL.concat(aQuery)).bearerTokenAuthentication(anOAuthToken)
                 .as(BodyCodec.jsonObject()).expect(ResponsePredicate.SC_OK).ssl(true);
         request.send(asyncResult -> {
             if (asyncResult.succeeded()) {
                 responseBody.mergeIn(asyncResult.result().body());
                 promise.complete(responseBody);
-
             } else {
                 responseBody.put("cause", asyncResult.cause().getMessage());
                 responseBody.put("status", asyncResult.result().statusMessage());
