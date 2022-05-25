@@ -43,20 +43,13 @@ public interface LibCalProxyService {
     }
 
     /**
-     * Retrieves the application config.
-     *
-     * @return A Future that resolves to a config bundle
-     */
-    //Future<JsonObject> getConfig();
-
-    /**
      * Retrieves the output of a LibCal API call.
      *
      * @param anOAuthToken An OAuth bearer token
      * @param aQuery The query string passes to the LibCal API
      * @return A Future that resolves to the JSON response from LibCal
      */
-    Future<JsonObject> getLibCalOutput(String anOAuthToken, String aQuery);
+    Future<String> getLibCalOutput(String anOAuthToken, String aQuery);
 
     /**
      * Closes the underlying resources used by this service.

@@ -27,7 +27,7 @@
   </issueManagement>
 
   <properties>
-    <vertx.version>4.2.6</vertx.version>
+    <vertx.version>4.3.1</vertx.version>
     <freelib.utils.version>3.0.1</freelib.utils.version>
     <freelib.maven.version>0.3.1</freelib.maven.version>
 

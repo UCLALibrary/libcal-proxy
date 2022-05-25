@@ -98,7 +98,7 @@ public class LibCalProxyServiceIT {
                     .register(OAuthTokenService.class, service);
             myTokenProxy = OAuthTokenService.createProxy(aVertx);
             myTokenProxy.getBearerToken().compose(token -> {
-                return myServiceProxy.getLibCalOutput(token, "1.1/calendars");
+                return myServiceProxy.getLibCalOutput(token, "api/1.1/hours/2572");
             }).onSuccess(output -> {
                 assertTrue(output != null);
                 aContext.completeNow();

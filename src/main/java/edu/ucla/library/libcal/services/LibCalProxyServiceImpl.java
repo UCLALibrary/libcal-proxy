@@ -33,22 +33,28 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
     }
 
     @Override
-    public Future<JsonObject> getLibCalOutput(final String anOAuthToken, final String aQuery) {
-        final Promise<JsonObject> promise = Promise.promise();
-        final HttpRequest<JsonObject> request;
-        final JsonObject responseBody = new JsonObject();
+    public Future<String> getLibCalOutput(final String anOAuthToken, final String aQuery) {
+        /*
+         * for some reason, JsonObject has trouble parsing the output from api/1.1/hours/[id]
+         * haven't tried with other API calls, buut seems safer to handle API output as string
+         */
+        final Promise<String> promise = Promise.promise();
+        final HttpRequest<String> request;
+        final StringBuilder responseBody = new StringBuilder();
         final String baseURL = myConfig.getString(Config.LIBCAL_BASE_URL);
 
         request = WebClient.create(myVertx).getAbs(baseURL.concat(aQuery)).bearerTokenAuthentication(anOAuthToken)
-                .as(BodyCodec.jsonObject()).expect(ResponsePredicate.SC_OK).ssl(true);
+                .as(BodyCodec.string()).expect(ResponsePredicate.SC_OK).ssl(true);
         request.send(asyncResult -> {
             if (asyncResult.succeeded()) {
-                responseBody.mergeIn(asyncResult.result().body());
-                promise.complete(responseBody);
+                responseBody.append(asyncResult.result().body());
+                promise.complete(responseBody.toString());
             } else {
-                responseBody.put("cause", asyncResult.cause().getMessage());
-                responseBody.put("status", asyncResult.result().statusMessage());
-                promise.fail(responseBody.encodePrettily());
+                responseBody.append("cause: ".concat(asyncResult.cause().getMessage()));
+                if (asyncResult.result() != null) {
+                    responseBody.append("status: ".concat(asyncResult.result().statusMessage()));
+                }
+                promise.fail(responseBody.toString());
             }
         });
 
