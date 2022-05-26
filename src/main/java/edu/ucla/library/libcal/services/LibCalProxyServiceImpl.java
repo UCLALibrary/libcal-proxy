@@ -18,9 +18,9 @@ import io.vertx.ext.web.codec.BodyCodec;
 public class LibCalProxyServiceImpl implements LibCalProxyService {
 
     /**
-     * A Vert.x instance.
+     * HTTP client for retrieving LibCal output.
      */
-    private final Vertx myVertx;
+    private final WebClient myWebClient;
 
     /**
      * App config in Json format.
@@ -28,33 +28,29 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
     private final JsonObject myConfig;
 
     LibCalProxyServiceImpl(final Vertx aVertx, final JsonObject aConfig) {
-        myVertx = aVertx;
         myConfig = aConfig;
+        myWebClient = WebClient.create(aVertx);
     }
 
     @Override
     public Future<String> getLibCalOutput(final String anOAuthToken, final String aQuery) {
         /*
-         * for some reason, JsonObject has trouble parsing the output from api/1.1/hours/[id]
-         * haven't tried with other API calls, buut seems safer to handle API output as string
+         * LibCal API returns JSON in variable formats (sometimes objects, sometimes arrays),
+         * so safer to handle API output as string to avoid parsing errors
          */
         final Promise<String> promise = Promise.promise();
         final HttpRequest<String> request;
         final StringBuilder responseBody = new StringBuilder();
         final String baseURL = myConfig.getString(Config.LIBCAL_BASE_URL);
 
-        request = WebClient.create(myVertx).getAbs(baseURL.concat(aQuery)).bearerTokenAuthentication(anOAuthToken)
+        request = myWebClient.getAbs(baseURL.concat(aQuery)).bearerTokenAuthentication(anOAuthToken)
                 .as(BodyCodec.string()).expect(ResponsePredicate.SC_OK).ssl(true);
         request.send(asyncResult -> {
             if (asyncResult.succeeded()) {
                 responseBody.append(asyncResult.result().body());
                 promise.complete(responseBody.toString());
             } else {
-                responseBody.append("cause: ".concat(asyncResult.cause().getMessage()));
-                if (asyncResult.result() != null) {
-                    responseBody.append("status: ".concat(asyncResult.result().statusMessage()));
-                }
-                promise.fail(responseBody.toString());
+                promise.fail(asyncResult.cause());
             }
         });
 
