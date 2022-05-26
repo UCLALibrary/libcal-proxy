@@ -22,9 +22,6 @@ import io.vertx.ext.auth.oauth2.OAuth2Options;
 
 /**
  * Implementation of {@link OAuthTokenService}.
- * <p>
- * FIXME: the likelihood of {@link OAuthTokenService#getBearerToken(Vertx)} returning an expired token is probably too
- * high for a production service.
  */
 public class OAuthTokenServiceImpl implements OAuthTokenService {
 
