@@ -68,7 +68,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
         myVertx = aVertx;
         myAuthProvider = OAuth2Auth.create(aVertx, options);
 
-        authenticateWithRetry(Optional.of(1), 5000).compose(token -> {
+        authenticateWithRetry(Optional.of(1), 5).compose(token -> {
             myTimerId = keepTokenFresh(token, 300);
 
             LOGGER.debug(MessageCodes.LCP_002, aConfig.getString(Config.OAUTH_CLIENT_ID),
@@ -115,7 +115,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
         final int delay = aToken.principal().getInteger(JsonKeys.EXPIRES_IN) - aSecondsBeforeExpiration;
 
         return myVertx.setTimer(delay, timerID -> {
-            authenticateWithRetry(Optional.of(3), 5000).compose(newToken -> {
+            authenticateWithRetry(Optional.of(3), 5).compose(newToken -> {
                 myTimerId = keepTokenFresh(newToken, aSecondsBeforeExpiration);
 
                 return shareAccessToken(newToken);
@@ -127,7 +127,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
      * Attempts authentication with a set number of retries.
      *
      * @param aRetryCount The optional number of times to retry (retries forever if empty)
-     * @param aRetryDelay The number of milliseconds to wait between retry attempts
+     * @param aRetryDelay The number of seconds to wait between retry attempts
      * @return A Future that succeeds with the new access token if authentication is successful, or fails otherwise
      */
     private Future<User> authenticateWithRetry(final Optional<Integer> aRetryCount, final long aRetryDelay) {
@@ -142,7 +142,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
      * Helper function for hiding the recursion.
      *
      * @param aRetryCount The optional number of times to retry (retries forever if empty)
-     * @param aRetryDelay The time to wait between retry attempts, in milliseconds
+     * @param aRetryDelay The number of seconds to wait between retry attempts
      * @param aPromise A Promise that completes with the new access token if authentication is successful, or fails
      *        otherwise
      */
@@ -153,7 +153,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
                 // Wait a bit before retrying again
                 myVertx.executeBlocking(sleep -> {
                     try {
-                        Thread.sleep(aRetryDelay);
+                        Thread.sleep(aRetryDelay * 1000);
                         sleep.complete();
                     } catch (final InterruptedException details) {
                         sleep.fail(details);
