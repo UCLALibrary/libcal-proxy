@@ -148,19 +148,8 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
         myAuthProvider.authenticate(new JsonObject()).onSuccess(aPromise::complete).onFailure(failure -> {
             if (aRetryCount.isEmpty() || aRetryCount.get() > 0) {
                 // Wait a bit before retrying again
-                myVertx.executeBlocking(sleep -> {
-                    try {
-                        Thread.sleep(aRetryDelay * 1000);
-                        sleep.complete();
-                    } catch (final InterruptedException details) {
-                        sleep.fail(details);
-                    }
-                }, sleep -> {
-                    if (sleep.succeeded()) {
-                        authenticateWithRetryHelper(aRetryCount.map(count -> count - 1), aRetryDelay, aPromise);
-                    } else {
-                        aPromise.fail(sleep.cause());
-                    }
+                myVertx.setTimer(aRetryDelay * 1000, timerID -> {
+                    authenticateWithRetryHelper(aRetryCount.map(count -> count - 1), aRetryDelay, aPromise);
                 });
             } else {
                 aPromise.fail(failure);
