@@ -5,12 +5,9 @@ import static edu.ucla.library.libcal.MediaType.APPLICATION_JSON;
 
 import info.freelibrary.util.HTTP;
 
-import edu.ucla.library.libcal.Config;
-// activate after SERV-442 merge
-//import edu.ucla.library.libcal.Constants;
-import edu.ucla.library.libcal.JsonKeys;
-// activate after SERV-442 merge
-//import eduedu.ucla.library.libcal.services.LibCalProxyService;
+import edu.ucla.library.libcal.Constants;
+import eduedu.ucla.library.libcal.services.LibCalProxyService;
+import eduedu.ucla.library.libcal.services.OAuthTokenService;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -30,35 +27,61 @@ public class ProxyHandler implements Handler<RoutingContext> {
     private final Vertx myVertx;
 
     /**
-     * A service for LibCal OAuth and API calls
+     * The handler's copy of the application config.
      */
-    private final LibCalProxyService myProxyService;
+    private final JsonObject myConfig;
+
+    /**
+     * A service for LibCal API calls
+     */
+    private final LibCalProxyService myAPIProxy;
+
+    /**
+     * A service for LibCal OAuth calls
+     */
+    private final OAuthTokenService myTokenProxy;
 
     /**
      * Creates a handler that returns a status response.
      *
      * @param aVertx A Vert.x instance
+     * @param aConfig A configuration
      */
-    public ProxyHandler(final Vertx aVertx) {
+    public ProxyHandler(final Vertx aVertx, final JsonObject aConfig) {
         myVertx = aVertx;
-	myProxyService = LibCalProxyService.createProxy(myVertx);
+        myConfig = aConfig;
     }
 
     @Override
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
-        final String receivedApp = aContext.pathParam("theApp");
-	final String receivedQuery = aContext.pathParam("theQuery");
+        final String receivedQuery = aContext.pathParam(Constants.QUERY_PARAM);
 
-        if (receivedApp == null || receivedApp.length() == 0) {
-            response.setStatusCode(HTTP.BAD_REQUEST).end("missing app param"); //add message bundle message here
+        if (receivedQuery == null || receivedQuery.equals(Constants.EMPTY)) {
+            response.setStatusCode(HTTP.BAD_REQUEST).end(LOGGER.getMessage(MessageCodes.LCP_005));
             return;
-	} else if (receivedQuery == null || receivedQuery.length() ==0) {
-            response.setStatusCode(HTTP.BAD_REQUEST).end("missing query param"); //add message bundle message here
-            return;
-	} else {
+        } else {
             response.setStatusCode(HTTP.OK).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
-	}
+            OAuthTokenService.create(myVertx, myConfig)
+            .onSuccess(service -> {
+                final MessageConsumer<?> myToken = new ServiceBinder(myVertx).setAddress(OAuthTokenService.ADDRESS)
+                      .register(OAuthTokenService.class, service);
+                myTokenProxy = OAuthTokenService.createProxy(myVertx);
+                myTokenProxy.getBearerToken().compose(token -> {
+                    return LibCalProxyService.create(aVertx, config);
+                }).onSuccess(apiProxy -> {
+                    final MessageConsumer<?> myAPI = new ServiceBinder(myVertx).setAddress(LibCalProxyService.ADDRESS)
+                          .register(LibCalProxyService.class, apiProxy);
+                    myAPIProxy = LibCalProxyService.createProxy(myVertx);
+                    myServiceProxy.getLibCalOutput(token, Constants.SLASH.concat(receivedQuery))
+                    .onSuccess(apiOutput -> {
+                        response.setStatusCode(HTTP.OK).putHeader(
+                                 HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
+                        response.end(apiOutput);
+                    }).onFailure();
+                }).onFailure();
+            }).onFailure();
+        }
     }
 
     /**
