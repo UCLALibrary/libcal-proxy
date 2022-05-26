@@ -1,17 +1,13 @@
 
 package edu.ucla.library.libcal.services;
 
-import edu.ucla.library.libcal.Config;
-
 import io.vertx.codegen.annotations.ProxyClose;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
 
 /**
@@ -34,17 +30,10 @@ public interface OAuthTokenService {
      * @return The service instance
      */
     static Future<OAuthTokenService> create(final Vertx aVertx, final JsonObject aConfig) {
-        final OAuth2Options options = new OAuth2Options().setFlow(OAuth2FlowType.CLIENT)
-                .setClientId(aConfig.getString(Config.OAUTH_CLIENT_ID))
-                .setClientSecret(aConfig.getString(Config.OAUTH_CLIENT_SECRET))
-                .setSite(aConfig.getString(Config.OAUTH_TOKEN_URL));
-        final OAuth2Auth provider = OAuth2Auth.create(aVertx, options);
+        final Promise<OAuthTokenService> initialization = Promise.promise();
+        new OAuthTokenServiceImpl(aVertx, aConfig, initialization);
 
-        return provider.authenticate(new JsonObject()).compose(token -> {
-            final OAuthTokenService service = new OAuthTokenServiceImpl(aVertx, aConfig, provider, token);
-
-            return ((OAuthTokenServiceImpl) service).shareAccessToken(token).map(service);
-        });
+        return initialization.future();
     }
 
     /**

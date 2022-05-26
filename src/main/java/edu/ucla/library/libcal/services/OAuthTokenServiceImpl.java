@@ -17,6 +17,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 
 /**
  * Implementation of {@link OAuthTokenService}.
@@ -48,20 +50,32 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
 
     /**
      * Creates an instance of the service. Use {@link OAuthTokenService#create(Vertx, JsonObject)} to invoke.
+     * <p>
+     * Note that the return value should not be used directly. Instead use the result of {@code aPromise}.
      *
      * @param aVertx A Vert.x instance
      * @param aConfig A configuration
-     * @param anAuthProvider An OAuth authentication provider
-     * @param aToken A token that was returned by authenticating against {@code anAuthProvider}
+     * @param aPromise A Promise that completes with the service instance if initialization was successful, or fails
+     *        otherwise
      */
-    public OAuthTokenServiceImpl(final Vertx aVertx, final JsonObject aConfig, final OAuth2Auth anAuthProvider,
-            final User aToken) {
-        myVertx = aVertx;
-        myAuthProvider = anAuthProvider;
-        myTimerId = keepTokenFresh(aToken, 300);
+    public OAuthTokenServiceImpl(final Vertx aVertx, final JsonObject aConfig,
+            final Promise<OAuthTokenService> aPromise) {
+        final OAuth2Options options = new OAuth2Options().setFlow(OAuth2FlowType.CLIENT)
+                .setClientId(aConfig.getString(Config.OAUTH_CLIENT_ID))
+                .setClientSecret(aConfig.getString(Config.OAUTH_CLIENT_SECRET))
+                .setSite(aConfig.getString(Config.OAUTH_TOKEN_URL));
 
-        LOGGER.debug(MessageCodes.LCP_002, aConfig.getString(Config.OAUTH_CLIENT_ID),
-                aToken.principal().encodePrettily());
+        myVertx = aVertx;
+        myAuthProvider = OAuth2Auth.create(aVertx, options);
+
+        authenticateWithRetry(Optional.of(1), 5000).compose(token -> {
+            myTimerId = keepTokenFresh(token, 300);
+
+            LOGGER.debug(MessageCodes.LCP_002, aConfig.getString(Config.OAUTH_CLIENT_ID),
+                    token.principal().encodePrettily());
+
+            return shareAccessToken(token);
+        }).onSuccess(unused -> aPromise.complete(this)).onFailure(aPromise::fail);
     }
 
     @Override
