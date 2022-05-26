@@ -123,7 +123,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
                 LOGGER.debug(MessageCodes.LCP_002, myLibCalClientID, newToken.principal().encodePrettily());
 
                 return shareAccessToken(newToken);
-            }).onFailure(details -> LOGGER.error(details.getMessage()));
+            }).onFailure(details -> LOGGER.error(MessageCodes.LCP_005, details.getMessage()));
         });
     }
 
@@ -158,6 +158,8 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
                 myVertx.setTimer(aRetryDelay * 1000, timerID -> {
                     authenticateWithRetryHelper(aRetryCount.map(count -> count - 1), aRetryDelay, aPromise);
                 });
+
+                LOGGER.warn(MessageCodes.LCP_004, failure.getMessage(), aRetryDelay);
             } else {
                 aPromise.fail(failure);
             }
