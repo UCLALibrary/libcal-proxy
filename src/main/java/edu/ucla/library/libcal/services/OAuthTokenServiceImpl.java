@@ -41,6 +41,11 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
     private final OAuth2Auth myAuthProvider;
 
     /**
+     * The LibCal client ID.
+     */
+    private final String myLibCalClientID;
+
+    /**
      * The ID of the periodic timer for checking if the OAuth token needs refreshing.
      */
     private long myTimerId;
@@ -64,12 +69,12 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
 
         myVertx = aVertx;
         myAuthProvider = OAuth2Auth.create(aVertx, options);
+        myLibCalClientID = aConfig.getString(Config.OAUTH_CLIENT_ID);
 
         authenticateWithRetry(Optional.of(1), 5).compose(token -> {
             myTimerId = keepTokenFresh(token, 300);
 
-            LOGGER.debug(MessageCodes.LCP_002, aConfig.getString(Config.OAUTH_CLIENT_ID),
-                    token.principal().encodePrettily());
+            LOGGER.debug(MessageCodes.LCP_002, myLibCalClientID, token.principal().encodePrettily());
 
             return shareAccessToken(token);
         }).onSuccess(unused -> aPromise.complete(this)).onFailure(aPromise::fail);
@@ -114,6 +119,8 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
         return myVertx.setTimer(delay * 1000, timerID -> {
             authenticateWithRetry(Optional.of(3), 5).compose(newToken -> {
                 myTimerId = keepTokenFresh(newToken, aSecondsBeforeExpiration);
+
+                LOGGER.debug(MessageCodes.LCP_002, myLibCalClientID, newToken.principal().encodePrettily());
 
                 return shareAccessToken(newToken);
             }).onFailure(details -> LOGGER.error(details.getMessage()));
