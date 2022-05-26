@@ -128,7 +128,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
      *
      * @param aRetryCount The optional number of times to retry (retries forever if empty)
      * @param aRetryDelay The number of seconds to wait between retry attempts
-     * @return A Future that succeeds with the new access token if authentication is successful, or fails otherwise
+     * @return A Future that succeeds with the new OAuth token if authentication is successful, or fails otherwise
      */
     private Future<User> authenticateWithRetry(final Optional<Integer> aRetryCount, final long aRetryDelay) {
         final Promise<User> authentication = Promise.promise();
@@ -143,7 +143,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
      *
      * @param aRetryCount The optional number of times to retry (retries forever if empty)
      * @param aRetryDelay The number of seconds to wait between retry attempts
-     * @param aPromise A Promise that completes with the new access token if authentication is successful, or fails
+     * @param aPromise A Promise that completes with the new OAuth token if authentication is successful, or fails
      *        otherwise
      */
     private void authenticateWithRetryHelper(final Optional<Integer> aRetryCount, final long aRetryDelay,
