@@ -24,10 +24,6 @@ RUN apk add openjdk11 --quiet --no-cache \
 # The user that runs the application
 USER ${project.artifactId}
 
-# Overridable ENV properties
-ENV HEAP_SIZE="${heap.size}"
-ENV HTTP_PORT="${http.port}"
-
 # The service's exposed port
 EXPOSE ${HTTP_PORT}
 
@@ -36,4 +32,4 @@ EXPOSE ${HTTP_PORT}
 
 # Run the service
 ENV JAR_PATH="/opt/${project.artifactId}/${project.artifactId}-${project.version}.jar"
-CMD ["sh", "-c", "exec java -Xmx${HEAP_SIZE} -jar ${JAR_PATH}"]
+CMD ["sh", "-c", "exec java ${JAVA_OPTS} -jar ${JAR_PATH}"]

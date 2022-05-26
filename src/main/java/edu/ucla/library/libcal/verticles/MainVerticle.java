@@ -12,15 +12,19 @@ import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.MessageCodes;
 import edu.ucla.library.libcal.Op;
 import edu.ucla.library.libcal.handlers.StatusHandler;
+import edu.ucla.library.libcal.services.OAuthTokenService;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import io.vertx.serviceproxy.ServiceBinder;
 
 /**
  * Main verticle that starts the application.
@@ -38,42 +42,55 @@ public class MainVerticle extends AbstractVerticle {
     private static final String API_SPEC = "src/main/resources/libcal-proxy.yaml";
 
     /**
+     * The OAuth token service proxy.
+     */
+    private MessageConsumer<?> myOAuthTokenService;
+
+    /**
      * The main verticle's HTTP server.
      */
     private HttpServer myServer;
 
     @Override
     public void start(final Promise<Void> aPromise) {
-        ConfigRetriever.create(vertx).getConfig().onFailure(aPromise::fail)
-                .onSuccess(config -> configureServer(config.mergeIn(config()), aPromise));
+        ConfigRetriever.create(vertx).getConfig().compose(config -> {
+            return OAuthTokenService.create(vertx, config).compose(service -> {
+                myOAuthTokenService = new ServiceBinder(vertx).setAddress(OAuthTokenService.ADDRESS)
+                        .register(OAuthTokenService.class, service);
+
+                return configureServer(config);
+            });
+        }).onSuccess(server -> {
+            LOGGER.info(MessageCodes.LCP_001, server.actualPort());
+            aPromise.complete();
+        }).onFailure(aPromise::fail);
     }
 
     @Override
     public void stop(final Promise<Void> aPromise) {
-        myServer.close().onFailure(aPromise::fail).onSuccess(result -> aPromise.complete());
+        myServer.close().compose(unused -> myOAuthTokenService.unregister()).onSuccess(unused -> aPromise.complete())
+                .onFailure(aPromise::fail);
     }
 
     /**
      * Configure the application server.
      *
      * @param aConfig A JSON configuration
-     * @param aPromise A startup promise
+     * @return A Future that resolves to the configured and listening server
      */
-    private void configureServer(final JsonObject aConfig, final Promise<Void> aPromise) {
+    private Future<HttpServer> configureServer(final JsonObject aConfig) {
         final String host = aConfig.getString(Config.HTTP_HOST, INADDR_ANY);
         final int port = aConfig.getInteger(Config.HTTP_PORT, 8888);
 
-        RouterBuilder.create(vertx, getRouterSpec()).onFailure(aPromise::fail).onSuccess(routeBuilder -> {
+        return RouterBuilder.create(vertx, getRouterSpec()).compose(routeBuilder -> {
             final HttpServerOptions serverOptions = new HttpServerOptions().setPort(port).setHost(host);
 
             // Associate handlers with operation IDs from the application's OpenAPI specification
             routeBuilder.operation(Op.GET_STATUS).handler(new StatusHandler(getVertx()));
 
             myServer = getVertx().createHttpServer(serverOptions).requestHandler(routeBuilder.createRouter());
-            myServer.listen().onFailure(aPromise::fail).onSuccess(result -> {
-                LOGGER.info(MessageCodes.LCP_001, port);
-                aPromise.complete();
-            });
+
+            return myServer.listen();
         });
     }
 
