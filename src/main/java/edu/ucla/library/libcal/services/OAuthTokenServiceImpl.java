@@ -34,19 +34,14 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
     private final Vertx myVertx;
 
     /**
-     * The ID of the periodic timer for checking if the OAuth token needs refreshing.
-     */
-    private final long myTimerId;
-
-    /**
      * The OAuth authentication provider.
      */
     private final OAuth2Auth myAuthProvider;
 
     /**
-     * LibCal credentials represented as an OAuth token.
+     * The ID of the periodic timer for checking if the OAuth token needs refreshing.
      */
-    private User myToken;
+    private long myTimerId;
 
     /**
      * Creates an instance of the service. Use {@link OAuthTokenService#create(Vertx, JsonObject)} to invoke.
@@ -60,12 +55,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
             final User aToken) {
         myVertx = aVertx;
         myAuthProvider = anAuthProvider;
-        myToken = aToken;
-        myTimerId = aVertx.setPeriodic(1000, timerId -> {
-            if (myToken.expired()) {
-                refreshTokenIfExpired().onFailure(details -> LOGGER.error(details.getMessage()));
-            }
-        });
+        myTimerId = keepTokenFresh(aToken, 300);
 
         LOGGER.debug(MessageCodes.LCP_002, aConfig.getString(Config.OAUTH_CLIENT_ID),
                 aToken.principal().encodePrettily());
@@ -78,23 +68,11 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
         });
     }
 
-    /**
-     * Requests that the OAuth token managed by this service is refreshed.
-     *
-     * @return A Future that succeeds when a valid token is available via {@link #getBearerToken(Vertx)}, or fails if a
-     *         new token could not be obtained
-     */
-    protected Future<User> refreshTokenIfExpired() {
-        if (myToken.expired()) {
-            // FIXME: retry on failure; see https://vertx.io/docs/vertx-auth-oauth2/java/#_refresh_token
-            return myAuthProvider.authenticate(new JsonObject()).compose(newUser -> {
-                myToken = newUser;
+    @Override
+    public Future<Void> close() {
+        myVertx.cancelTimer(myTimerId);
 
-                return shareAccessToken(newUser).map(newUser);
-            });
-        } else {
-            return Future.succeededFuture();
-        }
+        return Future.succeededFuture();
     }
 
     /**
@@ -109,10 +87,23 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
         });
     }
 
-    @Override
-    public Future<Void> close() {
-        myVertx.cancelTimer(myTimerId);
+    /**
+     * Refresh the OAuth token before it has a chance to expire. This method is recursive.
+     *
+     * @param aToken The OAuth token
+     * @param aSecondsBeforeExpiration The number of seconds before expiration to attempt a refresh
+     * @return The ID of a Vert.x timer
+     */
+    private long keepTokenFresh(final User aToken, final int aSecondsBeforeExpiration) {
+        final int tokenExpiresIn = aToken.principal().getInteger(JsonKeys.EXPIRES_IN);
 
-        return Future.succeededFuture();
+        return myVertx.setTimer(tokenExpiresIn - aSecondsBeforeExpiration, timerID -> {
+            // FIXME: retry on failure; see https://vertx.io/docs/vertx-auth-oauth2/java/#_refresh_token
+            myAuthProvider.authenticate(new JsonObject()).compose(newToken -> {
+                myTimerId = keepTokenFresh(newToken, aSecondsBeforeExpiration);
+
+                return shareAccessToken(newToken);
+            }).onFailure(details -> LOGGER.error(details.getMessage()));
+        });
     }
 }
