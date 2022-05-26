@@ -11,9 +11,7 @@ import edu.ucla.library.libcal.MessageCodes;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -103,42 +101,55 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
         final int delay = aToken.principal().getInteger(JsonKeys.EXPIRES_IN) - aSecondsBeforeExpiration;
 
         return myVertx.setTimer(delay, timerID -> {
-            authenticateWithRetry(Optional.of(3), 5000, Promise.promise(), authentication -> {
-                if (authentication.succeeded()) {
-                    final User newToken = authentication.result();
+            authenticateWithRetry(Optional.of(3), 5000).compose(newToken -> {
+                myTimerId = keepTokenFresh(newToken, aSecondsBeforeExpiration);
 
-                    myTimerId = keepTokenFresh(newToken, aSecondsBeforeExpiration);
-
-                    shareAccessToken(newToken);
-                } else {
-                    LOGGER.error(authentication.cause().getMessage());
-                }
-            });
+                return shareAccessToken(newToken);
+            }).onFailure(details -> LOGGER.error(details.getMessage()));
         });
     }
 
     /**
-     * Attempts authentication with a set number of retries. This method is recursive.
+     * Attempts authentication with a set number of retries.
+     *
+     * @param aRetryCount The optional number of times to retry (retries forever if empty)
+     * @param aRetryDelay The number of milliseconds to wait between retry attempts
+     * @return A Future that succeeds with the new access token if authentication is successful, or fails otherwise
+     */
+    private Future<User> authenticateWithRetry(final Optional<Integer> aRetryCount, final long aRetryDelay) {
+        final Promise<User> authentication = Promise.promise();
+
+        authenticateWithRetryHelper(aRetryCount, aRetryDelay, authentication);
+
+        return authentication.future();
+    }
+
+    /**
+     * Helper function for hiding the recursion.
      *
      * @param aRetryCount The optional number of times to retry (retries forever if empty)
      * @param aRetryDelay The time to wait between retry attempts, in milliseconds
-     * @param aPromise The promise that will be completed if authentication succeeds, or failed otherwise
-     * @param aResultHandler The handler that will be called with the result of {@code aPromise}
+     * @param aPromise A Promise that completes with the new access token if authentication is successful, or fails
+     *        otherwise
      */
-    private void authenticateWithRetry(final Optional<Integer> aRetryCount, final long aRetryDelay,
-            final Promise<User> aPromise, final Handler<AsyncResult<User>> aResultHandler) {
-        myAuthProvider.authenticate(new JsonObject()).onFailure(failure -> {
+    private void authenticateWithRetryHelper(final Optional<Integer> aRetryCount, final long aRetryDelay,
+            final Promise<User> aPromise) {
+        myAuthProvider.authenticate(new JsonObject()).onSuccess(aPromise::complete).onFailure(failure -> {
             if (aRetryCount.isEmpty() || aRetryCount.get() > 0) {
                 // Wait a bit before retrying again
-                myVertx.executeBlocking(promise -> {
+                myVertx.executeBlocking(sleep -> {
                     try {
                         Thread.sleep(aRetryDelay);
-                        promise.complete();
+                        sleep.complete();
                     } catch (final InterruptedException details) {
-                        promise.fail(details);
+                        sleep.fail(details);
                     }
-                }, result -> {
-                    authenticateWithRetry(aRetryCount.map(count -> count - 1), aRetryDelay, aPromise, aResultHandler);
+                }, sleep -> {
+                    if (sleep.succeeded()) {
+                        authenticateWithRetryHelper(aRetryCount.map(count -> count - 1), aRetryDelay, aPromise);
+                    } else {
+                        aPromise.fail(sleep.cause());
+                    }
                 });
             } else {
                 aPromise.fail(failure);
