@@ -111,7 +111,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
     private long keepTokenFresh(final User aToken, final int aSecondsBeforeExpiration) {
         final int delay = aToken.principal().getInteger(JsonKeys.EXPIRES_IN) - aSecondsBeforeExpiration;
 
-        return myVertx.setTimer(delay, timerID -> {
+        return myVertx.setTimer(delay * 1000, timerID -> {
             authenticateWithRetry(Optional.of(3), 5).compose(newToken -> {
                 myTimerId = keepTokenFresh(newToken, aSecondsBeforeExpiration);
 
