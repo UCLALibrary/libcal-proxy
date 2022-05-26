@@ -29,3 +29,4 @@ jobs:
             -Dlibcal.client.id=${{ secrets.LIBCAL_CLIENT_ID }}
             -Dlibcal.secret=${{ secrets.LIBCAL_CLIENT_SECRET }}
             -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token"
+            -Dlibcal.base.url="https://calendar.library.ucla.edu"

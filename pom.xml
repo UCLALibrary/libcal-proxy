@@ -27,7 +27,7 @@
   </issueManagement>
 
   <properties>
-    <vertx.version>4.2.6</vertx.version>
+    <vertx.version>4.3.1</vertx.version>
     <freelib.utils.version>3.0.1</freelib.utils.version>
     <freelib.maven.version>0.3.1</freelib.maven.version>
 
@@ -71,6 +71,7 @@
     <libcal.client.id>A_CLIENT_ID</libcal.client.id>
     <libcal.secret>A_CLIENT_SECRET</libcal.secret>
     <libcal.token.endpoint>A_TOKEN_ENDPOINT</libcal.token.endpoint>
+    <libcal.base.url>A_BASE_URL</libcal.base.url>
 
   </properties>
 
@@ -275,6 +276,7 @@
             <LIBCAL_CLIENT_ID>${libcal.client.id}</LIBCAL_CLIENT_ID>
             <LIBCAL_SECRET>${libcal.secret}</LIBCAL_SECRET>
             <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
+            <LIBCAL_BASE_URL>${libcal.base.url}</LIBCAL_BASE_URL>
           </environmentVariables>
         </configuration>
       </plugin>
@@ -289,6 +291,7 @@
             <LIBCAL_CLIENT_ID>${libcal.client.id}</LIBCAL_CLIENT_ID>
             <LIBCAL_SECRET>${libcal.secret}</LIBCAL_SECRET>
             <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
+            <LIBCAL_BASE_URL>${libcal.base.url}</LIBCAL_BASE_URL>
           </environmentVariables>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
@@ -351,6 +354,7 @@
                   <LIBCAL_CLIENT_ID>${libcal.client.id}</LIBCAL_CLIENT_ID>
                   <LIBCAL_SECRET>${libcal.secret}</LIBCAL_SECRET>
                   <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
+                  <LIBCAL_BASE_URL>${libcal.base.url}</LIBCAL_BASE_URL>
                 </env>
                 <!-- Test to make sure the server started as expected -->
                 <wait>
