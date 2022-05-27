@@ -1,6 +1,10 @@
 
 package edu.ucla.library.libcal;
 
+import static info.freelibrary.util.Constants.EMPTY;
+
+import io.vertx.core.json.JsonObject;
+
 /**
  * Properties that are used to configure the application.
  */
@@ -68,4 +72,21 @@ public final class Config {
         // This is intentionally left empty
     }
 
+    /**
+     * Removes any empty strings from the application configuration.
+     *
+     * @param aConfig An application configuration
+     * @return The processed application configuration
+     */
+    public static JsonObject removeEmptyString(final JsonObject aConfig) {
+        final JsonObject processedConfig = aConfig.copy();
+
+        for (final String key : aConfig.fieldNames()) {
+            if (aConfig.getString(key).equals(EMPTY)) {
+                processedConfig.remove(key);
+            }
+        }
+
+        return processedConfig;
+    }
 }

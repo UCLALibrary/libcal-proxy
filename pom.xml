@@ -286,7 +286,7 @@
             <LIBCAL_BASE_URL>${libcal.base.url}</LIBCAL_BASE_URL>
             <LIBCAL_AUTHENTICATION_RETRY_COUNT>${libcal.authentication.retry.count}</LIBCAL_AUTHENTICATION_RETRY_COUNT>
             <LIBCAL_AUTHENTICATION_RETRY_DELAY>${libcal.authentication.retry.delay}</LIBCAL_AUTHENTICATION_RETRY_DELAY>
-            <LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>${libcal.authentication.expires_in.padding}}</LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>
+            <LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>${libcal.authentication.expires_in.padding}</LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>
           </environmentVariables>
         </configuration>
       </plugin>
@@ -306,7 +306,7 @@
             <LIBCAL_BASE_URL>${libcal.base.url}</LIBCAL_BASE_URL>
             <LIBCAL_AUTHENTICATION_RETRY_COUNT>${libcal.authentication.retry.count}</LIBCAL_AUTHENTICATION_RETRY_COUNT>
             <LIBCAL_AUTHENTICATION_RETRY_DELAY>${libcal.authentication.retry.delay}</LIBCAL_AUTHENTICATION_RETRY_DELAY>
-            <LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>${libcal.authentication.expires_in.padding}}</LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>
+            <LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>${libcal.authentication.expires_in.padding}</LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>
           </environmentVariables>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
@@ -374,7 +374,7 @@
                   <LIBCAL_BASE_URL>${libcal.base.url}</LIBCAL_BASE_URL>
                   <LIBCAL_AUTHENTICATION_RETRY_COUNT>${libcal.authentication.retry.count}</LIBCAL_AUTHENTICATION_RETRY_COUNT>
                   <LIBCAL_AUTHENTICATION_RETRY_DELAY>${libcal.authentication.retry.delay}</LIBCAL_AUTHENTICATION_RETRY_DELAY>
-                  <LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>${libcal.authentication.expires_in.padding}}</LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>
+                  <LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>${libcal.authentication.expires_in.padding}</LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>
                 </env>
                 <!-- Test to make sure the server started as expected -->
                 <wait>

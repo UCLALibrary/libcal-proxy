@@ -1,6 +1,7 @@
 
 package edu.ucla.library.libcal.services;
 
+import static info.freelibrary.util.Constants.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.MessageCodes;
 
 import info.freelibrary.util.Logger;
@@ -19,6 +21,7 @@ import info.freelibrary.util.LoggerFactory;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.VertxExtension;
@@ -57,9 +60,11 @@ public class OAuthTokenServiceIT {
      */
     @BeforeAll
     public final void setUp(final Vertx aVertx, final VertxTestContext aContext) {
+        final ConfigRetriever cr = ConfigRetriever.create(aVertx).setConfigurationProcessor(Config::removeEmptyString);
+
         myWebClient = WebClient.create(aVertx);
 
-        ConfigRetriever.create(aVertx).getConfig().compose(config -> {
+        cr.getConfig().compose(config -> {
             return OAuthTokenService.create(aVertx, config);
         }).onSuccess(service -> {
             myService = new ServiceBinder(aVertx).setAddress(OAuthTokenService.ADDRESS)

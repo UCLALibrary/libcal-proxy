@@ -1,6 +1,7 @@
 
 package edu.ucla.library.libcal.services;
 
+import static info.freelibrary.util.Constants.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.AfterAll;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.MessageCodes;
 
 import info.freelibrary.util.Logger;
@@ -18,6 +20,7 @@ import info.freelibrary.util.LoggerFactory;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.serviceproxy.ServiceBinder;
@@ -59,7 +62,9 @@ public class LibCalProxyServiceIT {
      */
     @BeforeAll
     public final void setUp(final Vertx aVertx, final VertxTestContext aContext) {
-        ConfigRetriever.create(aVertx).getConfig().compose(config -> {
+        final ConfigRetriever cr = ConfigRetriever.create(aVertx).setConfigurationProcessor(Config::removeEmptyString);
+
+        cr.getConfig().compose(config -> {
             return LibCalProxyService.create(aVertx, config);
         }).onSuccess(proxy -> {
             myService = new ServiceBinder(aVertx).setAddress(LibCalProxyService.ADDRESS)
@@ -91,7 +96,9 @@ public class LibCalProxyServiceIT {
      */
     @Test
     public final void testGetLibCalOutput(final Vertx aVertx, final VertxTestContext aContext) {
-        ConfigRetriever.create(aVertx).getConfig().compose(config -> {
+        final ConfigRetriever cr = ConfigRetriever.create(aVertx).setConfigurationProcessor(Config::removeEmptyString);
+
+        cr.getConfig().compose(config -> {
             return OAuthTokenService.create(aVertx, config);
         }).onSuccess(service -> {
             final MessageConsumer<?> myTokenService = new ServiceBinder(aVertx).setAddress(OAuthTokenService.ADDRESS)

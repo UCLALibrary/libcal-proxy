@@ -1,6 +1,7 @@
 
 package edu.ucla.library.libcal.verticles;
 
+import static info.freelibrary.util.Constants.EMPTY;
 import static info.freelibrary.util.Constants.INADDR_ANY;
 
 import java.io.File;
@@ -53,7 +54,9 @@ public class MainVerticle extends AbstractVerticle {
 
     @Override
     public void start(final Promise<Void> aPromise) {
-        ConfigRetriever.create(vertx).getConfig().compose(config -> {
+        final ConfigRetriever cr = ConfigRetriever.create(vertx).setConfigurationProcessor(Config::removeEmptyString);
+
+        cr.getConfig().compose(config -> {
             return OAuthTokenService.create(vertx, config).compose(service -> {
                 myOAuthTokenService = new ServiceBinder(vertx).setAddress(OAuthTokenService.ADDRESS)
                         .register(OAuthTokenService.class, service);
