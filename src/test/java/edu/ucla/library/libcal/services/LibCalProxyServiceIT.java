@@ -17,6 +17,7 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
 import io.vertx.config.ConfigRetriever;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.junit5.VertxExtension;
@@ -63,11 +64,17 @@ public class LibCalProxyServiceIT {
         final ConfigRetriever cr = ConfigRetriever.create(aVertx).setConfigurationProcessor(Config::removeEmptyString);
 
         cr.getConfig().compose(config -> {
-            return LibCalProxyService.create(aVertx, config);
-        }).onSuccess(proxy -> {
-            myService = new ServiceBinder(aVertx).setAddress(LibCalProxyService.ADDRESS)
-                    .register(LibCalProxyService.class, proxy);
+            return CompositeFuture.all(LibCalProxyService.create(aVertx, config),
+                    OAuthTokenService.create(aVertx, config));
+        }).onSuccess(services -> {
+            final ServiceBinder sb = new ServiceBinder(aVertx);
+
+            myService =
+                    sb.setAddress(LibCalProxyService.ADDRESS).register(LibCalProxyService.class, services.resultAt(0));
             myServiceProxy = LibCalProxyService.createProxy(aVertx);
+
+            myToken = sb.setAddress(OAuthTokenService.ADDRESS).register(OAuthTokenService.class, services.resultAt(1));
+            myTokenProxy = OAuthTokenService.createProxy(aVertx);
 
             aContext.completeNow();
         }).onFailure(aContext::failNow);
@@ -86,28 +93,18 @@ public class LibCalProxyServiceIT {
     }
 
     /**
-     * Tests that {@link LibCalProxyService#getLibCalOutput(String, String)} returns content from LibCal
-     * API calls.
+     * Tests that {@link LibCalProxyService#getLibCalOutput(String, String)} returns content from LibCal API calls.
      *
      * @param aVertx A Vert.x instance
      * @param aContext A test context
      */
     @Test
     public final void testGetLibCalOutput(final Vertx aVertx, final VertxTestContext aContext) {
-        final ConfigRetriever cr = ConfigRetriever.create(aVertx).setConfigurationProcessor(Config::removeEmptyString);
-
-        cr.getConfig().compose(config -> {
-            return OAuthTokenService.create(aVertx, config);
-        }).onSuccess(service -> {
-            final MessageConsumer<?> myTokenService = new ServiceBinder(aVertx).setAddress(OAuthTokenService.ADDRESS)
-                    .register(OAuthTokenService.class, service);
-            myTokenProxy = OAuthTokenService.createProxy(aVertx);
-            myTokenProxy.getBearerToken().compose(token -> {
-                return myServiceProxy.getLibCalOutput(token, "/api/1.1/hours/2572");
-            }).onSuccess(output -> {
-                assertTrue(output != null);
-                aContext.completeNow();
-            }).onFailure(aContext::failNow);
+        myTokenProxy.getBearerToken().compose(token -> {
+            return myServiceProxy.getLibCalOutput(token, "/api/1.1/hours/2572");
+        }).onSuccess(output -> {
+            assertTrue(output != null);
+            aContext.completeNow();
         }).onFailure(aContext::failNow);
     }
 }
