@@ -20,18 +20,7 @@ To build the project, which includes running a bunch of tests, type:
 
 ## Running in Development
 
-To run the application in a Docker container:
-
-    mvn initialize docker:run \
-        -Dlibcal.client1.id="123" \
-        -Dlibcal.client1.secret="0123456789abcdef0123456789abcdef" \
-        -Dlibcal.client2.id="456" \
-        -Dlibcal.client2.secret="0123456789abcdef0123456789abcdef" \
-        -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token"
-        -Dlibcal.base.url="https://calendar.library.ucla.edu"
-
-This will run the container in the foreground, with the logs being displayed in the terminal. You can use Ctrl-C to
-stop it.
+To run the application in a Docker container, use `mvn initialize docker:run`, passing in the configuration via Maven properties as above. This will run the container in the foreground, with the logs being displayed in the terminal. You can use Ctrl-C to stop it.
 
 If you'd like to run it in the background, use `docker:start` instead of `docker:run`. When you're ready to stop it, you can type:
 
