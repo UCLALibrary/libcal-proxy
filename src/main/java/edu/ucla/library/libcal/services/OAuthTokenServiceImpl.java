@@ -87,10 +87,12 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
         myVertx = aVertx;
         myAuthProviders.add(OAuth2Auth.create(aVertx, options1));
         myAuthProviders.add(OAuth2Auth.create(aVertx, options2));
-        myAuthenticationRetryCount =
-                Optional.ofNullable(aConfig.getInteger(Config.LIBCAL_AUTHENTICATION_RETRY_COUNT, null));
-        myAuthenticationRetryDelay = aConfig.getInteger(Config.LIBCAL_AUTHENTICATION_RETRY_DELAY, 10);
-        myAuthenticationExpiresInPadding = aConfig.getInteger(Config.LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING, 300);
+        myAuthenticationRetryCount = Optional
+                .ofNullable(aConfig.getString(Config.LIBCAL_AUTHENTICATION_RETRY_COUNT, null)).map(Integer::parseInt);
+        myAuthenticationRetryDelay =
+                Integer.parseInt(aConfig.getString(Config.LIBCAL_AUTHENTICATION_RETRY_DELAY, "10"));
+        myAuthenticationExpiresInPadding =
+                Integer.parseInt(aConfig.getString(Config.LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING, "300"));
 
         authenticateWithRetry(myAuthenticationRetryCount, myAuthenticationRetryDelay).compose(this::postAuthenticate)
                 .onSuccess(unused -> aPromise.complete(this)).onFailure(aPromise::fail);
