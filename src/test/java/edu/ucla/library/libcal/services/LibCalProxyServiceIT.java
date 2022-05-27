@@ -1,7 +1,6 @@
 
 package edu.ucla.library.libcal.services;
 
-import static info.freelibrary.util.Constants.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.AfterAll;
@@ -20,7 +19,6 @@ import info.freelibrary.util.LoggerFactory;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.serviceproxy.ServiceBinder;
