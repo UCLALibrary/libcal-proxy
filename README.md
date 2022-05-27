@@ -15,7 +15,7 @@ To build the project, which includes running a bunch of tests, type:
         -Dlibcal.client1.secret="0123456789abcdef0123456789abcdef" \
         -Dlibcal.client2.id="456" \
         -Dlibcal.client2.secret="0123456789abcdef0123456789abcdef" \
-        -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token"
+        -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token" \
         -Dlibcal.base.url="https://calendar.library.ucla.edu" \
         -Dlibcal.authentication.retry.count=3 \
         -Dlibcal.authentication.retry.delay=10 \
