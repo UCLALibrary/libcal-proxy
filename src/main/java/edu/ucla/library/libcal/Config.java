@@ -63,6 +63,7 @@ public final class Config {
     /**
      * The optional configuration property for the number of seconds before OAuth token expiration to attempt a refresh.
      */
+    @SuppressWarnings({ "PMD.LongVariable" })
     public static final String LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING = "LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING";
 
     /**
@@ -73,7 +74,7 @@ public final class Config {
     }
 
     /**
-     * Removes any empty strings from the application configuration.
+     * A configuration processor that removes empty strings.
      *
      * @param aConfig An application configuration
      * @return The processed application configuration

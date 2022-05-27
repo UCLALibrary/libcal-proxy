@@ -1,7 +1,6 @@
 
 package edu.ucla.library.libcal.verticles;
 
-import static info.freelibrary.util.Constants.EMPTY;
 import static info.freelibrary.util.Constants.INADDR_ANY;
 
 import java.io.File;
