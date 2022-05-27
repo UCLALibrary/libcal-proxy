@@ -44,6 +44,21 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
     private final Queue<OAuth2Auth> myAuthProviders = new LinkedList<>();
 
     /**
+     * See {@link Config#LIBCAL_AUTHENTICATION_RETRY_COUNT}.
+     */
+    private final Optional<Integer> myAuthenticationRetryCount;
+
+    /**
+     * See {@link Config#LIBCAL_AUTHENTICATION_RETRY_DELAY}.
+     */
+    private final int myAuthenticationRetryDelay;
+
+    /**
+     * See {@link Config#LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING}.
+     */
+    private final int myAuthenticationExpiresInPadding;
+
+    /**
      * The ID of the periodic timer for checking if the OAuth token needs refreshing.
      */
     private long myTimerId;
@@ -72,8 +87,12 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
         myVertx = aVertx;
         myAuthProviders.add(OAuth2Auth.create(aVertx, options1));
         myAuthProviders.add(OAuth2Auth.create(aVertx, options2));
+        myAuthenticationRetryCount =
+                Optional.ofNullable(aConfig.getInteger(Config.LIBCAL_AUTHENTICATION_RETRY_COUNT, null));
+        myAuthenticationRetryDelay = aConfig.getInteger(Config.LIBCAL_AUTHENTICATION_RETRY_DELAY, 10);
+        myAuthenticationExpiresInPadding = aConfig.getInteger(Config.LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING, 300);
 
-        authenticateWithRetry(Optional.of(1), 5).compose(this::postAuthenticate)
+        authenticateWithRetry(myAuthenticationRetryCount, myAuthenticationRetryDelay).compose(this::postAuthenticate)
                 .onSuccess(unused -> aPromise.complete(this)).onFailure(aPromise::fail);
     }
 
@@ -107,14 +126,14 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
      * Refresh the OAuth token before it has a chance to expire. This method is recursive.
      *
      * @param aToken The OAuth token
-     * @param aSecondsBeforeExpiration The number of seconds before expiration to attempt a refresh
      * @return The ID of a Vert.x timer
      */
-    private long keepTokenFresh(final User aToken, final int aSecondsBeforeExpiration) {
-        final int delay = aToken.principal().getInteger(JsonKeys.EXPIRES_IN) - aSecondsBeforeExpiration;
+    private long keepTokenFresh(final User aToken) {
+        final int delay = aToken.principal().getInteger(JsonKeys.EXPIRES_IN) - myAuthenticationExpiresInPadding;
 
         return myVertx.setTimer(delay * 1000, timerID -> {
-            authenticateWithRetry(Optional.of(3), 5).compose(this::postAuthenticate)
+            authenticateWithRetry(myAuthenticationRetryCount, myAuthenticationRetryDelay)
+                    .compose(this::postAuthenticate)
                     .onFailure(details -> LOGGER.error(MessageCodes.LCP_005, details.getMessage()));
         });
     }
@@ -165,7 +184,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
      * @return A Future that succeeds once the internal state has been updated, or fails if there was a problem
      */
     private Future<Void> postAuthenticate(final User aToken) {
-        myTimerId = keepTokenFresh(aToken, 300);
+        myTimerId = keepTokenFresh(aToken);
 
         LOGGER.debug(MessageCodes.LCP_002, ((OAuth2AuthProviderImpl) myAuthProviders.peek()).getConfig().getClientId(),
                 aToken.principal().encodePrettily());

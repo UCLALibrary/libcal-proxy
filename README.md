@@ -16,7 +16,10 @@ To build the project, which includes running a bunch of tests, type:
         -Dlibcal.client2.id="456" \
         -Dlibcal.client2.secret="0123456789abcdef0123456789abcdef" \
         -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token"
-        -Dlibcal.base.url="https://calendar.library.ucla.edu"
+        -Dlibcal.base.url="https://calendar.library.ucla.edu" \
+        -Dlibcal.authentication.retry.count=3 \
+        -Dlibcal.authentication.retry.delay=10 \
+        -Dlibcal.authentication.expires_in.padding=300 \
 
 ## Running in Development
 
@@ -37,6 +40,9 @@ You can also run the application directly on the host machine by defining enviro
     LIBCAL_CLIENT2_SECRET=0123456789abcdef0123456789abcdef \
     LIBCAL_TOKEN_ENDPOINT=https://calendar.library.ucla.edu/1.1/oauth/token \
     LIBCAL_BASE_URL=https://calendar.library.ucla.edu \
+    LIBCAL_AUTHENTICATION_RETRY_COUNT=3 \
+    LIBCAL_AUTHENTICATION_RETRY_DELAY=10 \
+    LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING=300 \
     mvn vertx:run
 
 ## Contact

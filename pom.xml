@@ -74,6 +74,9 @@
     <libcal.client2.secret>A_CLIENT2_SECRET</libcal.client2.secret>
     <libcal.token.endpoint>A_TOKEN_ENDPOINT</libcal.token.endpoint>
     <libcal.base.url>A_BASE_URL</libcal.base.url>
+    <libcal.authentication.retry.count></libcal.authentication.retry.count>
+    <libcal.authentication.retry.delay></libcal.authentication.retry.delay>
+    <libcal.authentication.expires_in.padding></libcal.authentication.expires_in.padding>
 
   </properties>
 
@@ -281,6 +284,9 @@
             <LIBCAL_CLIENT2_SECRET>${libcal.client2.secret}</LIBCAL_CLIENT2_SECRET>
             <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
             <LIBCAL_BASE_URL>${libcal.base.url}</LIBCAL_BASE_URL>
+            <LIBCAL_AUTHENTICATION_RETRY_COUNT>${libcal.authentication.retry.count}</LIBCAL_AUTHENTICATION_RETRY_COUNT>
+            <LIBCAL_AUTHENTICATION_RETRY_DELAY>${libcal.authentication.retry.delay}</LIBCAL_AUTHENTICATION_RETRY_DELAY>
+            <LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>${libcal.authentication.expires_in.padding}}</LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>
           </environmentVariables>
         </configuration>
       </plugin>
@@ -298,6 +304,9 @@
             <LIBCAL_CLIENT2_SECRET>${libcal.client2.secret}</LIBCAL_CLIENT2_SECRET>
             <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
             <LIBCAL_BASE_URL>${libcal.base.url}</LIBCAL_BASE_URL>
+            <LIBCAL_AUTHENTICATION_RETRY_COUNT>${libcal.authentication.retry.count}</LIBCAL_AUTHENTICATION_RETRY_COUNT>
+            <LIBCAL_AUTHENTICATION_RETRY_DELAY>${libcal.authentication.retry.delay}</LIBCAL_AUTHENTICATION_RETRY_DELAY>
+            <LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>${libcal.authentication.expires_in.padding}}</LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>
           </environmentVariables>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
@@ -363,6 +372,9 @@
                   <LIBCAL_CLIENT2_SECRET>${libcal.client2.secret}</LIBCAL_CLIENT2_SECRET>
                   <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
                   <LIBCAL_BASE_URL>${libcal.base.url}</LIBCAL_BASE_URL>
+                  <LIBCAL_AUTHENTICATION_RETRY_COUNT>${libcal.authentication.retry.count}</LIBCAL_AUTHENTICATION_RETRY_COUNT>
+                  <LIBCAL_AUTHENTICATION_RETRY_DELAY>${libcal.authentication.retry.delay}</LIBCAL_AUTHENTICATION_RETRY_DELAY>
+                  <LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>${libcal.authentication.expires_in.padding}}</LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING>
                 </env>
                 <!-- Test to make sure the server started as expected -->
                 <wait>
