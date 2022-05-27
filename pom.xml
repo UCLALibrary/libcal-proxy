@@ -68,8 +68,10 @@
     <docker.registry.account />
 
     <!-- LibCal OAuth credentials and endpoint -->
-    <libcal.client.id>A_CLIENT_ID</libcal.client.id>
-    <libcal.secret>A_CLIENT_SECRET</libcal.secret>
+    <libcal.client1.id>A_CLIENT1_ID</libcal.client1.id>
+    <libcal.client2.id>A_CLIENT2_ID</libcal.client2.id>
+    <libcal.client1.secret>A_CLIENT1_SECRET</libcal.client1.secret>
+    <libcal.client2.secret>A_CLIENT2_SECRET</libcal.client2.secret>
     <libcal.token.endpoint>A_TOKEN_ENDPOINT</libcal.token.endpoint>
     <libcal.base.url>A_BASE_URL</libcal.base.url>
 
@@ -273,8 +275,10 @@
           </systemPropertyVariables>
           <environmentVariables>
             <HTTP_PORT>${http.port}</HTTP_PORT>
-            <LIBCAL_CLIENT_ID>${libcal.client.id}</LIBCAL_CLIENT_ID>
-            <LIBCAL_SECRET>${libcal.secret}</LIBCAL_SECRET>
+            <LIBCAL_CLIENT1_ID>${libcal.client1.id}</LIBCAL_CLIENT1_ID>
+            <LIBCAL_CLIENT2_ID>${libcal.client2.id}</LIBCAL_CLIENT2_ID>
+            <LIBCAL_CLIENT1_SECRET>${libcal.client1.secret}</LIBCAL_CLIENT1_SECRET>
+            <LIBCAL_CLIENT2_SECRET>${libcal.client2.secret}</LIBCAL_CLIENT2_SECRET>
             <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
             <LIBCAL_BASE_URL>${libcal.base.url}</LIBCAL_BASE_URL>
           </environmentVariables>
@@ -288,8 +292,10 @@
           <argLine>${jacoco.agent.arg}</argLine>
           <environmentVariables>
             <HTTP_PORT>${http.port}</HTTP_PORT>
-            <LIBCAL_CLIENT_ID>${libcal.client.id}</LIBCAL_CLIENT_ID>
-            <LIBCAL_SECRET>${libcal.secret}</LIBCAL_SECRET>
+            <LIBCAL_CLIENT1_ID>${libcal.client1.id}</LIBCAL_CLIENT1_ID>
+            <LIBCAL_CLIENT2_ID>${libcal.client2.id}</LIBCAL_CLIENT2_ID>
+            <LIBCAL_CLIENT1_SECRET>${libcal.client1.secret}</LIBCAL_CLIENT1_SECRET>
+            <LIBCAL_CLIENT2_SECRET>${libcal.client2.secret}</LIBCAL_CLIENT2_SECRET>
             <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
             <LIBCAL_BASE_URL>${libcal.base.url}</LIBCAL_BASE_URL>
           </environmentVariables>
@@ -351,8 +357,10 @@
                 <env>
                   <JAVA_OPTS>-Xmx${heap.size}</JAVA_OPTS>
                   <HTTP_PORT>${http.port}</HTTP_PORT>
-                  <LIBCAL_CLIENT_ID>${libcal.client.id}</LIBCAL_CLIENT_ID>
-                  <LIBCAL_SECRET>${libcal.secret}</LIBCAL_SECRET>
+                  <LIBCAL_CLIENT1_ID>${libcal.client1.id}</LIBCAL_CLIENT1_ID>
+                  <LIBCAL_CLIENT2_ID>${libcal.client2.id}</LIBCAL_CLIENT2_ID>
+                  <LIBCAL_CLIENT1_SECRET>${libcal.client1.secret}</LIBCAL_CLIENT1_SECRET>
+                  <LIBCAL_CLIENT2_SECRET>${libcal.client2.secret}</LIBCAL_CLIENT2_SECRET>
                   <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
                   <LIBCAL_BASE_URL>${libcal.base.url}</LIBCAL_BASE_URL>
                 </env>

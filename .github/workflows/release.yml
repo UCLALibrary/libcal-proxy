@@ -44,6 +44,8 @@ jobs:
             -Ddocker.registry.username=${{ secrets.DOCKER_USERNAME }}
             -Ddocker.registry.account=${{ secrets.DOCKER_REGISTRY_ACCOUNT}}
             -Ddocker.registry.password=${{ secrets.DOCKER_PASSWORD }}
-            -Dlibcal.client.id=${{ secrets.LIBCAL_CLIENT_ID }}
-            -Dlibcal.secret=${{ secrets.LIBCAL_CLIENT_SECRET }}
+            -Dlibcal.client1.id=${{ secrets.LIBCAL_CLIENT1_ID }}
+            -Dlibcal.client1.secret=${{ secrets.LIBCAL_CLIENT1_SECRET }}
+            -Dlibcal.client2.id=${{ secrets.LIBCAL_CLIENT2_ID }}
+            -Dlibcal.client2.secret=${{ secrets.LIBCAL_CLIENT2_SECRET }}
             -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token"

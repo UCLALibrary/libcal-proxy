@@ -11,8 +11,10 @@ Clients are expected to send HTTP requests to this proxy service as if they were
 To build the project, which includes running a bunch of tests, type:
 
     mvn verify \
-        -Dlibcal.client.id="123" \
-        -Dlibcal.secret="0123456789abcdef0123456789abcdef" \
+        -Dlibcal.client1.id="123" \
+        -Dlibcal.client1.secret="0123456789abcdef0123456789abcdef" \
+        -Dlibcal.client2.id="456" \
+        -Dlibcal.client2.secret="0123456789abcdef0123456789abcdef" \
         -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token"
         -Dlibcal.base.url="https://calendar.library.ucla.edu"
 
@@ -20,8 +22,10 @@ To build the project, which includes running a bunch of tests, type:
 
 The easiest way to run the application locally for testing is to use Maven:
 
-    LIBCAL_CLIENT_ID=123 \
-    LIBCAL_SECRET=0123456789abcdef0123456789abcdef \
+    LIBCAL_CLIENT1_ID=123 \
+    LIBCAL_CLIENT1_SECRET=0123456789abcdef0123456789abcdef \
+    LIBCAL_CLIENT2_ID=456 \
+    LIBCAL_CLIENT2_SECRET=0123456789abcdef0123456789abcdef \
     LIBCAL_TOKEN_ENDPOINT=https://calendar.library.ucla.edu/1.1/oauth/token \
     LIBCAL_BASE_URL=https://calendar.library.ucla.edu \
     mvn vertx:run
@@ -29,8 +33,10 @@ The easiest way to run the application locally for testing is to use Maven:
 If you want to run the appliction in its Docker container, you can also do that through Maven:
 
     mvn initialize docker:run \
-        -Dlibcal.client.id="123" \
-        -Dlibcal.secret="0123456789abcdef0123456789abcdef" \
+        -Dlibcal.client1.id="123" \
+        -Dlibcal.client1.secret="0123456789abcdef0123456789abcdef" \
+        -Dlibcal.client2.id="456" \
+        -Dlibcal.client2.secret="0123456789abcdef0123456789abcdef" \
         -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token"
         -Dlibcal.base.url="https://calendar.library.ucla.edu"
 
@@ -40,8 +46,10 @@ stop it.
 If you'd like to run it in the background, use:
 
     mvn initialize docker:start \
-        -Dlibcal.client.id="123" \
-        -Dlibcal.secret="0123456789abcdef0123456789abcdef" \
+        -Dlibcal.client1.id="123" \
+        -Dlibcal.client1.secret="0123456789abcdef0123456789abcdef" \
+        -Dlibcal.client2.id="456" \
+        -Dlibcal.client2.secret="0123456789abcdef0123456789abcdef" \
         -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token"
         -Dlibcal.base.url="https://calendar.library.ucla.edu"
 

@@ -17,14 +17,24 @@ public final class Config {
     public static final String HTTP_HOST = "HTTP_HOST";
 
     /**
-     * The configuration property for the LibCal client ID credential.
+     * The configuration property for the first LibCal client's ID credential.
      */
-    public static final String OAUTH_CLIENT_ID = "LIBCAL_CLIENT_ID";
+    public static final String OAUTH_CLIENT1_ID = "LIBCAL_CLIENT1_ID";
 
     /**
-     * The configuration property for the LibCal client secret credential.
+     * The configuration property for the first LibCal client's secret credential.
      */
-    public static final String OAUTH_CLIENT_SECRET = "LIBCAL_SECRET";
+    public static final String OAUTH_CLIENT1_SECRET = "LIBCAL_CLIENT1_SECRET";
+
+    /**
+     * The configuration property for the second LibCal client's ID credential.
+     */
+    public static final String OAUTH_CLIENT2_ID = "LIBCAL_CLIENT2_ID";
+
+    /**
+     * The configuration property for the second LibCal client's secret credential.
+     */
+    public static final String OAUTH_CLIENT2_SECRET = "LIBCAL_CLIENT2_SECRET";
 
     /**
      * The configuration property for the LibCal access token provider endpoint.

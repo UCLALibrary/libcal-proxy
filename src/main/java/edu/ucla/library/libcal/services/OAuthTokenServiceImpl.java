@@ -1,7 +1,9 @@
 
 package edu.ucla.library.libcal.services;
 
+import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Queue;
 
 import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.Constants;
@@ -19,6 +21,7 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
+import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
 /**
  * Implementation of {@link OAuthTokenService}.
@@ -36,14 +39,9 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
     private final Vertx myVertx;
 
     /**
-     * The OAuth authentication provider.
+     * The OAuth authentication providers.
      */
-    private final OAuth2Auth myAuthProvider;
-
-    /**
-     * The LibCal client ID.
-     */
-    private final String myLibCalClientID;
+    private final Queue<OAuth2Auth> myAuthProviders = new LinkedList<>();
 
     /**
      * The ID of the periodic timer for checking if the OAuth token needs refreshing.
@@ -62,19 +60,27 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
      */
     public OAuthTokenServiceImpl(final Vertx aVertx, final JsonObject aConfig,
             final Promise<OAuthTokenService> aPromise) {
-        final OAuth2Options options = new OAuth2Options().setFlow(OAuth2FlowType.CLIENT)
-                .setClientId(aConfig.getString(Config.OAUTH_CLIENT_ID))
-                .setClientSecret(aConfig.getString(Config.OAUTH_CLIENT_SECRET))
-                .setSite(aConfig.getString(Config.OAUTH_TOKEN_URL));
+        final JsonObject baseOptions = new OAuth2Options().setFlow(OAuth2FlowType.CLIENT)
+                .setSite(aConfig.getString(Config.OAUTH_TOKEN_URL)).toJson();
+        final OAuth2Options options1 = new OAuth2Options(baseOptions)
+                .setClientId(aConfig.getString(Config.OAUTH_CLIENT1_ID))
+                .setClientSecret(aConfig.getString(Config.OAUTH_CLIENT1_SECRET));
+        final OAuth2Options options2 = new OAuth2Options(baseOptions)
+                .setClientId(aConfig.getString(Config.OAUTH_CLIENT2_ID))
+                .setClientSecret(aConfig.getString(Config.OAUTH_CLIENT2_SECRET));
 
         myVertx = aVertx;
-        myAuthProvider = OAuth2Auth.create(aVertx, options);
-        myLibCalClientID = aConfig.getString(Config.OAUTH_CLIENT_ID);
+        myAuthProviders.add(OAuth2Auth.create(aVertx, options1));
+        myAuthProviders.add(OAuth2Auth.create(aVertx, options2));
 
         authenticateWithRetry(Optional.of(1), 5).compose(token -> {
             myTimerId = keepTokenFresh(token, 300);
 
-            LOGGER.debug(MessageCodes.LCP_002, myLibCalClientID, token.principal().encodePrettily());
+            LOGGER.debug(MessageCodes.LCP_002,
+                    ((OAuth2AuthProviderImpl) myAuthProviders.peek()).getConfig().getClientId(),
+                    token.principal().encodePrettily());
+
+            myAuthProviders.add(myAuthProviders.remove());
 
             return shareAccessToken(token);
         }).onSuccess(unused -> aPromise.complete(this)).onFailure(aPromise::fail);
@@ -120,7 +126,11 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
             authenticateWithRetry(Optional.of(3), 5).compose(newToken -> {
                 myTimerId = keepTokenFresh(newToken, aSecondsBeforeExpiration);
 
-                LOGGER.debug(MessageCodes.LCP_002, myLibCalClientID, newToken.principal().encodePrettily());
+                LOGGER.debug(MessageCodes.LCP_002,
+                        ((OAuth2AuthProviderImpl) myAuthProviders.peek()).getConfig().getClientId(),
+                        newToken.principal().encodePrettily());
+
+                myAuthProviders.add(myAuthProviders.remove());
 
                 return shareAccessToken(newToken);
             }).onFailure(details -> LOGGER.error(MessageCodes.LCP_005, details.getMessage()));
@@ -152,7 +162,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
      */
     private void authenticateWithRetryHelper(final Optional<Integer> aRetryCount, final int aRetryDelay,
             final Promise<User> aPromise) {
-        myAuthProvider.authenticate(new JsonObject()).onSuccess(aPromise::complete).onFailure(failure -> {
+        myAuthProviders.peek().authenticate(new JsonObject()).onSuccess(aPromise::complete).onFailure(failure -> {
             if (aRetryCount.isEmpty() || aRetryCount.get() > 0) {
                 // Wait a bit before retrying again
                 myVertx.setTimer(aRetryDelay * 1000, timerID -> {
