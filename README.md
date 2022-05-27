@@ -19,7 +19,7 @@ To build the project, which includes running a bunch of tests, type:
         -Dlibcal.base.url="https://calendar.library.ucla.edu" \
         -Dlibcal.authentication.retry.count=3 \
         -Dlibcal.authentication.retry.delay=10 \
-        -Dlibcal.authentication.expires_in.padding=300 \
+        -Dlibcal.authentication.expires_in.padding=300
 
 ## Running in Development
 
