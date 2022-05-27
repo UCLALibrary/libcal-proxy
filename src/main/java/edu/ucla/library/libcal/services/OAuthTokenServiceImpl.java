@@ -77,12 +77,12 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
             final Promise<OAuthTokenService> aPromise) {
         final JsonObject baseOptions = new OAuth2Options().setFlow(OAuth2FlowType.CLIENT)
                 .setSite(aConfig.getString(Config.OAUTH_TOKEN_URL)).toJson();
-        final OAuth2Options options1 = new OAuth2Options(baseOptions)
-                .setClientId(aConfig.getString(Config.OAUTH_CLIENT1_ID))
-                .setClientSecret(aConfig.getString(Config.OAUTH_CLIENT1_SECRET));
-        final OAuth2Options options2 = new OAuth2Options(baseOptions)
-                .setClientId(aConfig.getString(Config.OAUTH_CLIENT2_ID))
-                .setClientSecret(aConfig.getString(Config.OAUTH_CLIENT2_SECRET));
+        final OAuth2Options options1 =
+                new OAuth2Options(baseOptions).setClientId(aConfig.getString(Config.OAUTH_CLIENT1_ID))
+                        .setClientSecret(aConfig.getString(Config.OAUTH_CLIENT1_SECRET));
+        final OAuth2Options options2 =
+                new OAuth2Options(baseOptions).setClientId(aConfig.getString(Config.OAUTH_CLIENT2_ID))
+                        .setClientSecret(aConfig.getString(Config.OAUTH_CLIENT2_SECRET));
 
         myVertx = aVertx;
         myAuthProviders.add(OAuth2Auth.create(aVertx, options1));
