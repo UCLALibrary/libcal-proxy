@@ -73,17 +73,8 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
         myAuthProviders.add(OAuth2Auth.create(aVertx, options1));
         myAuthProviders.add(OAuth2Auth.create(aVertx, options2));
 
-        authenticateWithRetry(Optional.of(1), 5).compose(token -> {
-            myTimerId = keepTokenFresh(token, 300);
-
-            LOGGER.debug(MessageCodes.LCP_002,
-                    ((OAuth2AuthProviderImpl) myAuthProviders.peek()).getConfig().getClientId(),
-                    token.principal().encodePrettily());
-
-            myAuthProviders.add(myAuthProviders.remove());
-
-            return shareAccessToken(token);
-        }).onSuccess(unused -> aPromise.complete(this)).onFailure(aPromise::fail);
+        authenticateWithRetry(Optional.of(1), 5).compose(this::postAuthenticate)
+                .onSuccess(unused -> aPromise.complete(this)).onFailure(aPromise::fail);
     }
 
     @Override
@@ -123,17 +114,8 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
         final int delay = aToken.principal().getInteger(JsonKeys.EXPIRES_IN) - aSecondsBeforeExpiration;
 
         return myVertx.setTimer(delay * 1000, timerID -> {
-            authenticateWithRetry(Optional.of(3), 5).compose(newToken -> {
-                myTimerId = keepTokenFresh(newToken, aSecondsBeforeExpiration);
-
-                LOGGER.debug(MessageCodes.LCP_002,
-                        ((OAuth2AuthProviderImpl) myAuthProviders.peek()).getConfig().getClientId(),
-                        newToken.principal().encodePrettily());
-
-                myAuthProviders.add(myAuthProviders.remove());
-
-                return shareAccessToken(newToken);
-            }).onFailure(details -> LOGGER.error(MessageCodes.LCP_005, details.getMessage()));
+            authenticateWithRetry(Optional.of(3), 5).compose(this::postAuthenticate)
+                    .onFailure(details -> LOGGER.error(MessageCodes.LCP_005, details.getMessage()));
         });
     }
 
@@ -174,5 +156,23 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
                 aPromise.fail(failure);
             }
         });
+    }
+
+    /**
+     * Update application state to reflect the newly-acquired OAuth token.
+     *
+     * @param aToken The OAuth token
+     * @return A Future that succeeds once the internal state has been updated, or fails if there was a problem
+     */
+    private Future<Void> postAuthenticate(final User aToken) {
+        myTimerId = keepTokenFresh(aToken, 300);
+
+        LOGGER.debug(MessageCodes.LCP_002, ((OAuth2AuthProviderImpl) myAuthProviders.peek()).getConfig().getClientId(),
+                aToken.principal().encodePrettily());
+
+        // Send the just-used auth provider to the back of the queue
+        myAuthProviders.add(myAuthProviders.remove());
+
+        return shareAccessToken(aToken);
     }
 }
