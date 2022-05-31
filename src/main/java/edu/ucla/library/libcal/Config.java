@@ -53,18 +53,17 @@ public final class Config {
     /**
      * The optional configuration property for the number of authentication retry attempts to make.
      */
-    public static final String LIBCAL_AUTHENTICATION_RETRY_COUNT = "LIBCAL_AUTHENTICATION_RETRY_COUNT";
+    public static final String LIBCAL_AUTH_RETRY_COUNT = "LIBCAL_AUTH_RETRY_COUNT";
 
     /**
      * The optional configuration property for the number of seconds to wait between authentication retry attempts.
      */
-    public static final String LIBCAL_AUTHENTICATION_RETRY_DELAY = "LIBCAL_AUTHENTICATION_RETRY_DELAY";
+    public static final String LIBCAL_AUTH_RETRY_DELAY = "LIBCAL_AUTH_RETRY_DELAY";
 
     /**
      * The optional configuration property for the number of seconds before OAuth token expiration to attempt a refresh.
      */
-    @SuppressWarnings({ "PMD.LongVariable" })
-    public static final String LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING = "LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING";
+    public static final String LIBCAL_AUTH_EXPIRES_IN_PADDING = "LIBCAL_AUTH_EXPIRES_IN_PADDING";
 
     /**
      * Constant classes should have private constructors.

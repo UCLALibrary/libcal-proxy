@@ -44,17 +44,17 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
     private final Queue<OAuth2Auth> myAuthProviders = new LinkedList<>();
 
     /**
-     * See {@link Config#LIBCAL_AUTHENTICATION_RETRY_COUNT}.
+     * See {@link Config#LIBCAL_AUTH_RETRY_COUNT}.
      */
     private final Optional<Integer> myAuthRetryCount;
 
     /**
-     * See {@link Config#LIBCAL_AUTHENTICATION_RETRY_DELAY}.
+     * See {@link Config#LIBCAL_AUTH_RETRY_DELAY}.
      */
     private final int myAuthRetryDelay;
 
     /**
-     * See {@link Config#LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING}.
+     * See {@link Config#LIBCAL_AUTH_EXPIRES_IN_PADDING}.
      */
     private final int myAuthExpiresInPadding;
 
@@ -87,9 +87,9 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
         myVertx = aVertx;
         myAuthProviders.add(OAuth2Auth.create(aVertx, options1));
         myAuthProviders.add(OAuth2Auth.create(aVertx, options2));
-        myAuthRetryCount = Optional.ofNullable(aConfig.getInteger(Config.LIBCAL_AUTHENTICATION_RETRY_COUNT, null));
-        myAuthRetryDelay = aConfig.getInteger(Config.LIBCAL_AUTHENTICATION_RETRY_DELAY, 10);
-        myAuthExpiresInPadding = aConfig.getInteger(Config.LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING, 300);
+        myAuthRetryCount = Optional.ofNullable(aConfig.getInteger(Config.LIBCAL_AUTH_RETRY_COUNT, null));
+        myAuthRetryDelay = aConfig.getInteger(Config.LIBCAL_AUTH_RETRY_DELAY, 10);
+        myAuthExpiresInPadding = aConfig.getInteger(Config.LIBCAL_AUTH_EXPIRES_IN_PADDING, 300);
 
         authenticateWithRetry().compose(this::postAuthenticate).onSuccess(unused -> aPromise.complete(this))
                 .onFailure(aPromise::fail);
