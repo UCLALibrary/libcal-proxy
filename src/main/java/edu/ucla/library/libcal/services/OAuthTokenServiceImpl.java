@@ -122,7 +122,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
     }
 
     /**
-     * Refresh the OAuth token before it has a chance to expire. This method is recursive.
+     * Refresh the OAuth token before it has a chance to expire.
      *
      * @param aToken The OAuth token
      * @return The ID of a Vert.x timer
