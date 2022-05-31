@@ -116,7 +116,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
      * @param aToken An OAuth token
      * @return A Future that resolves once the new value has been put into the map
      */
-    protected Future<Void> shareAccessToken(final User aToken) {
+    private Future<Void> shareAccessToken(final User aToken) {
         return myVertx.sharedData().getLocalAsyncMap(Constants.ACCESS_TOKEN_MAP).compose(asyncMap -> {
             return asyncMap.put(Constants.ACCESS_TOKEN, aToken.principal().getString(JsonKeys.ACCESS_TOKEN));
         });
@@ -154,7 +154,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
     }
 
     /**
-     * Helper function for hiding the recursion.
+     * Performs the recursion for {@link #authenticateWithRetry()}.
      *
      * @param aRetryCount The optional number of times to retry (retries forever if empty)
      * @param aRetryDelay The number of seconds to wait between retry attempts
@@ -178,10 +178,10 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
     }
 
     /**
-     * Update application state to reflect the newly-acquired OAuth token.
+     * Updates application state to reflect the newly-acquired OAuth token.
      *
      * @param aToken The OAuth token
-     * @return A Future that succeeds once the internal state has been updated, or fails if there was a problem
+     * @return A Future that succeeds once the application state has been updated, or fails if there was a problem
      */
     private Future<Void> postAuthenticate(final User aToken) {
         myTimerId = keepTokenFresh(aToken);

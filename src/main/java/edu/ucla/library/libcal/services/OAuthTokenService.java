@@ -27,7 +27,7 @@ public interface OAuthTokenService {
      *
      * @param aVertx A Vert.x instance
      * @param aConfig A configuration
-     * @return The service instance
+     * @return A Future that resolves to the service instance
      */
     static Future<OAuthTokenService> create(final Vertx aVertx, final JsonObject aConfig) {
         final Promise<OAuthTokenService> initialization = Promise.promise();
