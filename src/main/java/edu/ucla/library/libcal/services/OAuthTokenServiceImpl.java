@@ -92,8 +92,8 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
         myAuthenticationRetryDelay = aConfig.getInteger(Config.LIBCAL_AUTHENTICATION_RETRY_DELAY, 10);
         myAuthenticationExpiresInPadding = aConfig.getInteger(Config.LIBCAL_AUTHENTICATION_EXPIRES_IN_PADDING, 300);
 
-        authenticateWithRetry(myAuthenticationRetryCount, myAuthenticationRetryDelay).compose(this::postAuthenticate)
-                .onSuccess(unused -> aPromise.complete(this)).onFailure(aPromise::fail);
+        authenticateWithRetry().compose(this::postAuthenticate).onSuccess(unused -> aPromise.complete(this))
+                .onFailure(aPromise::fail);
     }
 
     @Override
@@ -132,8 +132,7 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
         final int delay = aToken.principal().getInteger(JsonKeys.EXPIRES_IN) - myAuthenticationExpiresInPadding;
 
         return myVertx.setTimer(delay * 1000, timerID -> {
-            authenticateWithRetry(myAuthenticationRetryCount, myAuthenticationRetryDelay)
-                    .compose(this::postAuthenticate)
+            authenticateWithRetry().compose(this::postAuthenticate)
                     .onFailure(details -> LOGGER.error(MessageCodes.LCP_005, details.getMessage()));
         });
     }
@@ -141,14 +140,12 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
     /**
      * Attempts authentication with a set number of retries.
      *
-     * @param aRetryCount The optional number of times to retry (retries forever if empty)
-     * @param aRetryDelay The number of seconds to wait between retry attempts
      * @return A Future that succeeds with the new OAuth token if authentication is successful, or fails otherwise
      */
-    private Future<User> authenticateWithRetry(final Optional<Integer> aRetryCount, final int aRetryDelay) {
+    private Future<User> authenticateWithRetry() {
         final Promise<User> authentication = Promise.promise();
 
-        authenticateWithRetryHelper(aRetryCount, aRetryDelay, authentication);
+        authenticateWithRetryHelper(myAuthenticationRetryCount, authentication);
 
         return authentication.future();
     }
@@ -157,20 +154,18 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
      * Performs the recursion for {@link #authenticateWithRetry()}.
      *
      * @param aRetryCount The optional number of times to retry (retries forever if empty)
-     * @param aRetryDelay The number of seconds to wait between retry attempts
      * @param aPromise A Promise that completes with the new OAuth token if authentication is successful, or fails
      *        otherwise
      */
-    private void authenticateWithRetryHelper(final Optional<Integer> aRetryCount, final int aRetryDelay,
-            final Promise<User> aPromise) {
+    private void authenticateWithRetryHelper(final Optional<Integer> aRetryCount, final Promise<User> aPromise) {
         myAuthProviders.peek().authenticate(new JsonObject()).onSuccess(aPromise::complete).onFailure(failure -> {
             if (aRetryCount.isEmpty() || aRetryCount.get() > 0) {
                 // Wait a bit before retrying again
-                myVertx.setTimer(aRetryDelay * 1000, timerID -> {
-                    authenticateWithRetryHelper(aRetryCount.map(count -> count - 1), aRetryDelay, aPromise);
+                myVertx.setTimer(myAuthenticationRetryDelay * 1000, timerID -> {
+                    authenticateWithRetryHelper(aRetryCount.map(count -> count - 1), aPromise);
                 });
 
-                LOGGER.warn(MessageCodes.LCP_004, failure.getMessage(), aRetryDelay);
+                LOGGER.warn(MessageCodes.LCP_004, failure.getMessage(), myAuthenticationRetryDelay);
             } else {
                 aPromise.fail(failure);
             }
