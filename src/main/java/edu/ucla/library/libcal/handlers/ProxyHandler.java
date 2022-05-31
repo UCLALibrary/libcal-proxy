@@ -2,24 +2,33 @@
 package edu.ucla.library.libcal.handlers;
 
 import static edu.ucla.library.libcal.MediaType.APPLICATION_JSON;
+import static edu.ucla.library.libcal.MediaType.TEXT_PLAIN;
 
 import info.freelibrary.util.HTTP;
 
 import edu.ucla.library.libcal.Constants;
-import eduedu.ucla.library.libcal.services.LibCalProxyService;
-import eduedu.ucla.library.libcal.services.OAuthTokenService;
+import edu.ucla.library.libcal.MessageCodes;
+import edu.ucla.library.libcal.services.LibCalProxyService;
+import edu.ucla.library.libcal.services.OAuthTokenService;
+
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.serviceproxy.ServiceBinder;
 
 /**
  * A handler that processes status information requests.
  */
 public class ProxyHandler implements Handler<RoutingContext> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyHandler.class, MessageCodes.BUNDLE);
 
     /**
      * The handler's copy of the Vert.x instance.
@@ -34,12 +43,12 @@ public class ProxyHandler implements Handler<RoutingContext> {
     /**
      * A service for LibCal API calls
      */
-    private final LibCalProxyService myAPIProxy;
+    private LibCalProxyService myApiProxy;
 
     /**
      * A service for LibCal OAuth calls
      */
-    private final OAuthTokenService myTokenProxy;
+    private OAuthTokenService myTokenProxy;
 
     /**
      * Creates a handler that returns a status response.
@@ -58,29 +67,37 @@ public class ProxyHandler implements Handler<RoutingContext> {
         final String receivedQuery = aContext.pathParam(Constants.QUERY_PARAM);
 
         if (receivedQuery == null || receivedQuery.equals(Constants.EMPTY)) {
-            response.setStatusCode(HTTP.BAD_REQUEST).end(LOGGER.getMessage(MessageCodes.LCP_005));
+            response.setStatusCode(HTTP.BAD_REQUEST).end(LOGGER.getMessage(MessageCodes.LCP_006));
             return;
         } else {
-            response.setStatusCode(HTTP.OK).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
-            OAuthTokenService.create(myVertx, myConfig)
-            .onSuccess(service -> {
-                final MessageConsumer<?> myToken = new ServiceBinder(myVertx).setAddress(OAuthTokenService.ADDRESS)
-                      .register(OAuthTokenService.class, service);
-                myTokenProxy = OAuthTokenService.createProxy(myVertx);
-                myTokenProxy.getBearerToken().compose(token -> {
-                    return LibCalProxyService.create(aVertx, config);
-                }).onSuccess(apiProxy -> {
-                    final MessageConsumer<?> myAPI = new ServiceBinder(myVertx).setAddress(LibCalProxyService.ADDRESS)
-                          .register(LibCalProxyService.class, apiProxy);
-                    myAPIProxy = LibCalProxyService.createProxy(myVertx);
-                    myServiceProxy.getLibCalOutput(token, Constants.SLASH.concat(receivedQuery))
-                    .onSuccess(apiOutput -> {
-                        response.setStatusCode(HTTP.OK).putHeader(
-                                 HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
-                        response.end(apiOutput);
-                    }).onFailure();
-                }).onFailure();
-            }).onFailure();
+            LibCalProxyService.create(myVertx, myConfig).compose(proxy -> {
+                final MessageConsumer<?> myProxy = new ServiceBinder(myVertx)
+                      .setAddress(LibCalProxyService.ADDRESS)
+                      .register(LibCalProxyService.class, proxy);
+                myApiProxy = LibCalProxyService.createProxy(myVertx);
+                return OAuthTokenService.create(myVertx, myConfig).compose(tokenService -> {
+                    final MessageConsumer<?> myToken = new ServiceBinder(myVertx)
+                          .setAddress(OAuthTokenService.ADDRESS)
+                          .register(OAuthTokenService.class, tokenService);
+                    myTokenProxy = OAuthTokenService.createProxy(myVertx);
+                    return myTokenProxy.getBearerToken().compose(token -> {
+                        return myApiProxy.getLibCalOutput(token,
+                              Constants.SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
+                                  response.setStatusCode(HTTP.OK).putHeader(
+                                      HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
+                                  response.end(apiOutput);
+                              }).onFailure(failure -> {
+                                  final String statusMessage = failure.getMessage();
+                                  final String errorMessage = LOGGER.getMessage(MessageCodes.LCP_007, statusMessage);
+
+                                  LOGGER.error(errorMessage);
+                                  response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
+                                  response.putHeader(HttpHeaders.CONTENT_TYPE, TEXT_PLAIN.toString());
+                                  response.end(errorMessage);
+                              });
+                    });
+                });
+            });
         }
     }
 

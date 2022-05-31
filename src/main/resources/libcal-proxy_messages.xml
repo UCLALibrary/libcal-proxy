@@ -8,5 +8,7 @@
   <entry key="LCP_001">Server started at port: {}</entry>
   <entry key="LCP_002">LibCal client {} authenticated: {}</entry>
   <entry key="LCP_003">Access token retrieved from shared data map: {}</entry>
+  <entry key="LCP_006">Missing LibCal query string in request</entry>
+  <entry key="LCP_007">Failure retrieving LibCal content: {}</entry>
 
 </properties>
