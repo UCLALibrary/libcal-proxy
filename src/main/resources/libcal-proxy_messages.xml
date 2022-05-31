@@ -8,5 +8,7 @@
   <entry key="LCP_001">Server started at port: {}</entry>
   <entry key="LCP_002">LibCal client {} authenticated: {}</entry>
   <entry key="LCP_003">Access token retrieved from shared data map: {}</entry>
+  <entry key="LCP_004">Authentication attempt failed: {}, retrying in {} seconds</entry>
+  <entry key="LCP_005">Authentication failed: {}</entry>
 
 </properties>
