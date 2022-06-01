@@ -26,3 +26,23 @@ paths:
                     example: ok
         '500':
           description: There was an internal server error
+  /libcal/{theQuery}:
+    get:
+      summary: Get LibCal API Output
+      description: "JSON Output from LibCal APIs"
+      operationId: getProxy
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+        '400':
+          description: Bad request from client
+        '500':
+          description: There was an internal server error

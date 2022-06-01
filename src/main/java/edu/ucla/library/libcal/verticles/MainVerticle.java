@@ -11,6 +11,7 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.MessageCodes;
 import edu.ucla.library.libcal.Op;
+import edu.ucla.library.libcal.handlers.ProxyHandler;
 import edu.ucla.library.libcal.handlers.StatusHandler;
 import edu.ucla.library.libcal.services.OAuthTokenService;
 
@@ -89,6 +90,7 @@ public class MainVerticle extends AbstractVerticle {
 
             // Associate handlers with operation IDs from the application's OpenAPI specification
             routeBuilder.operation(Op.GET_STATUS).handler(new StatusHandler(getVertx()));
+            routeBuilder.operation(Op.GET_PROXY).handler(new ProxyHandler(getVertx(), aConfig));
 
             myServer = getVertx().createHttpServer(serverOptions).requestHandler(routeBuilder.createRouter());
 
