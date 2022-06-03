@@ -31,6 +31,13 @@ paths:
       summary: Get LibCal API Output
       description: "JSON Output from LibCal APIs"
       operationId: getProxy
+      parameters:
+        - in: path
+          name: theQuery
+          description: The LibCal API query string
+          schema:
+            type: string
+          required: true
       responses:
         '200':
           description: OK
