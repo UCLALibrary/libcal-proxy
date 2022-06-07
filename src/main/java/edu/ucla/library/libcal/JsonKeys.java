@@ -12,6 +12,11 @@ public final class JsonKeys {
     public static final String STATUS = "status";
 
     /**
+     * A status key.
+     */
+    public static final String ERROR = "error";
+
+    /**
      * An OAuth access token key.
      */
     public static final String ACCESS_TOKEN = "access_token";

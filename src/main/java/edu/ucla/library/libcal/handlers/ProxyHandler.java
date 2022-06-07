@@ -7,6 +7,7 @@ import static edu.ucla.library.libcal.MediaType.TEXT_PLAIN;
 import info.freelibrary.util.HTTP;
 
 import edu.ucla.library.libcal.Constants;
+import edu.ucla.library.libcal.JsonKeys;
 import edu.ucla.library.libcal.MessageCodes;
 import edu.ucla.library.libcal.services.LibCalProxyService;
 import edu.ucla.library.libcal.services.OAuthTokenService;
@@ -28,6 +29,9 @@ import io.vertx.serviceproxy.ServiceBinder;
  */
 public class ProxyHandler implements Handler<RoutingContext> {
 
+    /**
+     * The handler's logger.
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyHandler.class, MessageCodes.BUNDLE);
 
     /**
@@ -67,7 +71,9 @@ public class ProxyHandler implements Handler<RoutingContext> {
         final String receivedQuery = aContext.pathParam(Constants.QUERY_PARAM);
 
         if (receivedQuery == null || receivedQuery.equals(Constants.EMPTY)) {
-            response.setStatusCode(HTTP.BAD_REQUEST).end(LOGGER.getMessage(MessageCodes.LCP_006));
+            response.setStatusCode(HTTP.BAD_REQUEST)
+                    .putHeader(HttpHeaders.CONTENT_TYPE, TEXT_PLAIN.toString())
+                    .end(LOGGER.getMessage(MessageCodes.LCP_006));
             return;
         } else {
             LibCalProxyService.create(myVertx, myConfig).compose(proxy -> {
@@ -87,16 +93,16 @@ public class ProxyHandler implements Handler<RoutingContext> {
                                       HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
                                   response.end(apiOutput);
                               }).onFailure(failure -> {
-                                  final String statusMessage = failure.getMessage();
-                                  final String errorMessage = LOGGER.getMessage(MessageCodes.LCP_007, statusMessage);
-
-                                  LOGGER.error(errorMessage);
-                                  response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-                                  response.putHeader(HttpHeaders.CONTENT_TYPE, TEXT_PLAIN.toString());
-                                  response.end(errorMessage);
+                                  returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
                               });
+                    }).onFailure(failure -> {
+                        returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
                     });
+                }).onFailure(failure -> {
+                    returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
                 });
+            }).onFailure(failure -> {
+                returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
             });
         }
     }
@@ -108,5 +114,24 @@ public class ProxyHandler implements Handler<RoutingContext> {
      */
     public Vertx getVertx() {
         return myVertx;
+    }
+
+    /**
+     * Return an error message/response code to the requester.
+     *
+     * @param aResponse A HTTP response
+     * @param aStatusCode A HTTP response code
+     * @param aError An exception message
+     */
+    private void returnError(final HttpServerResponse aResponse, final int aStatusCode, final String aError) {
+        final JsonObject errorBody = new JsonObject()
+                         .put(JsonKeys.ERROR,
+                              LOGGER.getMessage(MessageCodes.LCP_007,
+                              aError.replaceAll(Constants.EOL_REGEX, Constants.BR_TAG)));
+
+        aResponse.setStatusCode(aStatusCode);
+        aResponse.setStatusMessage(aError.replaceAll(Constants.EOL_REGEX, Constants.EMPTY));
+        aResponse.putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
+        aResponse.end(errorBody.encodePrettily());
     }
 }
