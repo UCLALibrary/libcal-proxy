@@ -38,6 +38,12 @@ public final class Constants {
     public static final String UNSPECIFIED_HOST = "0.0.0.0";
 
     /**
+     * The IP for an unspecified host.
+     */
+    @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
+    public static final String LOCAL_HOST = "127.0.0.1";
+
+    /**
      * HTTP 200 status phrase.
      */
     public static final String OK = "OK";
