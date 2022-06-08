@@ -13,7 +13,6 @@ import edu.ucla.library.libcal.Constants;
 import edu.ucla.library.libcal.MessageCodes;
 import edu.ucla.library.libcal.verticles.MainVerticle;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;

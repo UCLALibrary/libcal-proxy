@@ -27,6 +27,7 @@ import io.vertx.serviceproxy.ServiceBinder;
 /**
  * A handler that processes status information requests.
  */
+@SuppressWarnings("PMD.UnusedLocalVariable")
 public class ProxyHandler implements Handler<RoutingContext> {
 
     /**
