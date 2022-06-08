@@ -76,17 +76,17 @@ public class ProxyHandlerTest {
         final int port = Integer.parseInt(DEFAULT_PORT);
 
         webClient.get(port, Constants.LOCAL_HOST, requestPath).expect(ResponsePredicate.SC_SUCCESS)
-            .as(BodyCodec.string()).send(result -> {
-                if (result.succeeded()) {
-                    final HttpResponse<String> response = result.result();
+                .as(BodyCodec.string()).send(result -> {
+                    if (result.succeeded()) {
+                        final HttpResponse<String> response = result.result();
 
-                    assertEquals(HTTP.OK, response.statusCode());
-                    assertTrue(response.body().contains("Powell Library"));
-                    aContext.completeNow();
-                } else {
-                    aContext.failNow(result.cause());
-                }
-            });
+                        assertEquals(HTTP.OK, response.statusCode());
+                        assertTrue(response.body().contains("Powell Library"));
+                        aContext.completeNow();
+                    } else {
+                        aContext.failNow(result.cause());
+                    }
+                });
     }
 
 }

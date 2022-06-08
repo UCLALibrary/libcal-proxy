@@ -35,8 +35,8 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
     @Override
     public Future<String> getLibCalOutput(final String anOAuthToken, final String aQuery) {
         /*
-         * LibCal API returns JSON in variable formats (sometimes objects, sometimes arrays),
-         * so safer to handle API output as string to avoid parsing errors
+         * LibCal API returns JSON in variable formats (sometimes objects, sometimes arrays), so safer to handle API
+         * output as string to avoid parsing errors
          */
         final Promise<String> promise = Promise.promise();
         final HttpRequest<String> request;

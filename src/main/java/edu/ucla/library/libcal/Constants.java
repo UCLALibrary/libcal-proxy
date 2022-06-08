@@ -48,7 +48,7 @@ public final class Constants {
      */
     public static final String OK = "OK";
 
-    /** 
+    /**
      * A constant for the break tag.
      */
     public static final String BR_TAG = "<br>";
