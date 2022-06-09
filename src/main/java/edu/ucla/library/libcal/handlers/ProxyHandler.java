@@ -80,12 +80,12 @@ public class ProxyHandler implements Handler<RoutingContext> {
                     .end(LOGGER.getMessage(MessageCodes.LCP_006));
         } else {
             LibCalProxyService.create(myVertx, myConfig).compose(proxy -> {
-                final MessageConsumer<?> myProxy = new ServiceBinder(myVertx).setAddress(LibCalProxyService.ADDRESS)
-                        .register(LibCalProxyService.class, proxy);
+                //final MessageConsumer<?> myProxy = new ServiceBinder(myVertx).setAddress(LibCalProxyService.ADDRESS)
+                  //      .register(LibCalProxyService.class, proxy);
                 myApiProxy = LibCalProxyService.createProxy(myVertx);
                 return OAuthTokenService.create(myVertx, myConfig).compose(tokenService -> {
-                    final MessageConsumer<?> myToken = new ServiceBinder(myVertx).setAddress(OAuthTokenService.ADDRESS)
-                            .register(OAuthTokenService.class, tokenService);
+                    //final MessageConsumer<?> myToken = new ServiceBinder(myVertx).setAddress(OAuthTokenService.ADDRESS)
+                      //      .register(OAuthTokenService.class, tokenService);
                     myTokenProxy = OAuthTokenService.createProxy(myVertx);
                     return myTokenProxy.getBearerToken().compose(token -> {
                         return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {

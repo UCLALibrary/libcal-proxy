@@ -13,6 +13,7 @@ import edu.ucla.library.libcal.MessageCodes;
 import edu.ucla.library.libcal.Op;
 import edu.ucla.library.libcal.handlers.ProxyHandler;
 import edu.ucla.library.libcal.handlers.StatusHandler;
+import edu.ucla.library.libcal.services.LibCalProxyService;
 import edu.ucla.library.libcal.services.OAuthTokenService;
 
 import io.vertx.config.ConfigRetriever;
@@ -24,6 +25,7 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.Router;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.serviceproxy.ServiceBinder;
 
@@ -48,6 +50,11 @@ public class MainVerticle extends AbstractVerticle {
     private MessageConsumer<?> myOAuthTokenService;
 
     /**
+     * The OAuth token service proxy.
+     */
+    private MessageConsumer<?> myLibCalProxyService;
+
+    /**
      * The main verticle's HTTP server.
      */
     private HttpServer myServer;
@@ -61,7 +68,11 @@ public class MainVerticle extends AbstractVerticle {
                 myOAuthTokenService = new ServiceBinder(vertx).setAddress(OAuthTokenService.ADDRESS)
                         .register(OAuthTokenService.class, service);
 
-                return configureServer(config);
+                return LibCalProxyService.create(vertx, config).compose(proxy -> {
+                    myLibCalProxyService = new ServiceBinder(vertx).setAddress(LibCalProxyService.ADDRESS)
+                            .register(LibCalProxyService.class, proxy);
+                    return configureServer(config);
+		});
             });
         }).onSuccess(server -> {
             LOGGER.info(MessageCodes.LCP_001, server.actualPort());
@@ -71,7 +82,9 @@ public class MainVerticle extends AbstractVerticle {
 
     @Override
     public void stop(final Promise<Void> aPromise) {
-        myServer.close().compose(unused -> myOAuthTokenService.unregister()).onSuccess(unused -> aPromise.complete())
+        myServer.close().compose(unused -> myOAuthTokenService.unregister())
+                .compose(alsoUnused -> myLibCalProxyService.unregister())
+                .onSuccess(unused -> aPromise.complete())
                 .onFailure(aPromise::fail);
     }
 
@@ -87,13 +100,17 @@ public class MainVerticle extends AbstractVerticle {
 
         return RouterBuilder.create(vertx, getRouterSpec()).compose(routeBuilder -> {
             final HttpServerOptions serverOptions = new HttpServerOptions().setPort(port).setHost(host);
-
+            final Router router;
+            
             // Associate handlers with operation IDs from the application's OpenAPI specification
             routeBuilder.operation(Op.GET_STATUS).handler(new StatusHandler(getVertx()));
             // routeBuilder.operation(Op.GET_PROXY).handler(new ProxyHandler(getVertx(), aConfig));
-            routeBuilder.createRouter().route("/libcal/*").handler(new ProxyHandler(getVertx(), aConfig));
+            //routeBuilder.createRouter().route("/libcal/*").handler(new ProxyHandler(getVertx(), aConfig));
+            router = routeBuilder.createRouter();
+            router.route().handler(new ProxyHandler(getVertx(), aConfig));
 
-            myServer = getVertx().createHttpServer(serverOptions).requestHandler(routeBuilder.createRouter());
+            //myServer = getVertx().createHttpServer(serverOptions).requestHandler(routeBuilder.createRouter());
+            myServer = getVertx().createHttpServer(serverOptions).requestHandler(router);
 
             return myServer.listen();
         });
