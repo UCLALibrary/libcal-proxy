@@ -3,6 +3,8 @@ package edu.ucla.library.libcal.handlers;
 
 import static edu.ucla.library.libcal.MediaType.APPLICATION_JSON;
 import static edu.ucla.library.libcal.MediaType.TEXT_PLAIN;
+import static info.freelibrary.util.Constants.EMPTY;
+import static info.freelibrary.util.Constants.SLASH;
 
 import info.freelibrary.util.HTTP;
 
@@ -69,12 +71,13 @@ public class ProxyHandler implements Handler<RoutingContext> {
     @Override
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
-        final String receivedQuery = aContext.pathParam(Constants.QUERY_PARAM);
+        final String path = aContext.request().path();
+        final String receivedQuery = path.replaceAll("/libcal/", "");
+        // final String receivedQuery = path.substring(path.indexOf("libcal/") + 1);
 
-        if (receivedQuery == null || receivedQuery.equals(Constants.EMPTY)) {
+        if (receivedQuery == null || receivedQuery.equals(EMPTY)) {
             response.setStatusCode(HTTP.BAD_REQUEST).putHeader(HttpHeaders.CONTENT_TYPE, TEXT_PLAIN.toString())
                     .end(LOGGER.getMessage(MessageCodes.LCP_006));
-            return;
         } else {
             LibCalProxyService.create(myVertx, myConfig).compose(proxy -> {
                 final MessageConsumer<?> myProxy = new ServiceBinder(myVertx).setAddress(LibCalProxyService.ADDRESS)
@@ -85,14 +88,13 @@ public class ProxyHandler implements Handler<RoutingContext> {
                             .register(OAuthTokenService.class, tokenService);
                     myTokenProxy = OAuthTokenService.createProxy(myVertx);
                     return myTokenProxy.getBearerToken().compose(token -> {
-                        return myApiProxy.getLibCalOutput(token, Constants.SLASH.concat(receivedQuery))
-                                .onSuccess(apiOutput -> {
-                                    response.setStatusCode(HTTP.OK).putHeader(HttpHeaders.CONTENT_TYPE,
-                                            APPLICATION_JSON.toString());
-                                    response.end(apiOutput);
-                                }).onFailure(failure -> {
-                                    returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
-                                });
+                        return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
+                            response.setStatusCode(HTTP.OK).putHeader(HttpHeaders.CONTENT_TYPE,
+                                    APPLICATION_JSON.toString());
+                            response.end(apiOutput);
+                        }).onFailure(failure -> {
+                            returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
+                        });
                     }).onFailure(failure -> {
                         returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
                     });
@@ -126,7 +128,7 @@ public class ProxyHandler implements Handler<RoutingContext> {
                 LOGGER.getMessage(MessageCodes.LCP_007, aError.replaceAll(Constants.EOL_REGEX, Constants.BR_TAG)));
 
         aResponse.setStatusCode(aStatusCode);
-        aResponse.setStatusMessage(aError.replaceAll(Constants.EOL_REGEX, Constants.EMPTY));
+        aResponse.setStatusMessage(aError.replaceAll(Constants.EOL_REGEX, EMPTY));
         aResponse.putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
         aResponse.end(errorBody.encodePrettily());
     }

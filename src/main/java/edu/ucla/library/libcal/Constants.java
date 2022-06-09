@@ -22,22 +22,6 @@ public final class Constants {
     public static final String QUERY_PARAM = "theQuery";
 
     /**
-     * Just a empty string, useful.
-     */
-    public static final String EMPTY = "";
-
-    /**
-     * Slash character used in URL assembly
-     */
-    public static final String SLASH = "/";
-
-    /**
-     * The IP for an unspecified host.
-     */
-    @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
-    public static final String UNSPECIFIED_HOST = "0.0.0.0";
-
-    /**
      * The IP for an unspecified host.
      */
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")

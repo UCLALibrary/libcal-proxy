@@ -90,7 +90,8 @@ public class MainVerticle extends AbstractVerticle {
 
             // Associate handlers with operation IDs from the application's OpenAPI specification
             routeBuilder.operation(Op.GET_STATUS).handler(new StatusHandler(getVertx()));
-            routeBuilder.operation(Op.GET_PROXY).handler(new ProxyHandler(getVertx(), aConfig));
+            // routeBuilder.operation(Op.GET_PROXY).handler(new ProxyHandler(getVertx(), aConfig));
+            routeBuilder.createRouter().route("/libcal/*").handler(new ProxyHandler(getVertx(), aConfig));
 
             myServer = getVertx().createHttpServer(serverOptions).requestHandler(routeBuilder.createRouter());
 
