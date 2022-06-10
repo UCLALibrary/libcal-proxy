@@ -106,7 +106,7 @@ public class MainVerticle extends AbstractVerticle {
 
             // Empty-path router to handle the variable-format calls to ProxyHandler
             router = routeBuilder.createRouter();
-            router.route().handler(new ProxyHandler(getVertx(), aConfig));
+            router.route().handler(new ProxyHandler(getVertx()));
 
             myServer = getVertx().createHttpServer(serverOptions).requestHandler(router);
 

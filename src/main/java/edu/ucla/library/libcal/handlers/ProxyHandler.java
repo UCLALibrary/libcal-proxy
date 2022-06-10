@@ -46,19 +46,14 @@ public class ProxyHandler implements Handler<RoutingContext> {
     private final Vertx myVertx;
 
     /**
-     * The handler's copy of the application config.
-     */
-    private final JsonObject myConfig;
-
-    /**
      * A service for LibCal API calls
      */
-    private LibCalProxyService myApiProxy;
+    private final LibCalProxyService myApiProxy;
 
     /**
      * A service for LibCal OAuth calls
      */
-    private OAuthTokenService myTokenProxy;
+    private final OAuthTokenService myTokenProxy;
 
     /**
      * Creates a handler that returns a status response.
@@ -66,43 +61,29 @@ public class ProxyHandler implements Handler<RoutingContext> {
      * @param aVertx A Vert.x instance
      * @param aConfig A configuration
      */
-    public ProxyHandler(final Vertx aVertx, final JsonObject aConfig) {
+    public ProxyHandler(final Vertx aVertx) {
         myVertx = aVertx;
-        myConfig = aConfig;
+        myApiProxy = LibCalProxyService.createProxy(myVertx);
+        myTokenProxy = OAuthTokenService.createProxy(myVertx);
     }
 
     @Override
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final String path = aContext.request().path();
-        // final String receivedQuery = path.replaceAll("/libcal/", "");
-        // final String receivedQuery = path.substring(path.indexOf("libcal/") + 1);
 
         try {
             if (path.endsWith(LIBCAL) || path.endsWith(LIBCAL.concat(SLASH))) {
                 response.setStatusCode(HTTP.BAD_REQUEST).putHeader(HttpHeaders.CONTENT_TYPE, TEXT_PLAIN.toString())
                         .end(LOGGER.getMessage(MessageCodes.LCP_006));
             } else {
-                final String receivedQuery = path.replaceAll(LIBCAL.concat(SLASH), "");
-
-                LibCalProxyService.create(myVertx, myConfig).compose(proxy -> {
-                    myApiProxy = LibCalProxyService.createProxy(myVertx);
-                    return OAuthTokenService.create(myVertx, myConfig).compose(tokenService -> {
-                        myTokenProxy = OAuthTokenService.createProxy(myVertx);
-                        return myTokenProxy.getBearerToken().compose(token -> {
-                            return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery))
-                                    .onSuccess(apiOutput -> {
-                                        response.setStatusCode(HTTP.OK).putHeader(HttpHeaders.CONTENT_TYPE,
-                                                APPLICATION_JSON.toString());
-                                        response.end(apiOutput);
-                                    }).onFailure(failure -> {
-                                        returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
-                                    });
-                        }).onFailure(failure -> {
-                            returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
-                        });
-                    }).onFailure(failure -> {
-                        returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
+                final String receivedQuery = path.replaceAll(LIBCAL.concat(SLASH), "")
+                        .concat(aContext.request().query() != null ? aContext.request().query() : "");
+                myTokenProxy.getBearerToken().compose(token -> {
+                    return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
+                        response.setStatusCode(HTTP.OK).putHeader(HttpHeaders.CONTENT_TYPE,
+                                APPLICATION_JSON.toString());
+                        response.end(apiOutput);
                     });
                 }).onFailure(failure -> {
                     returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
