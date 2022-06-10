@@ -17,11 +17,6 @@ public final class Constants {
     public static final String ACCESS_TOKEN = "accessToken";
 
     /**
-     * The name of the path parameter holding the LibCal query
-     */
-    public static final String QUERY_PARAM = "theQuery";
-
-    /**
      * The IP for an unspecified host.
      */
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")

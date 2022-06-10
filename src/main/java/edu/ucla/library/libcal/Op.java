@@ -12,11 +12,6 @@ public final class Op {
     public static final String GET_STATUS = "getStatus";
 
     /**
-     * Defines a status operation.
-     */
-    public static final String GET_PROXY = "getProxy";
-
-    /**
      * Constant class constructors should be private.
      */
     private Op() {

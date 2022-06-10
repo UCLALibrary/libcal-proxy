@@ -71,7 +71,7 @@ public class ProxyHandlerTest {
      */
     @Test
     public void testGetOutput(final Vertx aVertx, final VertxTestContext aContext) {
-        final String requestPath = "/libcal/api/1.1/hours/2572"; // api%2F1.1%2Fhours%2F2572";
+        final String requestPath = "/api/1.1/hours/2572";
         final WebClient webClient = WebClient.create(aVertx);
         final int port = Integer.parseInt(DEFAULT_PORT);
 
