@@ -19,23 +19,26 @@ import info.freelibrary.util.LoggerFactory;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.serviceproxy.ServiceBinder;
 
 /**
  * A handler that processes status information requests.
  */
-@SuppressWarnings("PMD.UnusedLocalVariable")
+@SuppressWarnings("PMD.AvoidCatchingGenericException")
 public class ProxyHandler implements Handler<RoutingContext> {
 
     /**
      * The handler's logger.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyHandler.class, MessageCodes.BUNDLE);
+
+    /**
+     * A constant for evaluating request path.
+     */
+    private static final String LIBCAL = "libcal";
 
     /**
      * The handler's copy of the Vert.x instance.
@@ -72,26 +75,29 @@ public class ProxyHandler implements Handler<RoutingContext> {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final String path = aContext.request().path();
-        final String receivedQuery = path.replaceAll("/libcal/", "");
+        // final String receivedQuery = path.replaceAll("/libcal/", "");
         // final String receivedQuery = path.substring(path.indexOf("libcal/") + 1);
 
-        if (receivedQuery == null || receivedQuery.equals(EMPTY)) {
-            response.setStatusCode(HTTP.BAD_REQUEST).putHeader(HttpHeaders.CONTENT_TYPE, TEXT_PLAIN.toString())
-                    .end(LOGGER.getMessage(MessageCodes.LCP_006));
-        } else {
-            LibCalProxyService.create(myVertx, myConfig).compose(proxy -> {
-                //final MessageConsumer<?> myProxy = new ServiceBinder(myVertx).setAddress(LibCalProxyService.ADDRESS)
-                  //      .register(LibCalProxyService.class, proxy);
-                myApiProxy = LibCalProxyService.createProxy(myVertx);
-                return OAuthTokenService.create(myVertx, myConfig).compose(tokenService -> {
-                    //final MessageConsumer<?> myToken = new ServiceBinder(myVertx).setAddress(OAuthTokenService.ADDRESS)
-                      //      .register(OAuthTokenService.class, tokenService);
-                    myTokenProxy = OAuthTokenService.createProxy(myVertx);
-                    return myTokenProxy.getBearerToken().compose(token -> {
-                        return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
-                            response.setStatusCode(HTTP.OK).putHeader(HttpHeaders.CONTENT_TYPE,
-                                    APPLICATION_JSON.toString());
-                            response.end(apiOutput);
+        try {
+            if (path.endsWith(LIBCAL) || path.endsWith(LIBCAL.concat(SLASH))) {
+                response.setStatusCode(HTTP.BAD_REQUEST).putHeader(HttpHeaders.CONTENT_TYPE, TEXT_PLAIN.toString())
+                        .end(LOGGER.getMessage(MessageCodes.LCP_006));
+            } else {
+                final String receivedQuery = path.replaceAll(LIBCAL.concat(SLASH), "");
+
+                LibCalProxyService.create(myVertx, myConfig).compose(proxy -> {
+                    myApiProxy = LibCalProxyService.createProxy(myVertx);
+                    return OAuthTokenService.create(myVertx, myConfig).compose(tokenService -> {
+                        myTokenProxy = OAuthTokenService.createProxy(myVertx);
+                        return myTokenProxy.getBearerToken().compose(token -> {
+                            return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery))
+                                    .onSuccess(apiOutput -> {
+                                        response.setStatusCode(HTTP.OK).putHeader(HttpHeaders.CONTENT_TYPE,
+                                                APPLICATION_JSON.toString());
+                                        response.end(apiOutput);
+                                    }).onFailure(failure -> {
+                                        returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
+                                    });
                         }).onFailure(failure -> {
                             returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
                         });
@@ -101,9 +107,9 @@ public class ProxyHandler implements Handler<RoutingContext> {
                 }).onFailure(failure -> {
                     returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
                 });
-            }).onFailure(failure -> {
-                returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
-            });
+            }
+        } catch (Exception details) {
+            returnError(response, HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
         }
     }
 

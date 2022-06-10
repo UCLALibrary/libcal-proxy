@@ -72,7 +72,7 @@ public class MainVerticle extends AbstractVerticle {
                     myLibCalProxyService = new ServiceBinder(vertx).setAddress(LibCalProxyService.ADDRESS)
                             .register(LibCalProxyService.class, proxy);
                     return configureServer(config);
-		});
+                });
             });
         }).onSuccess(server -> {
             LOGGER.info(MessageCodes.LCP_001, server.actualPort());
@@ -83,8 +83,7 @@ public class MainVerticle extends AbstractVerticle {
     @Override
     public void stop(final Promise<Void> aPromise) {
         myServer.close().compose(unused -> myOAuthTokenService.unregister())
-                .compose(alsoUnused -> myLibCalProxyService.unregister())
-                .onSuccess(unused -> aPromise.complete())
+                .compose(alsoUnused -> myLibCalProxyService.unregister()).onSuccess(unused -> aPromise.complete())
                 .onFailure(aPromise::fail);
     }
 
@@ -101,15 +100,14 @@ public class MainVerticle extends AbstractVerticle {
         return RouterBuilder.create(vertx, getRouterSpec()).compose(routeBuilder -> {
             final HttpServerOptions serverOptions = new HttpServerOptions().setPort(port).setHost(host);
             final Router router;
-            
+
             // Associate handlers with operation IDs from the application's OpenAPI specification
             routeBuilder.operation(Op.GET_STATUS).handler(new StatusHandler(getVertx()));
-            // routeBuilder.operation(Op.GET_PROXY).handler(new ProxyHandler(getVertx(), aConfig));
-            //routeBuilder.createRouter().route("/libcal/*").handler(new ProxyHandler(getVertx(), aConfig));
+
+            // Empty-path router to handle the variable-format calls to ProxyHandler
             router = routeBuilder.createRouter();
             router.route().handler(new ProxyHandler(getVertx(), aConfig));
 
-            //myServer = getVertx().createHttpServer(serverOptions).requestHandler(routeBuilder.createRouter());
             myServer = getVertx().createHttpServer(serverOptions).requestHandler(router);
 
             return myServer.listen();
