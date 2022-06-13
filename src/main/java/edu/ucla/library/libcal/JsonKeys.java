@@ -27,11 +27,6 @@ public final class JsonKeys {
     public static final String EXPIRES_IN = "expires_in";
 
     /**
-     * An OAuth expires in key.
-     */
-    public static final String NAME = "name";
-
-    /**
      * Creates a new JSON keys constants class.
      */
     private JsonKeys() {

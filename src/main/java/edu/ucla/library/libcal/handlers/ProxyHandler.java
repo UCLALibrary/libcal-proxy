@@ -36,9 +36,9 @@ public class ProxyHandler implements Handler<RoutingContext> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyHandler.class, MessageCodes.BUNDLE);
 
     /**
-     * A constant for evaluating request path.
+     * A constant for the "?" to lead an HTTP query string.
      */
-    private static final String LIBCAL = "libcal";
+    private static final String QUESTION_MARK = "?";
 
     /**
      * The handler's copy of the Vert.x instance.
@@ -73,12 +73,12 @@ public class ProxyHandler implements Handler<RoutingContext> {
         final String path = aContext.request().path();
 
         try {
-            if (path.endsWith(LIBCAL) || path.endsWith(LIBCAL.concat(SLASH))) {
+            if (path.equals(EMPTY) || path.equals(SLASH)) {
                 response.setStatusCode(HTTP.BAD_REQUEST).putHeader(HttpHeaders.CONTENT_TYPE, TEXT_PLAIN.toString())
                         .end(LOGGER.getMessage(MessageCodes.LCP_006));
             } else {
-                final String receivedQuery = path.replaceAll(LIBCAL.concat(SLASH), "")
-                        .concat(aContext.request().query() != null ? aContext.request().query() : "");
+                final String receivedQuery = path.concat(aContext.request().query() != null ? 
+                    QUESTION_MARK.concat(aContext.request().query()) : "");
                 myTokenProxy.getBearerToken().compose(token -> {
                     return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
                         response.setStatusCode(HTTP.OK).putHeader(HttpHeaders.CONTENT_TYPE,
