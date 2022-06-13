@@ -59,7 +59,6 @@ public class ProxyHandler implements Handler<RoutingContext> {
      * Creates a handler that returns a status response.
      *
      * @param aVertx A Vert.x instance
-     * @param aConfig A configuration
      */
     public ProxyHandler(final Vertx aVertx) {
         myVertx = aVertx;
