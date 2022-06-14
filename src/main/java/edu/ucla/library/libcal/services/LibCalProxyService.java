@@ -49,7 +49,7 @@ public interface LibCalProxyService {
      * @param aQuery The query string passes to the LibCal API
      * @return A Future that resolves to the JSON response from LibCal
      */
-    Future<String> getLibCalOutput(String anOAuthToken, String aQuery);
+    Future<JsonObject> getLibCalOutput(String anOAuthToken, String aQuery);
 
     /**
      * Closes the underlying resources used by this service.
