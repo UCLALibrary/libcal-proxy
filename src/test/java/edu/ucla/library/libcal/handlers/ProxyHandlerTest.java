@@ -89,4 +89,29 @@ public class ProxyHandlerTest {
                 });
     }
 
+    /**
+     * Tests that a client handles bad input
+     *
+     * @param aVertx A Vert.x instance
+     * @param aContext A test context
+     */
+    @Test
+    public void testBadRequest(final Vertx aVertx, final VertxTestContext aContext) {
+        final String badRequestPath = "/1.1/hours/2572";
+        final WebClient webClient = WebClient.create(aVertx);
+        final int port = Integer.parseInt(DEFAULT_PORT);
+
+        webClient.get(port, Constants.LOCAL_HOST, badRequestPath)
+                .as(BodyCodec.string()).send(result -> {
+                    if (result.succeeded()) {
+                        final HttpResponse<String> response = result.result();
+
+                        assertEquals(HTTP.NOT_FOUND, response.statusCode());
+                        assertTrue(response.body().contains("Failure retrieving"));
+                        aContext.completeNow();
+                    } else {
+                        aContext.failNow(result.cause());
+                    }
+                });
+    }
 }

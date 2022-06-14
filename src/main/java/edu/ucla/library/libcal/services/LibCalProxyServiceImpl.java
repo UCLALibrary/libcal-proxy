@@ -1,8 +1,6 @@
 
 package edu.ucla.library.libcal.services;
 
-import static info.freelibrary.util.HTTP.BAD_REQUEST;
-
 import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.JsonKeys;
 
@@ -12,7 +10,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import io.vertx.ext.web.codec.BodyCodec;
 
 /**
@@ -47,14 +44,12 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
         final String baseURL = myConfig.getString(Config.LIBCAL_BASE_URL);
 
         request = myWebClient.getAbs(baseURL.concat(aQuery)).bearerTokenAuthentication(anOAuthToken)
-                .as(BodyCodec.string()).expect(ResponsePredicate.SC_OK).ssl(true);
+                .as(BodyCodec.string()).ssl(true);
         request.send(asyncResult -> {
             if (asyncResult.succeeded()) {
                 response.put(JsonKeys.STATUS_CODE, asyncResult.result().statusCode());
                 response.put(JsonKeys.STATUS_MESSAGE, asyncResult.result().statusMessage());
-                if (asyncResult.result().statusCode() < BAD_REQUEST) {
-                    response.put(JsonKeys.BODY, asyncResult.result().body());
-                }
+                response.put(JsonKeys.BODY, asyncResult.result().body());
                 promise.complete(response);
             } else {
                 promise.fail(asyncResult.cause());

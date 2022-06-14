@@ -1,7 +1,6 @@
 
 package edu.ucla.library.libcal.services;
 
-import io.vertx.codegen.annotations.ProxyClose;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;

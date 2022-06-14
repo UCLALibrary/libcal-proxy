@@ -2,7 +2,6 @@
 package edu.ucla.library.libcal.handlers;
 
 import static edu.ucla.library.libcal.MediaType.APPLICATION_JSON;
-import static edu.ucla.library.libcal.MediaType.TEXT_PLAIN;
 import static info.freelibrary.util.Constants.EMPTY;
 import static info.freelibrary.util.Constants.SLASH;
 
@@ -71,31 +70,21 @@ public class ProxyHandler implements Handler<RoutingContext> {
         final HttpServerResponse response = aContext.response();
         final String path = aContext.request().path();
 
-        // try {
-        if (path.equals(SLASH)) {
-            response.setStatusCode(HTTP.BAD_REQUEST).putHeader(HttpHeaders.CONTENT_TYPE, TEXT_PLAIN.toString())
-                    .end(LOGGER.getMessage(MessageCodes.LCP_006));
-        } else {
-            final String receivedQuery = path
-                    .concat(aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : "");
-            myTokenProxy.getBearerToken().compose(token -> {
-                return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
-                    if (apiOutput.getInteger(JsonKeys.STATUS_CODE) < HTTP.BAD_REQUEST) {
-                        response.setStatusCode(HTTP.OK).putHeader(HttpHeaders.CONTENT_TYPE,
-                                APPLICATION_JSON.toString());
-                        response.end(apiOutput.getString(JsonKeys.BODY));
-                    } else {
-                        returnError(response, apiOutput.getInteger(JsonKeys.STATUS_CODE),
-                                apiOutput.getString(JsonKeys.STATUS_MESSAGE));
-                    }
-                });
-            }).onFailure(failure -> {
-                returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
+        final String receivedQuery =
+                path.concat(aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : "");
+        myTokenProxy.getBearerToken().compose(token -> {
+            return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
+                if (apiOutput.getInteger(JsonKeys.STATUS_CODE) < HTTP.BAD_REQUEST) {
+                    response.setStatusCode(HTTP.OK).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
+                    response.end(apiOutput.getString(JsonKeys.BODY));
+                } else {
+                    returnError(response, apiOutput.getInteger(JsonKeys.STATUS_CODE),
+                            apiOutput.getString(JsonKeys.STATUS_MESSAGE));
+                }
             });
-        }
-        /*
-         * } catch (Exception details) { returnError(response, HTTP.INTERNAL_SERVER_ERROR, details.getMessage()); }
-         */
+        }).onFailure(failure -> {
+            returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
+        });
     }
 
     /**
