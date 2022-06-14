@@ -81,18 +81,6 @@ public class LibCalProxyServiceIT {
     }
 
     /**
-     * Tears down the test.
-     *
-     * @param aVertx A Vert.x instance
-     * @param aContext A test context
-     */
-    @AfterAll
-    public final void tearDown(final Vertx aVertx, final VertxTestContext aContext) {
-        myServiceProxy.close().compose(result -> CompositeFuture.all(myService.unregister(), myToken.unregister()))
-                .onSuccess(success -> aContext.completeNow()).onFailure(aContext::failNow);
-    }
-
-    /**
      * Tests that {@link LibCalProxyService#getLibCalOutput(String, String)} returns content from LibCal API calls.
      *
      * @param aVertx A Vert.x instance

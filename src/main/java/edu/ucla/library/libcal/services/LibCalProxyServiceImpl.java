@@ -64,8 +64,4 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
         return promise.future();
     }
 
-    @Override
-    public Future<Void> close() {
-        return Future.succeededFuture();
-    }
 }

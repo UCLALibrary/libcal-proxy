@@ -51,11 +51,4 @@ public interface LibCalProxyService {
      */
     Future<JsonObject> getLibCalOutput(String anOAuthToken, String aQuery);
 
-    /**
-     * Closes the underlying resources used by this service.
-     *
-     * @return A Future that resolves once the resources have been closed
-     */
-    @ProxyClose
-    Future<Void> close();
 }
