@@ -102,7 +102,7 @@ public class ProxyHandler implements Handler<RoutingContext> {
      */
     private void returnError(final HttpServerResponse aResponse, final int aStatusCode, final String aError) {
         final JsonObject errorBody = new JsonObject().put(JsonKeys.ERROR,
-                LOGGER.getMessage(MessageCodes.LCP_007, aError.replaceAll(Constants.EOL_REGEX, Constants.BR_TAG)));
+                LOGGER.getMessage(MessageCodes.LCP_006, aError.replaceAll(Constants.EOL_REGEX, Constants.BR_TAG)));
 
         aResponse.setStatusCode(aStatusCode);
         aResponse.setStatusMessage(aError.replaceAll(Constants.EOL_REGEX, EMPTY));

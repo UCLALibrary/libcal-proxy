@@ -10,7 +10,6 @@
   <entry key="LCP_003">Access token retrieved from shared data map: {}</entry>
   <entry key="LCP_004">Authentication attempt failed: {}, retrying in {} seconds</entry>
   <entry key="LCP_005">Authentication failed: {}</entry>
-  <entry key="LCP_006">Missing LibCal query string in request</entry>
-  <entry key="LCP_007">Failure retrieving LibCal content: {}</entry>
+  <entry key="LCP_006">Failure retrieving LibCal content: {}</entry>
 
 </properties>
