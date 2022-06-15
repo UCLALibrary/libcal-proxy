@@ -101,17 +101,16 @@ public class ProxyHandlerTest {
         final WebClient webClient = WebClient.create(aVertx);
         final int port = Integer.parseInt(DEFAULT_PORT);
 
-        webClient.get(port, Constants.LOCAL_HOST, badRequestPath)
-                .as(BodyCodec.string()).send(result -> {
-                    if (result.succeeded()) {
-                        final HttpResponse<String> response = result.result();
+        webClient.get(port, Constants.LOCAL_HOST, badRequestPath).as(BodyCodec.string()).send(result -> {
+            if (result.succeeded()) {
+                final HttpResponse<String> response = result.result();
 
-                        assertEquals(HTTP.NOT_FOUND, response.statusCode());
-                        assertTrue(response.body().contains("Not Found"));
-                        aContext.completeNow();
-                    } else {
-                        aContext.failNow(result.cause());
-                    }
-                });
+                assertEquals(HTTP.NOT_FOUND, response.statusCode());
+                assertTrue(response.body().contains("Not Found"));
+                aContext.completeNow();
+            } else {
+                aContext.failNow(result.cause());
+            }
+        });
     }
 }

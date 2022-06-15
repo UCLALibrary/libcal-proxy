@@ -7,6 +7,7 @@ import static info.freelibrary.util.Constants.SLASH;
 
 import info.freelibrary.util.HTTP;
 
+import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.Constants;
 import edu.ucla.library.libcal.JsonKeys;
 import edu.ucla.library.libcal.MessageCodes;
@@ -22,6 +23,8 @@ import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+
+import java.util.Arrays;
 
 /**
  * A handler that processes status information requests.
@@ -40,9 +43,19 @@ public class ProxyHandler implements Handler<RoutingContext> {
     private static final String QUESTION_MARK = "?";
 
     /**
+     * The name of the HTTP request header used by the reverse proxy to carry the client IP address.
+     */
+    private static final String X_FORWARDED_FOR = "X-Forwarded-For";
+
+    /**
      * The handler's copy of the Vert.x instance.
      */
     private final Vertx myVertx;
+
+    /**
+     * The handler's copy of the Vert.x instance.
+     */
+    private final JsonObject myConfig;
 
     /**
      * A service for LibCal API calls
@@ -59,8 +72,9 @@ public class ProxyHandler implements Handler<RoutingContext> {
      *
      * @param aVertx A Vert.x instance
      */
-    public ProxyHandler(final Vertx aVertx) {
+    public ProxyHandler(final Vertx aVertx, final JsonObject aConfig) {
         myVertx = aVertx;
+        myConfig = aConfig;
         myApiProxy = LibCalProxyService.createProxy(myVertx);
         myTokenProxy = OAuthTokenService.createProxy(myVertx);
     }
@@ -69,19 +83,25 @@ public class ProxyHandler implements Handler<RoutingContext> {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final String path = aContext.request().path();
+        final String originalClientIP = aContext.request().headers().get("X_FORWARDED_FOR").split(",")[0];
+        final String[] allowedIPs = myConfig.getString(Config.ALLOWED_IPS).split(",");
 
-        final String receivedQuery =
-                path.concat(aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : "");
-        myTokenProxy.getBearerToken().compose(token -> {
-            return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
-                response.setStatusCode(apiOutput.getInteger(JsonKeys.STATUS_CODE));
-                response.setStatusMessage(apiOutput.getString(JsonKeys.STATUS_MESSAGE));
-                response.putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
-                response.end(apiOutput.getString(JsonKeys.BODY));
+        if (Arrays.asList(allowedIPs).contains(originalClientIP)) {
+            final String receivedQuery = path
+                    .concat(aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : "");
+            myTokenProxy.getBearerToken().compose(token -> {
+                return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
+                    response.setStatusCode(apiOutput.getInteger(JsonKeys.STATUS_CODE));
+                    response.setStatusMessage(apiOutput.getString(JsonKeys.STATUS_MESSAGE));
+                    response.putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
+                    response.end(apiOutput.getString(JsonKeys.BODY));
+                });
+            }).onFailure(failure -> {
+                returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
             });
-        }).onFailure(failure -> {
-            returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
-        });
+        } else {
+            returnError(response, HTTP.FORBIDDEN, LOGGER.getMessage(MessageCodes.LCP_007, originalClientIP));
+        }
     }
 
     /**
