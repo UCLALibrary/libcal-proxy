@@ -17,6 +17,27 @@ public final class Constants {
     public static final String ACCESS_TOKEN = "accessToken";
 
     /**
+     * The IP for an unspecified host.
+     */
+    @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
+    public static final String LOCAL_HOST = "127.0.0.1";
+
+    /**
+     * HTTP 200 status phrase.
+     */
+    public static final String OK = "OK";
+
+    /**
+     * A constant for the break tag.
+     */
+    public static final String BR_TAG = "<br>";
+
+    /**
+     * A regular expression representing end of line character(s).
+     */
+    public static final String EOL_REGEX = "\\r|\\n|\\r\\n";
+
+    /**
      * Constant classes should have private constructors.
      */
     private Constants() {

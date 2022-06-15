@@ -88,8 +88,8 @@ public class LibCalProxyServiceIT {
      */
     @AfterAll
     public final void tearDown(final Vertx aVertx, final VertxTestContext aContext) {
-        myServiceProxy.close().compose(result -> CompositeFuture.all(myService.unregister(), myToken.unregister()))
-                .onSuccess(success -> aContext.completeNow()).onFailure(aContext::failNow);
+        CompositeFuture.all(myService.unregister(), myToken.unregister()).onSuccess(success -> aContext.completeNow())
+                .onFailure(aContext::failNow);
     }
 
     /**

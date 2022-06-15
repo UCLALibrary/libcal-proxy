@@ -1,7 +1,6 @@
 
 package edu.ucla.library.libcal.services;
 
-import io.vertx.codegen.annotations.ProxyClose;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
@@ -49,13 +48,6 @@ public interface LibCalProxyService {
      * @param aQuery The query string passes to the LibCal API
      * @return A Future that resolves to the JSON response from LibCal
      */
-    Future<String> getLibCalOutput(String anOAuthToken, String aQuery);
+    Future<JsonObject> getLibCalOutput(String anOAuthToken, String aQuery);
 
-    /**
-     * Closes the underlying resources used by this service.
-     *
-     * @return A Future that resolves once the resources have been closed
-     */
-    @ProxyClose
-    Future<Void> close();
 }

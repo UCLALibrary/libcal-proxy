@@ -5,6 +5,7 @@ import static edu.ucla.library.libcal.MediaType.APPLICATION_JSON;
 
 import info.freelibrary.util.HTTP;
 
+import edu.ucla.library.libcal.Constants;
 import edu.ucla.library.libcal.JsonKeys;
 
 import io.vertx.core.Handler;
@@ -35,7 +36,7 @@ public class StatusHandler implements Handler<RoutingContext> {
     @Override
     public void handle(final RoutingContext aContext) {
         aContext.response().setStatusCode(HTTP.OK).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString())
-                .end(new JsonObject().put(JsonKeys.STATUS, "ok").encodePrettily());
+                .end(new JsonObject().put(JsonKeys.STATUS, Constants.OK).encodePrettily());
     }
 
     /**

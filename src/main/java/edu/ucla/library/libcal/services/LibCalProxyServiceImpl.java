@@ -2,6 +2,7 @@
 package edu.ucla.library.libcal.services;
 
 import edu.ucla.library.libcal.Config;
+import edu.ucla.library.libcal.JsonKeys;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -9,7 +10,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import io.vertx.ext.web.codec.BodyCodec;
 
 /**
@@ -33,22 +33,24 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
     }
 
     @Override
-    public Future<String> getLibCalOutput(final String anOAuthToken, final String aQuery) {
+    public Future<JsonObject> getLibCalOutput(final String anOAuthToken, final String aQuery) {
         /*
-         * LibCal API returns JSON in variable formats (sometimes objects, sometimes arrays),
-         * so safer to handle API output as string to avoid parsing errors
+         * LibCal API returns JSON in variable formats (sometimes objects, sometimes arrays), so safer to handle API
+         * output as string to avoid parsing errors
          */
-        final Promise<String> promise = Promise.promise();
+        final Promise<JsonObject> promise = Promise.promise();
         final HttpRequest<String> request;
-        final StringBuilder responseBody = new StringBuilder();
+        final JsonObject response = new JsonObject();
         final String baseURL = myConfig.getString(Config.LIBCAL_BASE_URL);
 
         request = myWebClient.getAbs(baseURL.concat(aQuery)).bearerTokenAuthentication(anOAuthToken)
-                .as(BodyCodec.string()).expect(ResponsePredicate.SC_OK).ssl(true);
+                .as(BodyCodec.string()).ssl(true);
         request.send(asyncResult -> {
             if (asyncResult.succeeded()) {
-                responseBody.append(asyncResult.result().body());
-                promise.complete(responseBody.toString());
+                response.put(JsonKeys.STATUS_CODE, asyncResult.result().statusCode());
+                response.put(JsonKeys.STATUS_MESSAGE, asyncResult.result().statusMessage());
+                response.put(JsonKeys.BODY, asyncResult.result().body());
+                promise.complete(response);
             } else {
                 promise.fail(asyncResult.cause());
             }
@@ -57,8 +59,4 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
         return promise.future();
     }
 
-    @Override
-    public Future<Void> close() {
-        return Future.succeededFuture();
-    }
 }
