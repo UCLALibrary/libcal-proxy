@@ -107,7 +107,7 @@ public class ProxyHandlerTest {
                         final HttpResponse<String> response = result.result();
 
                         assertEquals(HTTP.NOT_FOUND, response.statusCode());
-                        assertTrue(response.body().contains("Failure retrieving"));
+                        assertTrue(response.body().contains("Not Found"));
                         aContext.completeNow();
                     } else {
                         aContext.failNow(result.cause());

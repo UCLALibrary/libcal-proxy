@@ -74,13 +74,10 @@ public class ProxyHandler implements Handler<RoutingContext> {
                 path.concat(aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : "");
         myTokenProxy.getBearerToken().compose(token -> {
             return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
-                if (apiOutput.getInteger(JsonKeys.STATUS_CODE) < HTTP.BAD_REQUEST) {
-                    response.setStatusCode(HTTP.OK).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
-                    response.end(apiOutput.getString(JsonKeys.BODY));
-                } else {
-                    returnError(response, apiOutput.getInteger(JsonKeys.STATUS_CODE),
-                            apiOutput.getString(JsonKeys.STATUS_MESSAGE));
-                }
+                response.setStatusCode(apiOutput.getInteger(JsonKeys.STATUS_CODE));
+                response.setStatusMessage(apiOutput.getString(JsonKeys.STATUS_MESSAGE));
+                response.putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
+                response.end(apiOutput.getString(JsonKeys.BODY));
             });
         }).onFailure(failure -> {
             returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
