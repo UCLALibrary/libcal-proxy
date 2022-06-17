@@ -47,6 +47,11 @@ public class ProxyHandlerTest {
     private static String DEFAULT_PORT = "8888";
 
     /**
+     * The default port that the application listens on.
+     */
+    private static String GOOD_IPS = "127.0.0.1,123.456.789.0";
+
+    /**
      * Sets up the test.
      *
      * @param aVertx A Vert.x instance
@@ -75,8 +80,8 @@ public class ProxyHandlerTest {
         final WebClient webClient = WebClient.create(aVertx);
         final int port = Integer.parseInt(DEFAULT_PORT);
 
-        webClient.get(port, Constants.LOCAL_HOST, requestPath).expect(ResponsePredicate.SC_SUCCESS)
-                .as(BodyCodec.string()).send(result -> {
+        webClient.get(port, Constants.LOCAL_HOST, requestPath).putHeader(Constants.X_FORWARDED_FOR, GOOD_IPS)
+                .expect(ResponsePredicate.SC_SUCCESS).as(BodyCodec.string()).send(result -> {
                     if (result.succeeded()) {
                         final HttpResponse<String> response = result.result();
 
@@ -101,16 +106,44 @@ public class ProxyHandlerTest {
         final WebClient webClient = WebClient.create(aVertx);
         final int port = Integer.parseInt(DEFAULT_PORT);
 
-        webClient.get(port, Constants.LOCAL_HOST, badRequestPath).as(BodyCodec.string()).send(result -> {
-            if (result.succeeded()) {
-                final HttpResponse<String> response = result.result();
+        webClient.get(port, Constants.LOCAL_HOST, badRequestPath).putHeader(Constants.X_FORWARDED_FOR, GOOD_IPS)
+                .as(BodyCodec.string()).send(result -> {
+                    if (result.succeeded()) {
+                        final HttpResponse<String> response = result.result();
 
-                assertEquals(HTTP.NOT_FOUND, response.statusCode());
-                assertTrue(response.body().contains("Not Found"));
-                aContext.completeNow();
-            } else {
-                aContext.failNow(result.cause());
-            }
-        });
+                        assertEquals(HTTP.NOT_FOUND, response.statusCode());
+                        assertTrue(response.body().contains("Not Found"));
+                        aContext.completeNow();
+                    } else {
+                        aContext.failNow(result.cause());
+                    }
+                });
+    }
+
+    /**
+     * Tests that proxy handler blocks bad IPs.
+     *
+     * @param aVertx A Vert.x instance
+     * @param aContext A test context
+     */
+    @Test
+    public void testBadClientIP(final Vertx aVertx, final VertxTestContext aContext) {
+        final String requestPath = "/api/1.1/hours/2572";
+	final String badIP = "10.10.10.1";
+        final WebClient webClient = WebClient.create(aVertx);
+        final int port = Integer.parseInt(DEFAULT_PORT);
+
+        webClient.get(port, Constants.LOCAL_HOST, requestPath).putHeader(Constants.X_FORWARDED_FOR, badIP)
+                .as(BodyCodec.string()).send(result -> {
+                    if (result.succeeded()) {
+                        final HttpResponse<String> response = result.result();
+
+                        assertEquals(HTTP.FORBIDDEN, response.statusCode());
+                        assertTrue(response.body().contains("unauthorized"));
+                        aContext.completeNow();
+                    } else {
+                        aContext.failNow(result.cause());
+                    }
+                });
     }
 }

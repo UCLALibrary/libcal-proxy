@@ -2,6 +2,7 @@
 package edu.ucla.library.libcal.handlers;
 
 import static edu.ucla.library.libcal.MediaType.APPLICATION_JSON;
+import static info.freelibrary.util.Constants.COMMA;
 import static info.freelibrary.util.Constants.EMPTY;
 import static info.freelibrary.util.Constants.SLASH;
 
@@ -29,7 +30,6 @@ import java.util.Arrays;
 /**
  * A handler that processes status information requests.
  */
-@SuppressWarnings("PMD.AvoidCatchingGenericException")
 public class ProxyHandler implements Handler<RoutingContext> {
 
     /**
@@ -41,11 +41,6 @@ public class ProxyHandler implements Handler<RoutingContext> {
      * A constant for the "?" to lead an HTTP query string.
      */
     private static final String QUESTION_MARK = "?";
-
-    /**
-     * The name of the HTTP request header used by the reverse proxy to carry the client IP address.
-     */
-    private static final String X_FORWARDED_FOR = "X-Forwarded-For";
 
     /**
      * The handler's copy of the Vert.x instance.
@@ -71,6 +66,7 @@ public class ProxyHandler implements Handler<RoutingContext> {
      * Creates a handler that returns a status response.
      *
      * @param aVertx A Vert.x instance
+     * @param aConfig Application config stored in JSON
      */
     public ProxyHandler(final Vertx aVertx, final JsonObject aConfig) {
         myVertx = aVertx;
@@ -83,8 +79,8 @@ public class ProxyHandler implements Handler<RoutingContext> {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final String path = aContext.request().path();
-        final String originalClientIP = aContext.request().headers().get("X_FORWARDED_FOR").split(",")[0];
-        final String[] allowedIPs = myConfig.getString(Config.ALLOWED_IPS).split(",");
+        final String originalClientIP = aContext.request().headers().get(Constants.X_FORWARDED_FOR).split(COMMA)[0];
+        final String[] allowedIPs = myConfig.getString(Config.ALLOWED_IPS).split(COMMA);
 
         if (Arrays.asList(allowedIPs).contains(originalClientIP)) {
             final String receivedQuery = path
