@@ -83,8 +83,8 @@ public class ProxyHandler implements Handler<RoutingContext> {
         final String[] allowedIPs = myConfig.getString(Config.ALLOWED_IPS).split(COMMA);
 
         if (Arrays.asList(allowedIPs).contains(originalClientIP)) {
-            final String receivedQuery = path
-                    .concat(aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : "");
+            final String receivedQuery = path.concat(
+                    aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
             myTokenProxy.getBearerToken().compose(token -> {
                 return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
                     response.setStatusCode(apiOutput.getInteger(JsonKeys.STATUS_CODE));

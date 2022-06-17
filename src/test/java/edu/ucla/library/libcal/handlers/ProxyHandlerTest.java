@@ -47,9 +47,14 @@ public class ProxyHandlerTest {
     private static String DEFAULT_PORT = "8888";
 
     /**
-     * The default port that the application listens on.
+     * The fake client and proxy IPs in X-FORWARDED header.
      */
-    private static String GOOD_IPS = "127.0.0.1,123.456.789.0";
+    private static String GOOD_FORWARDS = "127.0.0.1,123.456.789.0";
+
+    /**
+     * A legit LibCal API call
+     */
+    private static String REQUEST_PATH = "/api/1.1/hours/2572";
 
     /**
      * Sets up the test.
@@ -76,11 +81,10 @@ public class ProxyHandlerTest {
      */
     @Test
     public void testGetOutput(final Vertx aVertx, final VertxTestContext aContext) {
-        final String requestPath = "/api/1.1/hours/2572";
         final WebClient webClient = WebClient.create(aVertx);
         final int port = Integer.parseInt(DEFAULT_PORT);
 
-        webClient.get(port, Constants.LOCAL_HOST, requestPath).putHeader(Constants.X_FORWARDED_FOR, GOOD_IPS)
+        webClient.get(port, Constants.LOCAL_HOST, REQUEST_PATH).putHeader(Constants.X_FORWARDED_FOR, GOOD_FORWARDS)
                 .expect(ResponsePredicate.SC_SUCCESS).as(BodyCodec.string()).send(result -> {
                     if (result.succeeded()) {
                         final HttpResponse<String> response = result.result();
@@ -106,7 +110,7 @@ public class ProxyHandlerTest {
         final WebClient webClient = WebClient.create(aVertx);
         final int port = Integer.parseInt(DEFAULT_PORT);
 
-        webClient.get(port, Constants.LOCAL_HOST, badRequestPath).putHeader(Constants.X_FORWARDED_FOR, GOOD_IPS)
+        webClient.get(port, Constants.LOCAL_HOST, badRequestPath).putHeader(Constants.X_FORWARDED_FOR, GOOD_FORWARDS)
                 .as(BodyCodec.string()).send(result -> {
                     if (result.succeeded()) {
                         final HttpResponse<String> response = result.result();
@@ -128,12 +132,11 @@ public class ProxyHandlerTest {
      */
     @Test
     public void testBadClientIP(final Vertx aVertx, final VertxTestContext aContext) {
-        final String requestPath = "/api/1.1/hours/2572";
-	final String badIP = "10.10.10.1";
+        final String badForward = "10.10.10.1,10.10.10.2";
         final WebClient webClient = WebClient.create(aVertx);
         final int port = Integer.parseInt(DEFAULT_PORT);
 
-        webClient.get(port, Constants.LOCAL_HOST, requestPath).putHeader(Constants.X_FORWARDED_FOR, badIP)
+        webClient.get(port, Constants.LOCAL_HOST, REQUEST_PATH).putHeader(Constants.X_FORWARDED_FOR, badForward)
                 .as(BodyCodec.string()).send(result -> {
                     if (result.succeeded()) {
                         final HttpResponse<String> response = result.result();
