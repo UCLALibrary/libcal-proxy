@@ -132,7 +132,7 @@ public class ProxyHandlerTest {
      */
     @Test
     public void testBadClientIP(final Vertx aVertx, final VertxTestContext aContext) {
-        final String badForward = "10.10.10.1,10.10.10.2";
+        final String badForward = "10.10.10.3,10.10.10.4";
         final WebClient webClient = WebClient.create(aVertx);
         final int port = Integer.parseInt(DEFAULT_PORT);
 
