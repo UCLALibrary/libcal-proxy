@@ -41,6 +41,7 @@
     <docker.plugin.version>0.39.1</docker.plugin.version>
     <deploy.plugin.version>2.8.2</deploy.plugin.version>
     <jar.plugin.version>3.2.2</jar.plugin.version>
+    <cidr.ip.version>1.0.1</cidr.ip.version>
 
     <!-- Test dependency versions -->
     <junit.version>5.8.0-M1</junit.version>
@@ -77,7 +78,7 @@
     <libcal.auth.retry.count></libcal.auth.retry.count>
     <libcal.auth.retry.delay></libcal.auth.retry.delay>
     <libcal.auth.expires_in.padding></libcal.auth.expires_in.padding>
-    <allowed.ips></allowed.ips>
+    <libcal.allowed.ips></libcal.allowed.ips>
 
   </properties>
 
@@ -144,6 +145,11 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-auth-oauth2</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.veqryn</groupId>
+      <artifactId>cidr-ip-trie</artifactId>
+      <version>${cidr.ip.version}</version>
     </dependency>
 
     <!-- Below is a dependency that needs updating due to security issue (may be able to remove in future) -->
@@ -290,7 +296,7 @@
             <LIBCAL_AUTH_RETRY_COUNT>${libcal.auth.retry.count}</LIBCAL_AUTH_RETRY_COUNT>
             <LIBCAL_AUTH_RETRY_DELAY>${libcal.auth.retry.delay}</LIBCAL_AUTH_RETRY_DELAY>
             <LIBCAL_AUTH_EXPIRES_IN_PADDING>${libcal.auth.expires_in.padding}</LIBCAL_AUTH_EXPIRES_IN_PADDING>
-            <ALLOWED_IPS>${allowed.ips}</ALLOWED_IPS>
+            <LIBCAL_ALLOWED_IPS>${libcal.allowed.ips}</LIBCAL_ALLOWED_IPS>
           </environmentVariables>
         </configuration>
       </plugin>
@@ -311,7 +317,7 @@
             <LIBCAL_AUTH_RETRY_COUNT>${libcal.auth.retry.count}</LIBCAL_AUTH_RETRY_COUNT>
             <LIBCAL_AUTH_RETRY_DELAY>${libcal.auth.retry.delay}</LIBCAL_AUTH_RETRY_DELAY>
             <LIBCAL_AUTH_EXPIRES_IN_PADDING>${libcal.auth.expires_in.padding}</LIBCAL_AUTH_EXPIRES_IN_PADDING>
-            <ALLOWED_IPS>${allowed.ips}</ALLOWED_IPS>
+            <LIBCAL_ALLOWED_IPS>${libcal.allowed.ips}</LIBCAL_ALLOWED_IPS>
           </environmentVariables>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
@@ -380,7 +386,7 @@
                   <LIBCAL_AUTH_RETRY_COUNT>${libcal.auth.retry.count}</LIBCAL_AUTH_RETRY_COUNT>
                   <LIBCAL_AUTH_RETRY_DELAY>${libcal.auth.retry.delay}</LIBCAL_AUTH_RETRY_DELAY>
                   <LIBCAL_AUTH_EXPIRES_IN_PADDING>${libcal.auth.expires_in.padding}</LIBCAL_AUTH_EXPIRES_IN_PADDING>
-                  <ALLOWED_IPS>${allowed.ips}</ALLOWED_IPS>
+                  <LIBCAL_ALLOWED_IPS>${libcal.allowed.ips}</LIBCAL_ALLOWED_IPS>
                 </env>
                 <!-- Test to make sure the server started as expected -->
                 <wait>

@@ -68,7 +68,7 @@ public final class Config {
     /**
      * The set/range of IPs which can call the proxy service.
      */
-    public static final String ALLOWED_IPS = "ALLOWED_IPS";
+    public static final String ALLOWED_IPS = "LIBCAL_ALLOWED_IPS";
 
     /**
      * Constant classes should have private constructors.
