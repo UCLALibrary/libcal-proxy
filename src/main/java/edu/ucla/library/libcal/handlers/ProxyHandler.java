@@ -82,10 +82,8 @@ public class ProxyHandler implements Handler<RoutingContext> {
         final HttpServerResponse response = aContext.response();
         final String path = aContext.request().path();
         final String originalClientIP = aContext.request().remoteAddress().hostAddress();
-        // final String[] allowedIPs = myConfig.getString(Config.ALLOWED_IPS).split(COMMA);
         final Cidr4Trie<String> allowedIPs = buildAllowedNetwork(myConfig.getString(Config.ALLOWED_IPS).split(COMMA));
 
-        // if (Arrays.asList(allowedIPs).contains(originalClientIP)) {
         if (isOnNetwork(new Ip4(originalClientIP), allowedIPs)) {
             final String receivedQuery = path.concat(
                     aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
