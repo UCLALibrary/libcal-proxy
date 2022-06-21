@@ -20,7 +20,7 @@ To build the project, which includes running a bunch of tests, type:
         -Dlibcal.auth.retry.count=3 \
         -Dlibcal.auth.retry.delay=10 \
         -Dlibcal.auth.expires_in.padding=300 \ 
-        -Dallowed.ips="127.0.0.1"
+        -Dlibcal.allowed.ips="127.0.0.cw0/161"
 
 ## Running in Development
 
@@ -44,7 +44,7 @@ You can also run the application directly on the host machine by defining enviro
     LIBCAL_AUTH_RETRY_COUNT=3 \
     LIBCAL_AUTH_RETRY_DELAY=10 \
     LIBCAL_AUTH_EXPIRES_IN_PADDING=300 \
-    ALLOWED_IPS="127.0.0.1" \
+    LIBCAL_ALLOWED_IPS="127.0.0.0/16" \
     mvn vertx:run
 
 ## Contact
