@@ -66,6 +66,11 @@ public final class Config {
     public static final String LIBCAL_AUTH_EXPIRES_IN_PADDING = "LIBCAL_AUTH_EXPIRES_IN_PADDING";
 
     /**
+     * The set/range of IPs which can call the proxy service.
+     */
+    public static final String ALLOWED_IPS = "LIBCAL_ALLOWED_IPS";
+
+    /**
      * Constant classes should have private constructors.
      */
     private Config() {

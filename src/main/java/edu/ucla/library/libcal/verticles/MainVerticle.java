@@ -25,6 +25,7 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.serviceproxy.ServiceBinder;
@@ -106,7 +107,8 @@ public class MainVerticle extends AbstractVerticle {
 
             // Empty-path router to handle the variable-format calls to ProxyHandler
             router = routeBuilder.createRouter();
-            router.route().handler(new ProxyHandler(getVertx()));
+            router.allowForward(AllowForwardHeaders.X_FORWARD);
+            router.route().handler(new ProxyHandler(getVertx(), aConfig));
 
             myServer = getVertx().createHttpServer(serverOptions).requestHandler(router);
 
