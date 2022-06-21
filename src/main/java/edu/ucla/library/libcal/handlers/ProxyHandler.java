@@ -7,7 +7,6 @@ import static info.freelibrary.util.Constants.EMPTY;
 import static info.freelibrary.util.Constants.SLASH;
 
 import com.github.veqryn.collect.Cidr4Trie;
-import com.github.veqryn.collect.Trie;
 import com.github.veqryn.net.Cidr4;
 import com.github.veqryn.net.Ip4;
 
@@ -29,8 +28,6 @@ import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
-
-import java.util.Arrays;
 
 /**
  * A handler that processes status information requests.
@@ -84,11 +81,11 @@ public class ProxyHandler implements Handler<RoutingContext> {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final String path = aContext.request().path();
-        final String originalClientIP =  aContext.request().remoteAddress().hostAddress();
-        //final String[] allowedIPs = myConfig.getString(Config.ALLOWED_IPS).split(COMMA);
+        final String originalClientIP = aContext.request().remoteAddress().hostAddress();
+        // final String[] allowedIPs = myConfig.getString(Config.ALLOWED_IPS).split(COMMA);
         final Cidr4Trie<String> allowedIPs = buildAllowedNetwork(myConfig.getString(Config.ALLOWED_IPS).split(COMMA));
 
-        //if (Arrays.asList(allowedIPs).contains(originalClientIP)) {
+        // if (Arrays.asList(allowedIPs).contains(originalClientIP)) {
         if (isOnNetwork(new Ip4(originalClientIP), allowedIPs)) {
             final String receivedQuery = path.concat(
                     aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
@@ -139,8 +136,8 @@ public class ProxyHandler implements Handler<RoutingContext> {
      * @param anIpArray An array of IP addresses/ranges
      * @return The converted collection of allowed subnets in network
      */
-    private Cidr4Trie<String> buildAllowedNetwork(final String[] anIpArray) {
-       final Cidr4Trie<String> allowedNetwork = new Cidr4Trie<>();
+    private Cidr4Trie<String> buildAllowedNetwork(final String... anIpArray) {
+        final Cidr4Trie<String> allowedNetwork = new Cidr4Trie<>();
         for (final String address : anIpArray) {
             allowedNetwork.put(new Cidr4(address), address);
         }
