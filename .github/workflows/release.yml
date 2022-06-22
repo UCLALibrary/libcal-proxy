@@ -50,3 +50,4 @@ jobs:
             -Dlibcal.client2.secret=${{ secrets.LIBCAL_CLIENT2_SECRET }}
             -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token"
             -Dlibcal.base.url="https://calendar.library.ucla.edu"
+            -Dlibcal.allowed.ips="127.0.0.0/16,10.10.10.0/27"
