@@ -8,6 +8,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.RequestBody;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
@@ -34,10 +35,6 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
 
     @Override
     public Future<JsonObject> getLibCalOutput(final String anOAuthToken, final String aQuery) {
-        /*
-         * LibCal API returns JSON in variable formats (sometimes objects, sometimes arrays), so safer to handle API
-         * output as string to avoid parsing errors
-         */
         final Promise<JsonObject> promise = Promise.promise();
         final HttpRequest<String> request;
         final JsonObject response = new JsonObject();
@@ -59,4 +56,26 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
         return promise.future();
     }
 
+    @Override
+    public Future<JsonObject> postLibCalOutput(String anOAuthToken, String aQuery, JsonObject aBody) {
+        final Promise<JsonObject> promise = Promise.promise();
+        final HttpRequest<String> request;
+        final JsonObject response = new JsonObject();
+        final String baseURL = myConfig.getString(Config.LIBCAL_BASE_URL);
+
+        request = myWebClient.postAbs(baseURL.concat(aQuery)).bearerTokenAuthentication(anOAuthToken)
+                .as(BodyCodec.string()).ssl(true);
+        request.sendJsonObject(aBody, asyncResult -> {
+            if (asyncResult.succeeded()) {
+                response.put(JsonKeys.STATUS_CODE, asyncResult.result().statusCode());
+                response.put(JsonKeys.STATUS_MESSAGE, asyncResult.result().statusMessage());
+                response.put(JsonKeys.BODY, asyncResult.result().body());
+                promise.complete(response);
+            } else {
+                promise.fail(asyncResult.cause());
+            }
+        });
+
+        return promise.future();
+    }
 }
