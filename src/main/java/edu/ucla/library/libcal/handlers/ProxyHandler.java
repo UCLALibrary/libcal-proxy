@@ -25,6 +25,7 @@ import info.freelibrary.util.LoggerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -43,6 +44,16 @@ public class ProxyHandler implements Handler<RoutingContext> {
      * A constant for the "?" to lead an HTTP query string.
      */
     private static final String QUESTION_MARK = "?";
+
+    /**
+     * A constant for the HTTP GET method name.
+     */
+    private static final String GET = "GET";
+
+    /**
+     * A constant for the HTTP POST methos name.
+     */
+    private static final String POST = "POST";
 
     /**
      * The handler's copy of the Vert.x instance.
@@ -81,6 +92,7 @@ public class ProxyHandler implements Handler<RoutingContext> {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final String path = aContext.request().path();
+        final String method = aContext.request().method().name();
         final String originalClientIP = aContext.request().remoteAddress().hostAddress();
         final Cidr4Trie<String> allowedIPs = buildAllowedNetwork(myConfig.getString(Config.ALLOWED_IPS).split(COMMA));
 
@@ -88,12 +100,21 @@ public class ProxyHandler implements Handler<RoutingContext> {
             final String receivedQuery = path.concat(
                     aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
             myTokenProxy.getBearerToken().compose(token -> {
-                return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
+                if (method.equals(GET)) {
+                    return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
+                        returnSuccess(response, apiOutput);
+                    });
+		} else {
+                    return myApiProxy.postLibCalOutput(token, SLASH.concat(receivedQuery), aContext.body().asJsonObject() ).onSuccess(apiOutput -> {
+                        returnSuccess(response, apiOutput);
+                    });
+		}
+                /*return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
                     response.setStatusCode(apiOutput.getInteger(JsonKeys.STATUS_CODE));
                     response.setStatusMessage(apiOutput.getString(JsonKeys.STATUS_MESSAGE));
                     response.putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
                     response.end(apiOutput.getString(JsonKeys.BODY));
-                });
+                });*/
             }).onFailure(failure -> {
                 returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
             });
@@ -109,6 +130,19 @@ public class ProxyHandler implements Handler<RoutingContext> {
      */
     public Vertx getVertx() {
         return myVertx;
+    }
+
+    /**
+     * Return LibCal response to caller.
+     *
+     * @param aResponse A HTTP response
+     * @param aContent JSON content returned from LibCal API
+     */
+    private void returnSuccess(final HttpServerResponse aResponse, final JsonObject aContent) {
+        aResponse.setStatusCode(aContent.getInteger(JsonKeys.STATUS_CODE));
+        aResponse.setStatusMessage(aContent.getString(JsonKeys.STATUS_MESSAGE));
+        aResponse.putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
+        aResponse.end(aContent.getString(JsonKeys.BODY));
     }
 
     /**
