@@ -12,16 +12,20 @@ import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.Constants;
 import edu.ucla.library.libcal.MessageCodes;
 import edu.ucla.library.libcal.verticles.MainVerticle;
+import edu.ucla.library.libcal.MediaType;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.predicate.ResponsePredicate;
@@ -116,7 +120,37 @@ public class ProxyHandlerTest {
                         final HttpResponse<String> response = result.result();
 
                         assertEquals(HTTP.NOT_FOUND, response.statusCode());
-                        assertTrue(response.body().contains("Not Found"));
+                        assertTrue(response.headers().get(HttpHeaders.CONTENT_TYPE)
+                                .contains(MediaType.TEXT_HTML.toString()));
+                        aContext.completeNow();
+                    } else {
+                        aContext.failNow(result.cause());
+                    }
+                });
+    }
+
+    /**
+     * Tests that a client can make requests to paths that aren't part of the LibCal API, but are still valid
+     * application routes.
+     *
+     * @param aPath The request path
+     * @param aVertx A Vert.x instance
+     * @param aContext A test context
+     */
+    @ParameterizedTest
+    @ValueSource(strings = { "/", "/admin/home" })
+    public void testNonApiEndpointPath(final String aPath, final Vertx aVertx, final VertxTestContext aContext) {
+        final WebClient webClient = WebClient.create(aVertx);
+        final int port = Integer.parseInt(DEFAULT_PORT);
+
+        webClient.get(port, Constants.LOCAL_HOST, aPath).putHeader(Constants.X_FORWARDED_FOR, GOOD_FORWARDS)
+                .as(BodyCodec.string()).send(result -> {
+                    if (result.succeeded()) {
+                        final HttpResponse<String> response = result.result();
+
+                        assertEquals(HTTP.OK, response.statusCode());
+                        assertTrue(response.headers().get(HttpHeaders.CONTENT_TYPE)
+                                .contains(MediaType.TEXT_HTML.toString()));
                         aContext.completeNow();
                     } else {
                         aContext.failNow(result.cause());
