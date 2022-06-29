@@ -46,7 +46,7 @@ public interface LibCalProxyService {
      *
      * @param anOAuthToken An OAuth bearer token
      * @param aQuery The query string passes to the LibCal API
-     * @return A Future that resolves to the JSON response from LibCal
+     * @return A Future that resolves to the HTTP response from LibCal represented as a JsonObject
      */
     Future<JsonObject> getLibCalOutput(String anOAuthToken, String aQuery);
 

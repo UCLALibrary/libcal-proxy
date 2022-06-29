@@ -14,6 +14,7 @@ import info.freelibrary.util.HTTP;
 
 import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.Constants;
+import edu.ucla.library.libcal.HttpResponseMapper;
 import edu.ucla.library.libcal.JsonKeys;
 import edu.ucla.library.libcal.MessageCodes;
 import edu.ucla.library.libcal.services.LibCalProxyService;
@@ -27,6 +28,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.RoutingContext;
 
 /**
@@ -65,6 +67,11 @@ public class ProxyHandler implements Handler<RoutingContext> {
     private final OAuthTokenService myTokenProxy;
 
     /**
+     * The HTTP response deserializer.
+     */
+    private final HttpResponseMapper myMapper = new HttpResponseMapper();
+
+    /**
      * Creates a handler that returns a status response.
      *
      * @param aVertx A Vert.x instance
@@ -89,10 +96,15 @@ public class ProxyHandler implements Handler<RoutingContext> {
                     aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
             myTokenProxy.getBearerToken().compose(token -> {
                 return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
-                    response.setStatusCode(apiOutput.getInteger(JsonKeys.STATUS_CODE));
-                    response.setStatusMessage(apiOutput.getString(JsonKeys.STATUS_MESSAGE));
-                    response.putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
-                    response.end(apiOutput.getString(JsonKeys.BODY));
+                    final HttpResponse<String> libcalResponse = myMapper.decode(apiOutput);
+
+                    response.setStatusCode(libcalResponse.statusCode());
+                    response.setStatusMessage(libcalResponse.statusMessage());
+
+                    libcalResponse.headers().forEach(response::putHeader);
+                    libcalResponse.trailers().forEach(response::putTrailer);
+
+                    response.end(libcalResponse.body());
                 });
             }).onFailure(failure -> {
                 returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
