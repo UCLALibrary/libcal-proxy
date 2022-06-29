@@ -1,0 +1,9 @@
+{ 
+    "registration_type": "in-person", 
+    "form": { 
+        "first_name": "John", 
+        "last_name": "Smith", 
+        "email": "this@that.com", 
+        "q3": "Staff" 
+    } 
+}

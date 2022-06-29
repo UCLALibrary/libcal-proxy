@@ -104,17 +104,20 @@ public class ProxyHandler implements Handler<RoutingContext> {
                     return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
                         returnSuccess(response, apiOutput);
                     });
-		} else {
-                    return myApiProxy.postLibCalOutput(token, SLASH.concat(receivedQuery), aContext.body().asJsonObject() ).onSuccess(apiOutput -> {
-                        returnSuccess(response, apiOutput);
-                    });
-		}
-                /*return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
-                    response.setStatusCode(apiOutput.getInteger(JsonKeys.STATUS_CODE));
-                    response.setStatusMessage(apiOutput.getString(JsonKeys.STATUS_MESSAGE));
-                    response.putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
-                    response.end(apiOutput.getString(JsonKeys.BODY));
-                });*/
+                } else {
+                    return myApiProxy
+                            .postLibCalOutput(token, SLASH.concat(receivedQuery), aContext.body().asJsonObject())
+                            .onSuccess(apiOutput -> {
+                                returnSuccess(response, apiOutput);
+                            });
+                }
+                /*
+                 * return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
+                 * response.setStatusCode(apiOutput.getInteger(JsonKeys.STATUS_CODE));
+                 * response.setStatusMessage(apiOutput.getString(JsonKeys.STATUS_MESSAGE));
+                 * response.putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
+                 * response.end(apiOutput.getString(JsonKeys.BODY)); });
+                 */
             }).onFailure(failure -> {
                 returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
             });
