@@ -5,7 +5,6 @@ import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.HttpResponseMapper;
 
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpRequest;
@@ -23,9 +22,9 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
     private final WebClient myWebClient;
 
     /**
-     * App config in Json format.
+     * The LibCal base URL.
      */
-    private final JsonObject myConfig;
+    private final String myLibCalBaseURL;
 
     /**
      * The HTTP response serializer.
@@ -33,7 +32,7 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
     private final HttpResponseMapper myMapper = new HttpResponseMapper();
 
     LibCalProxyServiceImpl(final Vertx aVertx, final JsonObject aConfig) {
-        myConfig = aConfig;
+        myLibCalBaseURL = aConfig.getString(Config.LIBCAL_BASE_URL);
         myWebClient = WebClient.create(aVertx);
     }
 
@@ -43,20 +42,9 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
          * LibCal API returns JSON in variable formats (sometimes objects, sometimes arrays), so safer to handle API
          * output as string to avoid parsing errors
          */
-        final Promise<JsonObject> promise = Promise.promise();
-        final String baseURL = myConfig.getString(Config.LIBCAL_BASE_URL);
-        final HttpRequest<String> request = myWebClient.getAbs(baseURL.concat(aQuery))
+        final HttpRequest<String> request = myWebClient.getAbs(myLibCalBaseURL.concat(aQuery))
                 .bearerTokenAuthentication(anOAuthToken).as(BodyCodec.string()).ssl(true);
 
-        request.send(asyncResult -> {
-            if (asyncResult.succeeded()) {
-                promise.complete(myMapper.encode(asyncResult.result()));
-            } else {
-                promise.fail(asyncResult.cause());
-            }
-        });
-
-        return promise.future();
+        return request.send().map(myMapper::encode);
     }
-
 }

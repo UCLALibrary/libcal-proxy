@@ -28,7 +28,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.RoutingContext;
 
 /**
@@ -95,17 +94,15 @@ public class ProxyHandler implements Handler<RoutingContext> {
             final String receivedQuery = path.concat(
                     aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
             myTokenProxy.getBearerToken().compose(token -> {
-                return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
-                    final HttpResponse<String> libcalResponse = myMapper.decode(apiOutput);
+                return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).map(myMapper::decode);
+            }).onSuccess(libcalResponse -> {
+                response.setStatusCode(libcalResponse.statusCode());
+                response.setStatusMessage(libcalResponse.statusMessage());
 
-                    response.setStatusCode(libcalResponse.statusCode());
-                    response.setStatusMessage(libcalResponse.statusMessage());
+                libcalResponse.headers().forEach(response::putHeader);
+                libcalResponse.trailers().forEach(response::putTrailer);
 
-                    libcalResponse.headers().forEach(response::putHeader);
-                    libcalResponse.trailers().forEach(response::putTrailer);
-
-                    response.end(libcalResponse.body());
-                });
+                response.end(libcalResponse.body());
             }).onFailure(failure -> {
                 returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
             });
