@@ -27,6 +27,7 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.serviceproxy.ServiceBinder;
 
@@ -101,6 +102,7 @@ public class MainVerticle extends AbstractVerticle {
         return RouterBuilder.create(vertx, getRouterSpec()).compose(routeBuilder -> {
             final HttpServerOptions serverOptions = new HttpServerOptions().setPort(port).setHost(host);
             final Router router;
+            final BodyHandler postBodyHandler = BodyHandler.create();
 
             // Associate handlers with operation IDs from the application's OpenAPI specification
             routeBuilder.operation(Op.GET_STATUS).handler(new StatusHandler(getVertx()));
@@ -108,7 +110,8 @@ public class MainVerticle extends AbstractVerticle {
             // Empty-path router to handle the variable-format calls to ProxyHandler
             router = routeBuilder.createRouter();
             router.allowForward(AllowForwardHeaders.X_FORWARD);
-            router.route().handler(new ProxyHandler(getVertx(), aConfig));
+            // Add body handler so we can retirve incoming body from Apps client request
+            router.route().handler(postBodyHandler).handler(new ProxyHandler(getVertx(), aConfig));
 
             myServer = getVertx().createHttpServer(serverOptions).requestHandler(router);
 

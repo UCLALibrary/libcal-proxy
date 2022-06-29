@@ -42,12 +42,22 @@ public interface LibCalProxyService {
     }
 
     /**
-     * Retrieves the output of a LibCal API call.
+     * Retrieves the output of a GET LibCal API call.
      *
      * @param anOAuthToken An OAuth bearer token
      * @param aQuery The query string passes to the LibCal API
      * @return A Future that resolves to the HTTP response from LibCal represented as a JsonObject
      */
     Future<JsonObject> getLibCalOutput(String anOAuthToken, String aQuery);
+
+    /**
+     * Retrieves the output of a POST LibCal API call.
+     *
+     * @param anOAuthToken An OAuth bearer token
+     * @param aQuery The query string passed to the LibCal API
+     * @param aBody The original request body, passed along to the LibCal API
+     * @return A Future that resolves to the JSON response from LibCal
+     */
+    Future<JsonObject> postLibCalOutput(String anOAuthToken, String aQuery, JsonObject aBody);
 
 }

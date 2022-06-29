@@ -47,4 +47,12 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
 
         return request.send().map(myMapper::encode);
     }
+
+    @Override
+    public Future<JsonObject> postLibCalOutput(String anOAuthToken, String aQuery, JsonObject aBody) {
+        final HttpRequest<String> request = myWebClient.postAbs(myLibCalBaseURL.concat(aQuery))
+                .bearerTokenAuthentication(anOAuthToken).as(BodyCodec.string()).ssl(true);
+
+        return request.sendJsonObject(aBody).map(myMapper::encode);
+    }
 }
