@@ -4,7 +4,6 @@ package edu.ucla.library.libcal.handlers;
 import static edu.ucla.library.libcal.MediaType.APPLICATION_JSON;
 import static info.freelibrary.util.Constants.COMMA;
 import static info.freelibrary.util.Constants.EMPTY;
-import static info.freelibrary.util.Constants.SLASH;
 
 import com.github.veqryn.collect.Cidr4Trie;
 import com.github.veqryn.net.Cidr4;
@@ -94,7 +93,7 @@ public class ProxyHandler implements Handler<RoutingContext> {
             final String receivedQuery = path.concat(
                     aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
             myTokenProxy.getBearerToken().compose(token -> {
-                return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).map(myMapper::decode);
+                return myApiProxy.getLibCalOutput(token, receivedQuery).map(myMapper::decode);
             }).onSuccess(libcalResponse -> {
                 final String body = libcalResponse.body();
 
