@@ -4,7 +4,6 @@ package edu.ucla.library.libcal.handlers;
 import static edu.ucla.library.libcal.MediaType.APPLICATION_JSON;
 import static info.freelibrary.util.Constants.COMMA;
 import static info.freelibrary.util.Constants.EMPTY;
-import static info.freelibrary.util.Constants.SLASH;
 
 import com.github.veqryn.collect.Cidr4Trie;
 import com.github.veqryn.net.Cidr4;
@@ -14,6 +13,7 @@ import info.freelibrary.util.HTTP;
 
 import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.Constants;
+import edu.ucla.library.libcal.HttpResponseMapper;
 import edu.ucla.library.libcal.JsonKeys;
 import edu.ucla.library.libcal.MessageCodes;
 import edu.ucla.library.libcal.services.LibCalProxyService;
@@ -65,6 +65,11 @@ public class ProxyHandler implements Handler<RoutingContext> {
     private final OAuthTokenService myTokenProxy;
 
     /**
+     * The HTTP response deserializer.
+     */
+    private final HttpResponseMapper myMapper = new HttpResponseMapper();
+
+    /**
      * Creates a handler that returns a status response.
      *
      * @param aVertx A Vert.x instance
@@ -88,12 +93,21 @@ public class ProxyHandler implements Handler<RoutingContext> {
             final String receivedQuery = path.concat(
                     aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
             myTokenProxy.getBearerToken().compose(token -> {
-                return myApiProxy.getLibCalOutput(token, SLASH.concat(receivedQuery)).onSuccess(apiOutput -> {
-                    response.setStatusCode(apiOutput.getInteger(JsonKeys.STATUS_CODE));
-                    response.setStatusMessage(apiOutput.getString(JsonKeys.STATUS_MESSAGE));
-                    response.putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString());
-                    response.end(apiOutput.getString(JsonKeys.BODY));
-                });
+                return myApiProxy.getLibCalOutput(token, receivedQuery).map(myMapper::decode);
+            }).onSuccess(libcalResponse -> {
+                final String body = libcalResponse.body();
+
+                response.setStatusCode(libcalResponse.statusCode());
+                response.setStatusMessage(libcalResponse.statusMessage());
+
+                libcalResponse.headers().forEach(response::putHeader);
+                libcalResponse.trailers().forEach(response::putTrailer);
+
+                if (body != null) {
+                    response.end(body);
+                } else {
+                    response.end();
+                }
             }).onFailure(failure -> {
                 returnError(response, HTTP.INTERNAL_SERVER_ERROR, failure.getMessage());
             });
