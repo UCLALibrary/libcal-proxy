@@ -25,7 +25,6 @@ import info.freelibrary.util.LoggerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -49,11 +48,6 @@ public class ProxyHandler implements Handler<RoutingContext> {
      * A constant for the HTTP GET method name.
      */
     private static final String GET = "GET";
-
-    /**
-     * A constant for the HTTP POST methos name.
-     */
-    private static final String POST = "POST";
 
     /**
      * The handler's copy of the Vert.x instance.
@@ -105,7 +99,7 @@ public class ProxyHandler implements Handler<RoutingContext> {
             final String receivedQuery = path.concat(
                     aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
             myTokenProxy.getBearerToken().compose(token -> {
-                if (method.equals(GET)) {
+                if (GET.equals(method)) {
                     return myApiProxy.getLibCalOutput(token, receivedQuery).map(myMapper::decode);
                 } else {
                     return myApiProxy.postLibCalOutput(token, receivedQuery, aContext.body().asJsonObject())

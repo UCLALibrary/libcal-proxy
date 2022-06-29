@@ -49,7 +49,7 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
     }
 
     @Override
-    public Future<JsonObject> postLibCalOutput(String anOAuthToken, String aQuery, JsonObject aBody) {
+    public Future<JsonObject> postLibCalOutput(final String anOAuthToken, final String aQuery, final JsonObject aBody) {
         final HttpRequest<String> request = myWebClient.postAbs(myLibCalBaseURL.concat(aQuery))
                 .bearerTokenAuthentication(anOAuthToken).as(BodyCodec.string()).ssl(true);
 
