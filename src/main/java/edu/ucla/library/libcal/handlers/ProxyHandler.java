@@ -96,8 +96,9 @@ public class ProxyHandler implements Handler<RoutingContext> {
             final String receivedQuery = path.concat(
                     aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
             myTokenProxy.getBearerToken().compose(token -> {
-                return myApiProxy.getLibCalOutput(token, receivedQuery, method,
-                        payload != null ? payload.asJsonObject() : null).map(myMapper::decode);
+                return myApiProxy
+                        .getLibCalOutput(token, receivedQuery, method, payload != null ? payload.asString() : null)
+                        .map(myMapper::decode);
             }).onSuccess(libcalResponse -> {
                 final String body = libcalResponse.body();
 

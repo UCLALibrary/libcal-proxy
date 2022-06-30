@@ -13,6 +13,7 @@ import io.vertx.serviceproxy.ServiceProxyBuilder;
  */
 @ProxyGen
 @VertxGen
+@SuppressWarnings("PMD.UseObjectForClearerAPI")
 public interface LibCalProxyService {
 
     /**
@@ -42,14 +43,16 @@ public interface LibCalProxyService {
     }
 
     /**
-     * Retrieves the output of a GET LibCal API call.
+     * Retrieves the output of a LibCal API call.
+     * FYI: PMD wants a container rather than the multiple String paramss,
+     * but IMO the named params make the method call clearer
      *
      * @param anOAuthToken An OAuth bearer token
      * @param aQuery The query string passes to the LibCal API
      * @param aMethod The HTTP method used to contact LibCal
-     * @param aBody The (possibly empty) request payload from the client, represented as JSON
+     * @param aBody The (possibly empty) request payload from the client
      * @return A Future that resolves to the HTTP response from LibCal represented as a JsonObject
      */
-    Future<JsonObject> getLibCalOutput(String anOAuthToken, String aQuery, String aMethod, JsonObject aBody);
+    Future<JsonObject> getLibCalOutput(String anOAuthToken, String aQuery, String aMethod, String aBody);
 
 }
