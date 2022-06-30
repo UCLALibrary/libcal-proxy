@@ -110,7 +110,7 @@ public class MainVerticle extends AbstractVerticle {
             // Empty-path router to handle the variable-format calls to ProxyHandler
             router = routeBuilder.createRouter();
             router.allowForward(AllowForwardHeaders.X_FORWARD);
-            // Add body handler so we can retirve incoming body from Apps client request
+            // Add body handler so we can retreve incoming body from Apps client request
             router.route().handler(postBodyHandler).handler(new ProxyHandler(getVertx(), aConfig));
 
             myServer = getVertx().createHttpServer(serverOptions).requestHandler(router);

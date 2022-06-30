@@ -119,8 +119,8 @@ public class ProxyHandlerTest {
         final int port = Integer.parseInt(DEFAULT_PORT);
 
         webClient.post(port, Constants.LOCAL_HOST, postPath).putHeader(Constants.X_FORWARDED_FOR, GOOD_FORWARDS)
-                .putHeader(CONTENT_TYPE.toString(), APPLICATION_JSON.toString())
-                .expect(ResponsePredicate.SC_SUCCESS).as(BodyCodec.string()).sendJsonObject(payload, result -> {
+                .putHeader(CONTENT_TYPE.toString(), APPLICATION_JSON.toString()).expect(ResponsePredicate.SC_SUCCESS)
+                .as(BodyCodec.string()).sendJsonObject(payload, result -> {
                     if (result.succeeded()) {
                         final HttpResponse<String> response = result.result();
 
@@ -132,7 +132,6 @@ public class ProxyHandlerTest {
                     }
                 });
     }
-
 
     /**
      * Tests that a client handles bad input

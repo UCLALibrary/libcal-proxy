@@ -5,6 +5,7 @@ import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
 
@@ -46,9 +47,10 @@ public interface LibCalProxyService {
      *
      * @param anOAuthToken An OAuth bearer token
      * @param aQuery The query string passes to the LibCal API
+     * @param aMethod The HTTP method used to contact LibCal
      * @return A Future that resolves to the HTTP response from LibCal represented as a JsonObject
      */
-    Future<JsonObject> getLibCalOutput(String anOAuthToken, String aQuery);
+    Future<JsonObject> getLibCalOutput(String anOAuthToken, String aQuery, HttpMethod aMethod, JsonObject aBody);
 
     /**
      * Retrieves the output of a POST LibCal API call.

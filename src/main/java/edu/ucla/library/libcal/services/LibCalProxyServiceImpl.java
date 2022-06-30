@@ -6,6 +6,7 @@ import edu.ucla.library.libcal.HttpResponseMapper;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
@@ -37,15 +38,17 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
     }
 
     @Override
-    public Future<JsonObject> getLibCalOutput(final String anOAuthToken, final String aQuery) {
+    public Future<JsonObject> getLibCalOutput(final String anOAuthToken, final String aQuery, final HttpMethod aMethod,
+            final JsonObject aBody) {
         /*
          * LibCal API returns JSON in variable formats (sometimes objects, sometimes arrays), so safer to handle API
          * output as string to avoid parsing errors
          */
-        final HttpRequest<String> request = myWebClient.getAbs(myLibCalBaseURL.concat(aQuery))
+        final HttpRequest<String> request = myWebClient.requestAbs(aMethod, myLibCalBaseURL.concat(aQuery))
                 .bearerTokenAuthentication(anOAuthToken).as(BodyCodec.string()).ssl(true);
 
-        return request.send().map(myMapper::encode);
+        return (aBody != null ? request.sendJsonObject(aBody).map(myMapper::encode)
+                : request.send().map(myMapper::encode));
     }
 
     @Override
