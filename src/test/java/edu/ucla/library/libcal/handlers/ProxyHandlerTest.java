@@ -114,7 +114,7 @@ public class ProxyHandlerTest {
     public void testPostOutput(final Vertx aVertx, final VertxTestContext aContext) {
         final WebClient webClient = WebClient.create(aVertx);
         final String jsonSource = "src/test/resources/json/register.json";
-        final String postPath = "/api/1.1/events/9347519/register";
+        final String postPath = "/api/1.1/events/9353038/register";
         final JsonObject payload = new JsonObject(aVertx.fileSystem().readFileBlocking(jsonSource));
         final int port = Integer.parseInt(DEFAULT_PORT);
 

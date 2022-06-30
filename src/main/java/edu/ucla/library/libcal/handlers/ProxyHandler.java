@@ -22,11 +22,9 @@ import edu.ucla.library.libcal.services.OAuthTokenService;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RequestBody;
@@ -46,16 +44,6 @@ public class ProxyHandler implements Handler<RoutingContext> {
      * A constant for the "?" to lead an HTTP query string.
      */
     private static final String QUESTION_MARK = "?";
-
-    /**
-     * A constant for the HTTP GET method name.
-     */
-    private static final String GET = "GET";
-
-    /**
-     * A constant for the HTTP GET method name.
-     */
-    private static final String POST = "POST";
 
     /**
      * The handler's copy of the Vert.x instance.
@@ -99,7 +87,7 @@ public class ProxyHandler implements Handler<RoutingContext> {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final String path = aContext.request().path();
-        final HttpMethod method = aContext.request().method(); // .name();
+        final String method = aContext.request().method().name();
         final RequestBody payload = aContext.body();
         final String originalClientIP = aContext.request().remoteAddress().hostAddress();
         final Cidr4Trie<String> allowedIPs = buildAllowedNetwork(myConfig.getString(Config.ALLOWED_IPS).split(COMMA));
@@ -108,20 +96,8 @@ public class ProxyHandler implements Handler<RoutingContext> {
             final String receivedQuery = path.concat(
                     aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
             myTokenProxy.getBearerToken().compose(token -> {
-		    try {
                 return myApiProxy.getLibCalOutput(token, receivedQuery, method,
-                        (payload != null ? payload.asJsonObject() : null)).map(myMapper::decode);
-		    } catch (Exception details) {
-		    	details.printStackTrace();
-			return Future.failedFuture(details);
-		    }
-                /*
-                 * if (GET.equals(method)) { return myApiProxy.getLibCalOutput(token,
-                 * receivedQuery).map(myMapper::decode); } else if (POST.equals(method)) { return
-                 * myApiProxy.postLibCalOutput(token, receivedQuery, aContext.body().asJsonObject())
-                 * .map(myMapper::decode); } else { returnError(response, HTTP.METHOD_NOT_ALLOWED,
-                 * LOGGER.getMessage(MessageCodes.LCP_008, method)); }
-                 */
+                        payload != null ? payload.asJsonObject() : null).map(myMapper::decode);
             }).onSuccess(libcalResponse -> {
                 final String body = libcalResponse.body();
 

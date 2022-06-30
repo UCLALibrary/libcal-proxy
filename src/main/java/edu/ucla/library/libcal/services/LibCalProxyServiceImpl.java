@@ -38,24 +38,18 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
     }
 
     @Override
-    public Future<JsonObject> getLibCalOutput(final String anOAuthToken, final String aQuery, final HttpMethod aMethod,
+    public Future<JsonObject> getLibCalOutput(final String anOAuthToken, final String aQuery, final String aMethod,
             final JsonObject aBody) {
         /*
          * LibCal API returns JSON in variable formats (sometimes objects, sometimes arrays), so safer to handle API
          * output as string to avoid parsing errors
          */
-        final HttpRequest<String> request = myWebClient.requestAbs(aMethod, myLibCalBaseURL.concat(aQuery))
-                .bearerTokenAuthentication(anOAuthToken).as(BodyCodec.string()).ssl(true);
+        final HttpRequest<String> request =
+                myWebClient.requestAbs(HttpMethod.valueOf(aMethod), myLibCalBaseURL.concat(aQuery))
+                        .bearerTokenAuthentication(anOAuthToken).as(BodyCodec.string()).ssl(true);
 
-        return (aBody != null ? request.sendJsonObject(aBody).map(myMapper::encode)
-                : request.send().map(myMapper::encode));
+        return aBody != null ? request.sendJsonObject(aBody).map(myMapper::encode)
+                : request.send().map(myMapper::encode);
     }
 
-    @Override
-    public Future<JsonObject> postLibCalOutput(final String anOAuthToken, final String aQuery, final JsonObject aBody) {
-        final HttpRequest<String> request = myWebClient.postAbs(myLibCalBaseURL.concat(aQuery))
-                .bearerTokenAuthentication(anOAuthToken).as(BodyCodec.string()).ssl(true);
-
-        return request.sendJsonObject(aBody).map(myMapper::encode);
-    }
 }

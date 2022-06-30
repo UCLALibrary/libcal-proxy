@@ -101,7 +101,7 @@ public class LibCalProxyServiceIT {
     @Test
     public final void testGetLibCalOutput(final Vertx aVertx, final VertxTestContext aContext) {
         myTokenProxy.getBearerToken().compose(token -> {
-            return myServiceProxy.getLibCalOutput(token, "/api/1.1/hours/2572");
+            return myServiceProxy.getLibCalOutput(token, "/api/1.1/hours/2572", "GET", null);
         }).onSuccess(output -> {
             assertTrue(output != null);
             aContext.completeNow();
