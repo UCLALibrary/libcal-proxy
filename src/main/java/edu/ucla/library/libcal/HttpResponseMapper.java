@@ -57,7 +57,7 @@ public class HttpResponseMapper {
     private static final String FOLLOWED_REDIRECTS = "followed_redirects";
 
     /**
-     * Represents an {@HttpResponse} as a {@JsonObject}.
+     * Represents an {@link HttpResponse} as a {@link JsonObject}.
      *
      * @param aResponse The HTTP response
      * @return The JsonObject representation
