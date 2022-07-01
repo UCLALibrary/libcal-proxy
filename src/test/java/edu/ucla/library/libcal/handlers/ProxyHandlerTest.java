@@ -3,6 +3,8 @@ package edu.ucla.library.libcal.handlers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static edu.ucla.library.libcal.MediaType.APPLICATION_JSON;
+import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 import info.freelibrary.util.HTTP;
 import info.freelibrary.util.Logger;
@@ -61,6 +63,11 @@ public class ProxyHandlerTest {
     private static String REQUEST_PATH = "/api/1.1/hours/2572";
 
     /**
+     * A legit LibCal API call via POST
+     */
+    private static String POST_PATH = "/api/1.1/events/9353038/register";
+
+    /**
      * Sets up the test.
      *
      * @param aVertx A Vert.x instance
@@ -95,6 +102,62 @@ public class ProxyHandlerTest {
 
                         assertEquals(HTTP.OK, response.statusCode());
                         assertTrue(response.body().contains("Powell Library"));
+                        aContext.completeNow();
+                    } else {
+                        aContext.failNow(result.cause());
+                    }
+                });
+    }
+
+    /**
+     * Tests that a client can get LibCap API output via POST.
+     *
+     * @param aVertx A Vert.x instance
+     * @param aContext A test context
+     */
+    @Test
+    public void testPostOutput(final Vertx aVertx, final VertxTestContext aContext) {
+        final WebClient webClient = WebClient.create(aVertx);
+        final String jsonSource = "src/test/resources/json/register.json";
+        final JsonObject payload = new JsonObject(aVertx.fileSystem().readFileBlocking(jsonSource));
+        final int port = Integer.parseInt(DEFAULT_PORT);
+
+        webClient.post(port, Constants.LOCAL_HOST, POST_PATH).putHeader(Constants.X_FORWARDED_FOR, GOOD_FORWARDS)
+                .putHeader(CONTENT_TYPE.toString(), APPLICATION_JSON.toString()).expect(ResponsePredicate.SC_SUCCESS)
+                .as(BodyCodec.string()).sendJsonObject(payload, result -> {
+                    if (result.succeeded()) {
+                        final HttpResponse<String> response = result.result();
+
+                        assertEquals(HTTP.OK, response.statusCode());
+                        assertTrue(response.body().contains("booking_id"));
+                        aContext.completeNow();
+                    } else {
+                        aContext.failNow(result.cause());
+                    }
+                });
+    }
+
+    /**
+     * Tests that proxy handles bad POST request--this case, missing fields.
+     *
+     * @param aVertx A Vert.x instance
+     * @param aContext A test context
+     */
+    @Test
+    public void testBadPostOutput(final Vertx aVertx, final VertxTestContext aContext) {
+        final WebClient webClient = WebClient.create(aVertx);
+        final String jsonSource = "src/test/resources/json/bad_register.json";
+        final JsonObject payload = new JsonObject(aVertx.fileSystem().readFileBlocking(jsonSource));
+        final int port = Integer.parseInt(DEFAULT_PORT);
+
+        webClient.post(port, Constants.LOCAL_HOST, POST_PATH).putHeader(Constants.X_FORWARDED_FOR, GOOD_FORWARDS)
+                .putHeader(CONTENT_TYPE.toString(), APPLICATION_JSON.toString())
+                .expect(ResponsePredicate.SC_BAD_REQUEST).as(BodyCodec.string()).sendJsonObject(payload, result -> {
+                    if (result.succeeded()) {
+                        final HttpResponse<String> response = result.result();
+
+                        assertEquals(HTTP.BAD_REQUEST, response.statusCode());
+                        assertTrue(response.body().contains("incomplete required"));
                         aContext.completeNow();
                     } else {
                         aContext.failNow(result.cause());

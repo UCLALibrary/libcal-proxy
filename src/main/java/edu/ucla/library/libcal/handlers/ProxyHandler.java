@@ -27,6 +27,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.RequestBody;
 import io.vertx.ext.web.RoutingContext;
 
 /**
@@ -86,6 +87,8 @@ public class ProxyHandler implements Handler<RoutingContext> {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final String path = aContext.request().path();
+        final String method = aContext.request().method().name();
+        final RequestBody payload = aContext.body();
         final String originalClientIP = aContext.request().remoteAddress().hostAddress();
         final Cidr4Trie<String> allowedIPs = buildAllowedNetwork(myConfig.getString(Config.ALLOWED_IPS).split(COMMA));
 
@@ -93,7 +96,9 @@ public class ProxyHandler implements Handler<RoutingContext> {
             final String receivedQuery = path.concat(
                     aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
             myTokenProxy.getBearerToken().compose(token -> {
-                return myApiProxy.getLibCalOutput(token, receivedQuery).map(myMapper::decode);
+                return myApiProxy
+                        .getLibCalOutput(token, receivedQuery, method, payload != null ? payload.asString() : null)
+                        .map(myMapper::decode);
             }).onSuccess(libcalResponse -> {
                 final String body = libcalResponse.body();
 
