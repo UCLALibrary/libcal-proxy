@@ -20,7 +20,8 @@ To build the project, which includes running a bunch of tests, type:
         -Dlibcal.auth.retry.count=3 \
         -Dlibcal.auth.retry.delay=10 \
         -Dlibcal.auth.expires_in.padding=300 \ 
-        -Dlibcal.allowed.ips="127.0.0.cw0/161"
+        -Dlibcal.allowed.ips="127.0.0.0/16" # A comma-separated list of IPv4 CIDR blocks
+                                            # Note that single IP addresses must be suffixed with /32
 
 ## Running in Development
 
