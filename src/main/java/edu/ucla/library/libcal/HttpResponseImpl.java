@@ -17,128 +17,128 @@ public class HttpResponseImpl<T> implements HttpResponse<T> {
     /**
      * Function variable to handle JsonArray decoding.
      */
-    public static final Function<Buffer, JsonArray> JSON_ARRAY_DECODER = buff -> {
-        final Object val = Json.decodeValue(buff);
-        if (val == null) {
+    public static final Function<Buffer, JsonArray> JSON_ARRAY_DECODER = buffer -> {
+        final Object value = Json.decodeValue(buffer);
+        if (value == null) {
             return null;
         }
-        if (val instanceof JsonArray) {
-            return (JsonArray) val;
+        if (value instanceof JsonArray) {
+            return (JsonArray) value;
         }
-        throw new DecodeException("Invalid Json Object decoded as " + val.getClass().getName());
+        throw new DecodeException("Invalid Json Object decoded as " + value.getClass().getName());
     };
 
     /**
-     * Function variable to handle JsonArray decoding.
+     * The HTTP protocol version of an HTTP response.
      */
     private final HttpVersion myVersion;
 
     /**
-     * Function variable to handle JsonArray decoding.
+     * The status code of an HTTP response.
      */
-    private final int statusCode;
+    private final int myStatusCode;
 
     /**
-     * Function variable to handle JsonArray decoding.
+     * The status message of an HTTP response.
      */
-    private final String statusMessage;
+    private final String myStatusMessage;
 
     /**
-     * Function variable to handle JsonArray decoding.
+     * The headers of an HTTP response.
      */
-    private final MultiMap headers;
+    private final MultiMap myHeaders;
 
     /**
-     * Function variable to handle JsonArray decoding.
+     * The trailers of an HTTP response.
      */
-    private final MultiMap trailers;
+    private final MultiMap myTrailers;
 
     /**
-     * Function variable to handle JsonArray decoding.
+     * The cookies of an HTTP response.
      */
-    private final List<String> cookies;
+    private final List<String> myCookies;
 
     /**
-     * Function variable to handle JsonArray decoding.
+     * The body of an HTTP response.
      */
-    private final T body;
+    private final T myBody;
 
     /**
-     * Function variable to handle JsonArray decoding.
+     * The followed redirects of an HTTP response.
      */
-    private final List<String> redirects;
+    private final List<String> myRedirects;
 
-    public HttpResponseImpl(HttpVersion aVersion, int statusCode, String statusMessage, MultiMap headers,
-            MultiMap trailers, List<String> cookies, T body, List<String> redirects) {
+    public HttpResponseImpl(final HttpVersion aVersion, final int aStatusCode, final String aStatusMessage, final MultiMap aHeaders,
+            final MultiMap aTrailers, final List<String> aCookies, final T aBody, final List<String> aRedirects) {
         myVersion = aVersion;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
-        this.headers = headers;
-        this.trailers = trailers;
-        this.cookies = cookies;
-        this.body = body;
-        this.redirects = redirects;
+        myStatusCode = aStatusCode;
+        myStatusMessage = aStatusMessage;
+        myHeaders = aHeaders;
+        myTrailers = aTrailers;
+        myCookies = aCookies;
+        myBody = aBody;
+        myRedirects = aRedirects;
     }
 
     @Override
-    public HttpVersion myVersion() {
+    public HttpVersion version() {
         return myVersion;
     }
 
     @Override
     public int statusCode() {
-        return statusCode;
+        return myStatusCode;
     }
 
     @Override
     public String statusMessage() {
-        return statusMessage;
+        return myStatusMessage;
     }
 
     @Override
     public String getHeader(String headerName) {
-        return headers.get(headerName);
+        return myHeaders.get(headerName);
     }
 
     @Override
     public MultiMap trailers() {
-        return trailers;
+        return myTrailers;
     }
 
     @Override
     public String getTrailer(String trailerName) {
-        return trailers.get(trailerName);
+        return myTrailers.get(trailerName);
     }
 
     @Override
     public List<String> cookies() {
-        return cookies;
+        return myCookies;
     }
 
     @Override
     public MultiMap headers() {
-        return headers;
+        return myHeaders;
     }
 
     @Override
     public T body() {
-        return body;
+        return myBody;
     }
 
     @Override
     public Buffer bodyAsBuffer() {
-        return body instanceof Buffer ? (Buffer) body : null;
+        return myBody instanceof Buffer ? (Buffer) myBody : null;
     }
 
     @Override
     public List<String> followedRedirects() {
-        return redirects;
+        return myRedirects;
     }
 
     @Override
     public JsonArray bodyAsJsonArray() {
-        Buffer b = bodyAsBuffer();
-        return b != null ? JSON_ARRAY_DECODER.apply(b) : null;
+        final Buffer buffer = bodyAsBuffer();
+        return buffer != null ? JSON_ARRAY_DECODER.apply(buffer) : null;
     }
 
 }
