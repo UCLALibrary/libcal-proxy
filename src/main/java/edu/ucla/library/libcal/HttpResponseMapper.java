@@ -9,7 +9,6 @@ import io.vertx.core.http.HttpVersion;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpResponse;
-import io.vertx.ext.web.client.impl.HttpResponseImpl;
 
 /**
  * A mapper that allows for sending and receiving {@link HttpResponse}s over the event bus.
