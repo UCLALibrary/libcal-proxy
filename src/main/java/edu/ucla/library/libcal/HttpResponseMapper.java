@@ -81,7 +81,7 @@ public class HttpResponseMapper {
      */
     @SuppressWarnings("unchecked")
     public HttpResponse<String> decode(final JsonObject aJsonObject) {
-        return new HttpResponseImpl<String>( //
+        return new HttpResponseImpl( //
                 HttpVersion.valueOf(aJsonObject.getString(HTTP_VERSION)), //
                 aJsonObject.getInteger(STATUS_CODE).intValue(), //
                 aJsonObject.getString(STATUS_MESSAGE), //

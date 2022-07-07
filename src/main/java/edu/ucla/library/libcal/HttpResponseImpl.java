@@ -4,32 +4,15 @@ package edu.ucla.library.libcal;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpVersion;
-import io.vertx.core.json.DecodeException;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.client.HttpResponse;
 
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * A class that implements the {@link HttpResponse} interface.
  */
-public class HttpResponseImpl<T> implements HttpResponse<T> {
-
-    /**
-     * Function variable to handle JsonArray decoding.
-     */
-    public static final Function<Buffer, JsonArray> JSON_ARRAY_DECODER = buffer -> {
-        final Object value = Json.decodeValue(buffer);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof JsonArray) {
-            return (JsonArray) value;
-        }
-        throw new DecodeException("Invalid Json Object decoded as " + value.getClass().getName());
-    };
+public class HttpResponseImpl implements HttpResponse<String> {
 
     /**
      * The HTTP protocol version of an HTTP response.
@@ -64,7 +47,7 @@ public class HttpResponseImpl<T> implements HttpResponse<T> {
     /**
      * The body of an HTTP response.
      */
-    private final T myBody;
+    private final String myBody;
 
     /**
      * The followed redirects of an HTTP response.
@@ -84,7 +67,7 @@ public class HttpResponseImpl<T> implements HttpResponse<T> {
      * @param aRedirects A set of followed redirects of an HTTP response
      */
     public HttpResponseImpl(final HttpVersion aVersion, final int aStatusCode, final String aStatusMessage,
-            final MultiMap aHeaders, final MultiMap aTrailers, final List<String> aCookies, final T aBody,
+            final MultiMap aHeaders, final MultiMap aTrailers, final List<String> aCookies, final String aBody,
             final List<String> aRedirects) {
         myVersion = aVersion;
         myStatusCode = aStatusCode;
@@ -137,13 +120,13 @@ public class HttpResponseImpl<T> implements HttpResponse<T> {
     }
 
     @Override
-    public T body() {
+    public String body() {
         return myBody;
     }
 
     @Override
     public Buffer bodyAsBuffer() {
-        return myBody instanceof Buffer ? (Buffer) myBody : null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -153,8 +136,7 @@ public class HttpResponseImpl<T> implements HttpResponse<T> {
 
     @Override
     public JsonArray bodyAsJsonArray() {
-        final Buffer buffer = bodyAsBuffer();
-        return buffer != null ? JSON_ARRAY_DECODER.apply(buffer) : null;
+        throw new UnsupportedOperationException();
     }
 
 }
