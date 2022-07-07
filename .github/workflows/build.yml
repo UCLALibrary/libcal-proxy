@@ -38,9 +38,9 @@ jobs:
           CURRENT_CHART_VERSION=$(cat pom.xml | grep -i '<libcal.helm.chart.version>' | xargs | grep -oPm1 "(?<=<libcal.helm.chart.version>)[^<]+")
           HTTP_RESP=$(curl -s -w "%{http_code}" -o /dev/null https://chartmuseum.library.ucla.edu/api/charts/libcalproxy/${CURRENT_CHART_VERSION})
           echo "CM_HTTP_RESP=${HTTP_RESP} >> ${GITHUB_ENV}"
-      - name: Detect New Helm Chart
+      - name: DEBUG
         run: |
-          echo env.CM_HTTP_RESP
+          echo ${{ env.CM_HTTP_RESP }}
       - name: Deploy Helm Chart
         if: env.CM_HTTP_RESP == 404
         uses: samuelmeuli/action-maven-publish@201a45a3f311b2ee888f252ba9f4194257545709 # v1.4.0
