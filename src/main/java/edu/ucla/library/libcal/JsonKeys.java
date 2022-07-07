@@ -27,21 +27,6 @@ public final class JsonKeys {
     public static final String EXPIRES_IN = "expires_in";
 
     /**
-     * The status code returned with an HTTP response.
-     */
-    public static final String STATUS_CODE = "status_code";
-
-    /**
-     * The status message returned with an HTTP response.
-     */
-    public static final String STATUS_MESSAGE = "status_message";
-
-    /**
-     * The body of an HTTP response.
-     */
-    public static final String BODY = "body";
-
-    /**
      * Creates a new JSON keys constants class.
      */
     private JsonKeys() {

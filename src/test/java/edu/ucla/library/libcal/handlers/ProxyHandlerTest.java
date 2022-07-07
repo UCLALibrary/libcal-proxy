@@ -3,6 +3,8 @@ package edu.ucla.library.libcal.handlers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static edu.ucla.library.libcal.MediaType.APPLICATION_JSON;
+import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 import info.freelibrary.util.HTTP;
 import info.freelibrary.util.Logger;
@@ -12,16 +14,20 @@ import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.Constants;
 import edu.ucla.library.libcal.MessageCodes;
 import edu.ucla.library.libcal.verticles.MainVerticle;
+import edu.ucla.library.libcal.MediaType;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.predicate.ResponsePredicate;
@@ -45,6 +51,21 @@ public class ProxyHandlerTest {
      * The default port that the application listens on.
      */
     private static String DEFAULT_PORT = "8888";
+
+    /**
+     * The fake client and proxy IPs in X-FORWARDED header.
+     */
+    private static String GOOD_FORWARDS = "127.0.0.1,123.456.789.0";
+
+    /**
+     * A legit LibCal API call
+     */
+    private static String REQUEST_PATH = "/api/1.1/hours/2572";
+
+    /**
+     * A legit LibCal API call via POST
+     */
+    private static String POST_PATH = "/api/1.1/events/9353038/register";
 
     /**
      * Sets up the test.
@@ -71,17 +92,72 @@ public class ProxyHandlerTest {
      */
     @Test
     public void testGetOutput(final Vertx aVertx, final VertxTestContext aContext) {
-        final String requestPath = "/api/1.1/hours/2572";
         final WebClient webClient = WebClient.create(aVertx);
         final int port = Integer.parseInt(DEFAULT_PORT);
 
-        webClient.get(port, Constants.LOCAL_HOST, requestPath).expect(ResponsePredicate.SC_SUCCESS)
-                .as(BodyCodec.string()).send(result -> {
+        webClient.get(port, Constants.LOCAL_HOST, REQUEST_PATH).putHeader(Constants.X_FORWARDED_FOR, GOOD_FORWARDS)
+                .expect(ResponsePredicate.SC_SUCCESS).as(BodyCodec.string()).send(result -> {
                     if (result.succeeded()) {
                         final HttpResponse<String> response = result.result();
 
                         assertEquals(HTTP.OK, response.statusCode());
                         assertTrue(response.body().contains("Powell Library"));
+                        aContext.completeNow();
+                    } else {
+                        aContext.failNow(result.cause());
+                    }
+                });
+    }
+
+    /**
+     * Tests that a client can get LibCap API output via POST.
+     *
+     * @param aVertx A Vert.x instance
+     * @param aContext A test context
+     */
+    @Test
+    public void testPostOutput(final Vertx aVertx, final VertxTestContext aContext) {
+        final WebClient webClient = WebClient.create(aVertx);
+        final String jsonSource = "src/test/resources/json/register.json";
+        final JsonObject payload = new JsonObject(aVertx.fileSystem().readFileBlocking(jsonSource));
+        final int port = Integer.parseInt(DEFAULT_PORT);
+
+        webClient.post(port, Constants.LOCAL_HOST, POST_PATH).putHeader(Constants.X_FORWARDED_FOR, GOOD_FORWARDS)
+                .putHeader(CONTENT_TYPE.toString(), APPLICATION_JSON.toString()).expect(ResponsePredicate.SC_SUCCESS)
+                .as(BodyCodec.string()).sendJsonObject(payload, result -> {
+                    if (result.succeeded()) {
+                        final HttpResponse<String> response = result.result();
+
+                        assertEquals(HTTP.OK, response.statusCode());
+                        assertTrue(response.body().contains("booking_id"));
+                        aContext.completeNow();
+                    } else {
+                        aContext.failNow(result.cause());
+                    }
+                });
+    }
+
+    /**
+     * Tests that proxy handles bad POST request--this case, missing fields.
+     *
+     * @param aVertx A Vert.x instance
+     * @param aContext A test context
+     */
+    @Test
+    public void testBadPostOutput(final Vertx aVertx, final VertxTestContext aContext) {
+        final WebClient webClient = WebClient.create(aVertx);
+        final String jsonSource = "src/test/resources/json/bad_register.json";
+        final JsonObject payload = new JsonObject(aVertx.fileSystem().readFileBlocking(jsonSource));
+        final int port = Integer.parseInt(DEFAULT_PORT);
+
+        webClient.post(port, Constants.LOCAL_HOST, POST_PATH).putHeader(Constants.X_FORWARDED_FOR, GOOD_FORWARDS)
+                .putHeader(CONTENT_TYPE.toString(), APPLICATION_JSON.toString())
+                .expect(ResponsePredicate.SC_BAD_REQUEST).as(BodyCodec.string()).sendJsonObject(payload, result -> {
+                    if (result.succeeded()) {
+                        final HttpResponse<String> response = result.result();
+
+                        assertEquals(HTTP.BAD_REQUEST, response.statusCode());
+                        assertTrue(response.body().contains("incomplete required"));
                         aContext.completeNow();
                     } else {
                         aContext.failNow(result.cause());
@@ -101,13 +177,69 @@ public class ProxyHandlerTest {
         final WebClient webClient = WebClient.create(aVertx);
         final int port = Integer.parseInt(DEFAULT_PORT);
 
-        webClient.get(port, Constants.LOCAL_HOST, badRequestPath)
+        webClient.get(port, Constants.LOCAL_HOST, badRequestPath).putHeader(Constants.X_FORWARDED_FOR, GOOD_FORWARDS)
                 .as(BodyCodec.string()).send(result -> {
                     if (result.succeeded()) {
                         final HttpResponse<String> response = result.result();
 
                         assertEquals(HTTP.NOT_FOUND, response.statusCode());
-                        assertTrue(response.body().contains("Not Found"));
+                        assertTrue(response.headers().get(HttpHeaders.CONTENT_TYPE)
+                                .contains(MediaType.TEXT_HTML.toString()));
+                        aContext.completeNow();
+                    } else {
+                        aContext.failNow(result.cause());
+                    }
+                });
+    }
+
+    /**
+     * Tests that a client can make requests to paths that aren't part of the LibCal API, but are still valid
+     * application routes.
+     *
+     * @param aPath The request path
+     * @param aVertx A Vert.x instance
+     * @param aContext A test context
+     */
+    @ParameterizedTest
+    @ValueSource(strings = { "/", "/admin/home" })
+    public void testNonApiEndpointPath(final String aPath, final Vertx aVertx, final VertxTestContext aContext) {
+        final WebClient webClient = WebClient.create(aVertx);
+        final int port = Integer.parseInt(DEFAULT_PORT);
+
+        webClient.get(port, Constants.LOCAL_HOST, aPath).putHeader(Constants.X_FORWARDED_FOR, GOOD_FORWARDS)
+                .as(BodyCodec.string()).send(result -> {
+                    if (result.succeeded()) {
+                        final HttpResponse<String> response = result.result();
+
+                        assertEquals(HTTP.OK, response.statusCode());
+                        assertTrue(response.headers().get(HttpHeaders.CONTENT_TYPE)
+                                .contains(MediaType.TEXT_HTML.toString()));
+                        aContext.completeNow();
+                    } else {
+                        aContext.failNow(result.cause());
+                    }
+                });
+    }
+
+    /**
+     * Tests that proxy handler blocks bad IPs.
+     *
+     * @param aVertx A Vert.x instance
+     * @param aContext A test context
+     */
+    @Test
+    public void testBadClientIP(final Vertx aVertx, final VertxTestContext aContext) {
+        final String badForward = "127.1.0.1,10.10.10.4";
+        final WebClient webClient = WebClient.create(aVertx);
+        final int port = Integer.parseInt(DEFAULT_PORT);
+
+        webClient.get(port, Constants.LOCAL_HOST, REQUEST_PATH).putHeader(Constants.X_FORWARDED_FOR, badForward)
+                .as(BodyCodec.string()).send(result -> {
+                    if (result.succeeded()) {
+                        final HttpResponse<String> response = result.result();
+
+                        assertEquals(HTTP.FORBIDDEN, response.statusCode());
+                        assertTrue(response.body().contains("unauthorized"));
                         aContext.completeNow();
                     } else {
                         aContext.failNow(result.cause());

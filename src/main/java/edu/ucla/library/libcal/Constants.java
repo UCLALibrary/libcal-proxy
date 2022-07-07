@@ -38,6 +38,11 @@ public final class Constants {
     public static final String EOL_REGEX = "\\r|\\n|\\r\\n";
 
     /**
+     * The name of the HTTP request header used by the reverse proxy to carry the client IP address.
+     */
+    public static final String X_FORWARDED_FOR = "X-Forwarded-For";
+
+    /**
      * Constant classes should have private constructors.
      */
     private Constants() {

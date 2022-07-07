@@ -1,0 +1,24 @@
+replicaCount: 1
+image:
+  repository: uclalibrary/libcal-proxy
+  pullPolicy: IfNotPresent
+  tag: 5.0.5-1
+imagePullSecrets: []
+nameOverride: ''
+fullnameOverride: ''
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ''
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+service:
+  type: ClusterIP
+  port: 80
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+libcalproxy:
+  env: {}

@@ -2,11 +2,12 @@
 package edu.ucla.library.libcal.services;
 
 import edu.ucla.library.libcal.Config;
-import edu.ucla.library.libcal.JsonKeys;
+import edu.ucla.library.libcal.HttpResponseMapper;
 
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
@@ -15,6 +16,7 @@ import io.vertx.ext.web.codec.BodyCodec;
 /**
  * The implementation of LibCalProxyService.
  */
+@SuppressWarnings("PMD.UseObjectForClearerAPI")
 public class LibCalProxyServiceImpl implements LibCalProxyService {
 
     /**
@@ -23,40 +25,33 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
     private final WebClient myWebClient;
 
     /**
-     * App config in Json format.
+     * The LibCal base URL.
      */
-    private final JsonObject myConfig;
+    private final String myLibCalBaseURL;
+
+    /**
+     * The HTTP response serializer.
+     */
+    private final HttpResponseMapper myMapper = new HttpResponseMapper();
 
     LibCalProxyServiceImpl(final Vertx aVertx, final JsonObject aConfig) {
-        myConfig = aConfig;
+        myLibCalBaseURL = aConfig.getString(Config.LIBCAL_BASE_URL);
         myWebClient = WebClient.create(aVertx);
     }
 
     @Override
-    public Future<JsonObject> getLibCalOutput(final String anOAuthToken, final String aQuery) {
+    public Future<JsonObject> getLibCalOutput(final String anOAuthToken, final String aQuery, final String aMethod,
+            final String aBody) {
         /*
          * LibCal API returns JSON in variable formats (sometimes objects, sometimes arrays), so safer to handle API
          * output as string to avoid parsing errors
          */
-        final Promise<JsonObject> promise = Promise.promise();
-        final HttpRequest<String> request;
-        final JsonObject response = new JsonObject();
-        final String baseURL = myConfig.getString(Config.LIBCAL_BASE_URL);
+        final HttpRequest<String> request =
+                myWebClient.requestAbs(HttpMethod.valueOf(aMethod), myLibCalBaseURL.concat(aQuery))
+                        .bearerTokenAuthentication(anOAuthToken).as(BodyCodec.string()).ssl(true);
 
-        request = myWebClient.getAbs(baseURL.concat(aQuery)).bearerTokenAuthentication(anOAuthToken)
-                .as(BodyCodec.string()).ssl(true);
-        request.send(asyncResult -> {
-            if (asyncResult.succeeded()) {
-                response.put(JsonKeys.STATUS_CODE, asyncResult.result().statusCode());
-                response.put(JsonKeys.STATUS_MESSAGE, asyncResult.result().statusMessage());
-                response.put(JsonKeys.BODY, asyncResult.result().body());
-                promise.complete(response);
-            } else {
-                promise.fail(asyncResult.cause());
-            }
-        });
-
-        return promise.future();
+        return aBody != null ? request.sendBuffer(Buffer.buffer(aBody)).map(myMapper::encode)
+                : request.send().map(myMapper::encode);
     }
 
 }
