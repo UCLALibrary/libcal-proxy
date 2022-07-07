@@ -43,7 +43,9 @@ public interface LibCalProxyService {
     }
 
     /**
-     * Retrieves the output of a LibCal API call. FYI: PMD wants a container rather than the multiple String paramss,
+     * Retrieves the output of a LibCal API call. 
+     *
+     * FYI: PMD wants a container rather than the multiple String paramss,
      * but IMO the named params make the method call clearer
      *
      * @param anOAuthToken An OAuth bearer token

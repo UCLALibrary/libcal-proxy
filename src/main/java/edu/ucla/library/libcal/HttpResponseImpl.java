@@ -12,6 +12,9 @@ import io.vertx.ext.web.client.HttpResponse;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * A class that implements the {@link HttpResponse} interface.
+ */
 public class HttpResponseImpl<T> implements HttpResponse<T> {
 
     /**
@@ -68,8 +71,21 @@ public class HttpResponseImpl<T> implements HttpResponse<T> {
      */
     private final List<String> myRedirects;
 
-    public HttpResponseImpl(final HttpVersion aVersion, final int aStatusCode, final String aStatusMessage, final MultiMap aHeaders,
-            final MultiMap aTrailers, final List<String> aCookies, final T aBody, final List<String> aRedirects) {
+    /**
+     * Creates an object that embodies an HTTP response.
+     *
+     * @param aVersion An HTTP protocol version
+     * @param aStatusCode An HTTP status code
+     * @param aStatusMessage An HTTP status message
+     * @param aHeaders A set of HTTP headers
+     * @param aTrailers A set of HTTP trailers
+     * @param aCookies A set of HTTP cookies
+     * @param aBody A body of an HTTP response
+     * @param aRedirects A set of followed redirects of an HTTP response
+     */
+    public HttpResponseImpl(final HttpVersion aVersion, final int aStatusCode, final String aStatusMessage,
+            final MultiMap aHeaders, final MultiMap aTrailers, final List<String> aCookies, final T aBody,
+            final List<String> aRedirects) {
         myVersion = aVersion;
         myStatusCode = aStatusCode;
         myStatusMessage = aStatusMessage;
@@ -96,8 +112,8 @@ public class HttpResponseImpl<T> implements HttpResponse<T> {
     }
 
     @Override
-    public String getHeader(String headerName) {
-        return myHeaders.get(headerName);
+    public String getHeader(final String aHeaderName) {
+        return myHeaders.get(aHeaderName);
     }
 
     @Override
@@ -106,8 +122,8 @@ public class HttpResponseImpl<T> implements HttpResponse<T> {
     }
 
     @Override
-    public String getTrailer(String trailerName) {
-        return myTrailers.get(trailerName);
+    public String getTrailer(final String aTrailerName) {
+        return myTrailers.get(aTrailerName);
     }
 
     @Override
