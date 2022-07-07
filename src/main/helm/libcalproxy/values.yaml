@@ -2,14 +2,14 @@ replicaCount: 1
 image:
   repository: uclalibrary/libcal-proxy
   pullPolicy: IfNotPresent
-  tag: 5.0.5-1
+  tag: ""
 imagePullSecrets: []
-nameOverride: ''
-fullnameOverride: ''
+nameOverride: ""
+fullnameOverride: ""
 serviceAccount:
   create: true
   annotations: {}
-  name: ''
+  name: ""
 podAnnotations: {}
 podSecurityContext: {}
 securityContext: {}
