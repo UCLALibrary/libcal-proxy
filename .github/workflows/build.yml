@@ -40,6 +40,7 @@ jobs:
           echo "CM_HTTP_RESP=${HTTP_RESP} >> ${GITHUB_ENV}"
       - name: DEBUG
         run: |
+          printenv
           echo ${{ env.CM_HTTP_RESP }}
       - name: Deploy Helm Chart
         if: env.CM_HTTP_RESP == 404
