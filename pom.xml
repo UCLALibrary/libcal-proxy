@@ -80,6 +80,22 @@
     <libcal.auth.expires_in.padding></libcal.auth.expires_in.padding>
     <libcal.allowed.ips></libcal.allowed.ips>
 
+    <!-- Helm Maven Plugin -->
+    <helm.maven.plugin.version>2.10.0</helm.maven.plugin.version>
+    <helm.version>3.8.0</helm.version>
+    <helm.maven.repo.publish.url></helm.maven.repo.publish.url>
+    <helm.maven.repo.username></helm.maven.repo.username>
+    <helm.maven.repo.password></helm.maven.repo.password>
+
+    <!-- LibCalProxy Helm Chart Properties -->
+    <libcal.helm.chart.name>libcalproxy</libcal.helm.chart.name>
+
+    <!-- Increment this version number when logic change is made to src/main/helm/libcalproxy -->
+    <libcal.helm.chart.version>1.0.0</libcal.helm.chart.version>
+
+    <!-- This can be left alone as this will set a default image tag in the helm chart relative to the release tag -->
+    <libcal.helm.chart.app.version>${revision}</libcal.helm.chart.app.version>
+
   </properties>
 
   <dependencyManagement>
@@ -452,6 +468,31 @@
                 <password>${docker.registry.password}</password>
               </authConfig>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Integrate Helm Maven Plugin -->
+      <plugin>
+        <groupId>com.deviceinsight.helm</groupId>
+        <artifactId>helm-maven-plugin</artifactId>
+        <version>${helm.maven.plugin.version}</version>
+        <configuration>
+          <chartName>libcalproxy</chartName>
+          <chartVersion>${libcal.helm.chart.version}</chartVersion>
+          <chartPublishUrl>${helm.maven.repo.publish.url}</chartPublishUrl>
+          <chartRepoUsername>${helm.maven.repo.username}</chartRepoUsername>
+          <chartRepoPassword>${helm.maven.repo.password}</chartRepoPassword>
+          <helmVersion>${helm.version}</helmVersion>
+          <strictLint>true</strictLint>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>package</goal>
+              <goal>lint</goal>
+              <goal>template</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>

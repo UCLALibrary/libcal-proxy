@@ -2,5 +2,5 @@ apiVersion: v2
 name: libcalproxy
 description: A Helm chart for to deploy libcalproxy into Kubernetes
 type: application
-version: ${chart.version}
+version: ${libcal.helm.chart.version}
 appVersion: "${revision}"

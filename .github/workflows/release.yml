@@ -51,3 +51,19 @@ jobs:
             -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token"
             -Dlibcal.base.url="https://calendar.library.ucla.edu"
             -Dlibcal.allowed.ips="127.0.0.0/16,10.10.10.0/27"
+      - name: Detect New Helm Chart
+        run: |
+          CURRENT_CHART_VERSION=$(cat pom.xml | grep -oPm1 "(?<=<libcal.helm.chart.version>)[^<]+")
+          HTTP_RESP=$(curl -s -w "%{http_code}" -o /dev/null https://chartmuseum.library.ucla.edu/api/charts/libcalproxy/${CURRENT_CHART_VERSION})
+          echo "CM_HTTP_RESP=${HTTP_RESP}" >> $GITHUB_ENV
+      - name: Deploy Helm Chart
+        if: env.CM_HTTP_RESP == 404
+        uses: samuelmeuli/action-maven-publish@201a45a3f311b2ee888f252ba9f4194257545709 # v1.4.0
+        with:
+          maven_goals_phases: "com.deviceinsight.helm:helm-maven-plugin:2.10.0:deploy"
+          maven_profiles: default
+          maven_args: >
+            -Drevision=${{ github.event.release.tag_name }}
+            -Dhelm.maven.repo.publish.url=${{ secrets.UCLALIB_HELM_CM_PUBLISH_URL }}
+            -Dhelm.maven.repo.username=${{ secrets.UCLALIB_HELM_CM_USERNAME }}
+            -Dhelm.maven.repo.password=${{ secrets.UCLALIB_HELM_CM_PASSWORD }}

@@ -5,9 +5,7 @@ metadata:
   labels:
     {{- include "libcalproxy.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
+  replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
       {{- include "libcalproxy.selectorLabels" . | nindent 6 }}
