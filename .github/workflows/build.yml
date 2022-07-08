@@ -48,4 +48,4 @@ jobs:
           maven_goals_phases: "com.deviceinsight.helm:helm-maven-plugin:2.10.0:deploy"
           maven_profiles: default
           maven_args: >
-            -Drevision=${{ github.event.release.tag_name }}
+            -Drevision=1.0.0
