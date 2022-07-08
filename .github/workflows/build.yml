@@ -43,5 +43,6 @@ jobs:
         uses: samuelmeuli/action-maven-publish@201a45a3f311b2ee888f252ba9f4194257545709 # v1.4.0
         with:
           maven_goals_phases: "com.deviceinsight.helm:helm-maven-plugin:2.10.0:deploy"
+          maven_profiles: default
           maven_args: >
             -Drevision=${{ github.event.release.tag_name }}
