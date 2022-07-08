@@ -83,9 +83,9 @@
     <!-- Helm Maven Plugin -->
     <helm.maven.plugin.version>2.10.0</helm.maven.plugin.version>
     <helm.version>3.8.0</helm.version>
-    <helm.maven.repo.publish.url>${UCLALIB_HELM_CM_PUBLISH_URL}</helm.maven.repo.publish.url>
-    <helm.maven.repo.username>${UCLALIB_HELM_CM_USERNAME}</helm.maven.repo.username>
-    <helm.maven.repo.password>${UCLALIB_HELM_CM_PASSWORD}</helm.maven.repo.password>
+    <helm.maven.repo.publish.url></helm.maven.repo.publish.url>
+    <helm.maven.repo.username></helm.maven.repo.username>
+    <helm.maven.repo.password></helm.maven.repo.password>
 
     <!-- LibCalProxy Helm Chart Properties -->
     <libcal.helm.chart.name>libcalproxy</libcal.helm.chart.name>
