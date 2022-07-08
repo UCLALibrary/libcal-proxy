@@ -39,10 +39,6 @@ jobs:
           HTTP_RESP=$(curl -s -w "%{http_code}" -o /dev/null https://chartmuseum.library.ucla.edu/api/charts/libcalproxy/${CURRENT_CHART_VERSION})
           echo "CM_HTTP_RESP=${HTTP_RESP}" >> $GITHUB_ENV
           echo "CURRENT_CHART_VERSION=${CURRENT_CHART_VERSION}" >> $GITHUB_ENV
-      - name: DEBUG
-        run: |
-          echo "${{ env.CURRENT_CHART_VERSION }}"
-          echo "${{ env.CM_HTTP_RESP }}"
       - name: Deploy Helm Chart
         if: env.CM_HTTP_RESP == 404
         uses: samuelmeuli/action-maven-publish@201a45a3f311b2ee888f252ba9f4194257545709 # v1.4.0
@@ -50,7 +46,7 @@ jobs:
           maven_goals_phases: "com.deviceinsight.helm:helm-maven-plugin:2.10.0:deploy"
           maven_profiles: default
           maven_args: >
-            -Drevision=${{ env.CURRENT_CHART_VERSION }}
+            -Drevision=5.0.0
             -Dhelm.maven.repo.publish.url=${{ secrets.UCLALIB_HELM_CM_PUBLISH_URL }}
             -Dhelm.maven.repo.username=${{ secrets.UCLALIB_HELM_CM_USERNAME }}
             -Dhelm.maven.repo.password=${{ secrets.UCLALIB_HELM_CM_PASSWORD }}
