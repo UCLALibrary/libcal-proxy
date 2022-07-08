@@ -37,7 +37,7 @@ jobs:
         run: |
           CURRENT_CHART_VERSION=$(cat pom.xml | grep -i '<libcal.helm.chart.version>' | xargs | grep -oPm1 "(?<=<libcal.helm.chart.version>)[^<]+")
           HTTP_RESP=$(curl -s -w "%{http_code}" -o /dev/null https://chartmuseum.library.ucla.edu/api/charts/libcalproxy/${CURRENT_CHART_VERSION})
-          echo "CM_HTTP_RESP=${HTTP_RESP}" >> GITHUB_ENV
+          echo "CM_HTTP_RESP=${HTTP_RESP}" >> $GITHUB_ENV
       - name: DEBUG
         run: |
           echo "${{ env.CM_HTTP_RESP }}"
