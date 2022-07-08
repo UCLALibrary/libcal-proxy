@@ -38,12 +38,10 @@ jobs:
           CURRENT_CHART_VERSION=$(cat pom.xml | grep -i '<libcal.helm.chart.version>' | xargs | grep -oPm1 "(?<=<libcal.helm.chart.version>)[^<]+")
           HTTP_RESP=$(curl -s -w "%{http_code}" -o /dev/null https://chartmuseum.library.ucla.edu/api/charts/libcalproxy/${CURRENT_CHART_VERSION})
           echo "CM_HTTP_RESP=${HTTP_RESP}" >> $GITHUB_ENV
-      - name: DEBUG
-        run: |
-          echo "${{ env.CM_HTTP_RESP }}"
       - name: Deploy Helm Chart
         if: env.CM_HTTP_RESP == 404
         uses: samuelmeuli/action-maven-publish@201a45a3f311b2ee888f252ba9f4194257545709 # v1.4.0
         with:
+          maven_goals_phases: "com.deviceinsight.helm:helm-maven-plugin:2.10.0:deploy"
           maven_args: >
-            -Drevision=${{ github.event.release.tag_name }} com.deviceinsight.helm:helm-maven-plugin:2.10.0:deploy
+            -Drevision=${{ github.event.release.tag_name }}
