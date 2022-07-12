@@ -1,9 +1,14 @@
 
 package edu.ucla.library.libcal;
 
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
+
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpVersion;
+import io.vertx.core.json.DecodeException;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.client.HttpResponse;
 
@@ -13,6 +18,11 @@ import java.util.List;
  * A class that implements the {@link HttpResponse} interface.
  */
 public class HttpResponseImpl implements HttpResponse<String> {
+
+    /**
+     * The class's logger.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpResponseImpl.class, MessageCodes.BUNDLE);
 
     /**
      * The HTTP protocol version of an HTTP response.
@@ -126,7 +136,7 @@ public class HttpResponseImpl implements HttpResponse<String> {
 
     @Override
     public Buffer bodyAsBuffer() {
-        throw new UnsupportedOperationException();
+        return Buffer.buffer(myBody);
     }
 
     @Override
@@ -136,7 +146,12 @@ public class HttpResponseImpl implements HttpResponse<String> {
 
     @Override
     public JsonArray bodyAsJsonArray() {
-        throw new UnsupportedOperationException();
+        final Object value = Json.decodeValue(myBody);
+        if (value instanceof JsonArray) {
+            return (JsonArray) value;
+        } else {
+            throw new DecodeException(LOGGER.getMessage(MessageCodes.LCP_008, value.getClass().getName()));
+        }
     }
 
 }
