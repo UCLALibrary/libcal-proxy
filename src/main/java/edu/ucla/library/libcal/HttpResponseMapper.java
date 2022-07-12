@@ -9,7 +9,6 @@ import io.vertx.core.http.HttpVersion;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpResponse;
-import io.vertx.ext.web.client.impl.HttpResponseImpl;
 
 /**
  * A mapper that allows for sending and receiving {@link HttpResponse}s over the event bus.
@@ -82,7 +81,7 @@ public class HttpResponseMapper {
      */
     @SuppressWarnings("unchecked")
     public HttpResponse<String> decode(final JsonObject aJsonObject) {
-        return new HttpResponseImpl<String>( //
+        return new HttpResponseImpl( //
                 HttpVersion.valueOf(aJsonObject.getString(HTTP_VERSION)), //
                 aJsonObject.getInteger(STATUS_CODE).intValue(), //
                 aJsonObject.getString(STATUS_MESSAGE), //

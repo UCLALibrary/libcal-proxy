@@ -12,5 +12,6 @@
   <entry key="LCP_005">Authentication failed: {}</entry>
   <entry key="LCP_006">Failure retrieving LibCal content: {}</entry>
   <entry key="LCP_007">Request came from unauthorized IP: {}</entry>
+  <entry key="LCP_008">Invalid Json Object decoded as: {}</entry>
 
 </properties>
