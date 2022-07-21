@@ -50,11 +50,6 @@ public class ProxyHandlerIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyHandlerTest.class, MessageCodes.BUNDLE);
 
     /**
-     * The default port that the application listens on.
-     */
-    private static String DEFAULT_PORT = "8888";
-
-    /**
      * The fake client and proxy IPs in X-FORWARDED header.
      */
     private static String GOOD_FORWARDS = "127.0.0.1,123.456.789.0";
