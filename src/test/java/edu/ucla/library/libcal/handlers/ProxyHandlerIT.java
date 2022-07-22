@@ -47,7 +47,7 @@ public class ProxyHandlerIT {
     /**
      * The test's logger.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyHandlerTest.class, MessageCodes.BUNDLE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyHandlerIT.class, MessageCodes.BUNDLE);
 
     /**
      * The fake client and proxy IPs in X-FORWARDED header.
