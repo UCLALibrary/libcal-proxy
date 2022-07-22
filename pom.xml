@@ -323,7 +323,7 @@
         <configuration>
           <argLine>${jacoco.agent.arg}</argLine>
           <environmentVariables>
-            <HTTP_PORT>${http.port}</HTTP_PORT>
+            <HTTP_PORT>${http.test.port}</HTTP_PORT>
             <LIBCAL_CLIENT1_ID>${libcal.client1.id}</LIBCAL_CLIENT1_ID>
             <LIBCAL_CLIENT2_ID>${libcal.client2.id}</LIBCAL_CLIENT2_ID>
             <LIBCAL_CLIENT1_SECRET>${libcal.client1.secret}</LIBCAL_CLIENT1_SECRET>
