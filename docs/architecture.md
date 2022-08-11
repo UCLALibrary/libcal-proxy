@@ -25,7 +25,7 @@ It consists of:
 
 ## Functional Overview
 The proxy exists to insulate cients from the process of retrieving an OAuth token from the LibCal OAuth provider. Client calls are identical to direct calls to a LibCal API, except for two points: 
-1) "proxy" is prefixed to the UCLA LibCal URL (e.g.: if the direct LibCal call is https://calendar.library.ucla.edu/1.1/event_search?search=*, the proxy call would be https://proxy.calendar.library.ucla.edu/1.1/event_search?search=*)
+1) "proxy" is prefixed to the UCLA LibCal URL (e.g.: if the direct LibCal call is https://calendar.library.ucla.edu/1.1/event_search?search=X, the proxy call would be https://proxy.calendar.library.ucla.edu/1.1/event_search?search=X)
 2) No Authorization header is constructed by the client
 
 Otherwise, the client builds a request URL and submits is via the same HTTP verb that would be used in a direct call to LibCal.
