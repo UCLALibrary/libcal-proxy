@@ -32,6 +32,7 @@
     <freelib.maven.version>0.3.1</freelib.maven.version>
 
     <!-- Security update overrides -->
+    <snakeyaml.version>1.31</snakeyaml.version>
     <slf4j.ext.version>1.7.36</slf4j.ext.version>
     <jackson.databind.version>2.13.2.1</jackson.databind.version>
 
@@ -178,6 +179,11 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.databind.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>${snakeyaml.version}</version>
     </dependency>
 
     <!-- Below dependencies only used for testing -->
