@@ -8,15 +8,19 @@ ARG ALPINE_TAG
 # Pull our source image to use as the base for this image
 FROM alpine:${ALPINE_TAG}
 
+# Our JDK version is managed in the project's POM file as 'jdk.version'
+ARG JDK_VERSION
+
 # Store some project metadata in the Docker image
 LABEL ContainerName=${project.name} ContainerSourceCode=${project.url}
 
 # Copy files from our build environment into the container
 WORKDIR /opt/${project.artifactId}
 COPY maven/${project.artifactId}-${project.version}.jar /opt/${project.artifactId}/
+COPY maven/logback.xml /etc/${project.artifactId}/
 
 # Install packages and setup the application's user
-RUN apk add openjdk11 --quiet --no-cache \
+RUN apk add "openjdk${JDK_VERSION}" --quiet --no-cache \
   && addgroup -S ${project.artifactId} \
   && adduser -S ${project.artifactId} -G ${project.artifactId} \
   && chown ${project.artifactId}:${project.artifactId} /opt/${project.artifactId}
@@ -27,9 +31,9 @@ USER ${project.artifactId}
 # The service's exposed port
 EXPOSE ${HTTP_PORT}
 
-# For container debugging
-#ENTRYPOINT ["tail", "-f", "/dev/null"]
-
-# Run the service
+# Configure and run the service
 ENV JAR_PATH="/opt/${project.artifactId}/${project.artifactId}-${project.version}.jar"
-CMD ["sh", "-c", "exec java ${JAVA_OPTS} -jar ${JAR_PATH}"]
+ENV LOGGING_CONFIG="-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory"
+ENV LOGBACK_CONFIG="-Dlogback.configurationFile=/etc/${project.artifactId}/logback.xml"
+
+CMD ["sh", "-c", "exec java \"${JAVA_OPTS}\" \"${LOGGING_CONFIG}\" \"${LOGBACK_CONFIG}\" -jar \"${JAR_PATH}\""]

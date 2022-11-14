@@ -20,7 +20,6 @@ import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -63,9 +62,9 @@ public class MainVerticle extends AbstractVerticle {
 
     @Override
     public void start(final Promise<Void> aPromise) {
-        final ConfigRetriever cr = ConfigRetriever.create(vertx).setConfigurationProcessor(Config::removeEmptyString);
+        final ConfigRetriever configRetriever = ConfigRetriever.create(vertx);
 
-        cr.getConfig().compose(config -> {
+        configRetriever.setConfigurationProcessor(Config::removeEmptyString).getConfig().compose(config -> {
             return OAuthTokenService.create(vertx, config).compose(service -> {
                 myOAuthTokenService = new ServiceBinder(vertx).setAddress(OAuthTokenService.ADDRESS)
                         .register(OAuthTokenService.class, service);
@@ -85,7 +84,7 @@ public class MainVerticle extends AbstractVerticle {
     @Override
     public void stop(final Promise<Void> aPromise) {
         myServer.close().compose(unused -> myOAuthTokenService.unregister())
-                .compose(alsoUnused -> myLibCalProxyService.unregister()).onSuccess(unused -> aPromise.complete())
+                .compose(alsoUnused -> myLibCalProxyService.unregister()).onSuccess(aPromise::complete)
                 .onFailure(aPromise::fail);
     }
 
@@ -110,7 +109,7 @@ public class MainVerticle extends AbstractVerticle {
             // Empty-path router to handle the variable-format calls to ProxyHandler
             router = routeBuilder.createRouter();
             router.allowForward(AllowForwardHeaders.X_FORWARD);
-            // Add body handler so we can retreve incoming body from Apps client request
+            // Add body handler so we can retrieve incoming body from Apps client request
             router.route().handler(postBodyHandler).handler(new ProxyHandler(getVertx(), aConfig));
 
             myServer = getVertx().createHttpServer(serverOptions).requestHandler(router);
@@ -128,15 +127,5 @@ public class MainVerticle extends AbstractVerticle {
     private String getRouterSpec() {
         final File specFile = new File(API_SPEC);
         return specFile.exists() ? API_SPEC : specFile.getName();
-    }
-
-    /**
-     * Starts up the main verticle.
-     *
-     * @param aArgsArray An array of arguments
-     */
-    @SuppressWarnings("UncommentedMain")
-    public static void main(final String[] aArgsArray) {
-        Vertx.vertx().deployVerticle(new MainVerticle());
     }
 }

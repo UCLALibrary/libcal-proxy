@@ -4,7 +4,7 @@ on:
     types: [ published ]
 jobs:
   publish:
-    name: Maven Artifact Publisher (JDK 11)
+    name: Maven Artifact Publisher (JDK 17)
     runs-on: ubuntu-latest
     env:
       AUTORELEASE_ARTIFACT: ${{ secrets.AUTORELEASE_ARTIFACT }}
@@ -12,12 +12,12 @@ jobs:
     steps:
       - name: Check out source code
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # v3.0.2
-      - name: Install JDK 11
+      - name: Install JDK 17
         uses: actions/setup-java@860f60056505705214d223b91ed7a30f173f6142 # v3.3.0
         with:
           cache: maven
           distribution: 'adopt'
-          java-version: 11
+          java-version: 17
       - name: Set autorelease config
         if: env.AUTORELEASE_ARTIFACT == null
         run: echo "AUTORELEASE_ARTIFACT=false" >> $GITHUB_ENV
