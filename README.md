@@ -46,6 +46,12 @@ You can also run the application directly on the host machine by defining enviro
     LIBCAL_ALLOWED_IPS="127.0.0.0/16" \
     mvn vertx:run
 
+If you want to fine tune the application's configuration, the additional options can also be supplied with the above:
+
+    LIBCAL_AUTH_RETRY_COUNT=3 \
+    LIBCAL_AUTH_RETRY_DELAY=10 \
+    LIBCAL_AUTH_EXPIRES_IN_PADDING=300 \
+
 ## Contact
 
 We use an internal ticketing system, but have left the GitHub [issues](https://github.com/UCLALibrary/libcal-proxy/issues)
