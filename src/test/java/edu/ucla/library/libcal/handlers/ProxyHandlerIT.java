@@ -224,7 +224,7 @@ public class ProxyHandlerIT {
         formData.put("q3", "Staff");
 
         // Set required POST parameters + form data
-        payload.put("registration_type", "online");
+        payload.put("registration_type", "in-person");
         payload.put("form", formData);
         payload.put("no_email", 1);
 
