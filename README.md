@@ -46,7 +46,7 @@ You can also run the application directly on the host machine by defining enviro
     LIBCAL_ALLOWED_IPS="127.0.0.0/16" \
     mvn vertx:run
 
-If you want to fine tune the application's configuration, the additional options can also be supplied with the above:
+If you want to fine tune the application's configuration, any of the additional options below can also be supplied:
 
     LIBCAL_AUTH_RETRY_COUNT=3 \
     LIBCAL_AUTH_RETRY_DELAY=10 \
