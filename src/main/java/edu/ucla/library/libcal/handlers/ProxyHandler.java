@@ -1,15 +1,20 @@
 
 package edu.ucla.library.libcal.handlers;
 
+import static edu.ucla.library.libcal.Constants.LOCAL_HOST;
 import static edu.ucla.library.libcal.MediaType.APPLICATION_JSON;
 import static info.freelibrary.util.Constants.COMMA;
 import static info.freelibrary.util.Constants.EMPTY;
+
+import java.util.regex.Pattern;
 
 import com.github.veqryn.collect.Cidr4Trie;
 import com.github.veqryn.net.Cidr4;
 import com.github.veqryn.net.Ip4;
 
 import info.freelibrary.util.HTTP;
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.libcal.Config;
 import edu.ucla.library.libcal.Constants;
@@ -19,12 +24,10 @@ import edu.ucla.library.libcal.MessageCodes;
 import edu.ucla.library.libcal.services.LibCalProxyService;
 import edu.ucla.library.libcal.services.OAuthTokenService;
 
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
-
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RequestBody;
@@ -44,6 +47,12 @@ public class ProxyHandler implements Handler<RoutingContext> {
      * A constant for the "?" to lead an HTTP query string.
      */
     private static final String QUESTION_MARK = "?";
+
+    /** The LibCal event registration endpoint. */
+    private static final Pattern REGISTRATION = Pattern.compile("/api/1.1/events/[a-zA-Z0-9]+/register");
+
+    /** The LibCal event form endpoint. */
+    private static final Pattern EVENT_FORM = Pattern.compile("/api/1.1/events/form/[a-zA-Z0-9]+");
 
     /**
      * The handler's copy of the Vert.x instance.
@@ -90,9 +99,10 @@ public class ProxyHandler implements Handler<RoutingContext> {
         final String method = aContext.request().method().name();
         final RequestBody payload = aContext.body();
         final String originalClientIP = aContext.request().remoteAddress().hostAddress();
-        final Cidr4Trie<String> allowedIPs = buildAllowedNetwork(myConfig.getString(Config.ALLOWED_IPS).split(COMMA));
+        final String[] allowedIPsArray = myConfig.getString(Config.ALLOWED_IPS, LOCAL_HOST + "/32").split(COMMA);
+        final Cidr4Trie<String> allowedIPs = buildAllowedNetwork(allowedIPsArray);
 
-        if (isOnNetwork(new Ip4(originalClientIP), allowedIPs)) {
+        if (isOnNetwork(new Ip4(originalClientIP), allowedIPs) || isOpenEndpoint(path, method)) {
             final String receivedQuery = path.concat(
                     aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
             myTokenProxy.getBearerToken().compose(token -> {
@@ -155,9 +165,11 @@ public class ProxyHandler implements Handler<RoutingContext> {
      */
     private Cidr4Trie<String> buildAllowedNetwork(final String... anIpArray) {
         final Cidr4Trie<String> allowedNetwork = new Cidr4Trie<>();
+
         for (final String address : anIpArray) {
             allowedNetwork.put(new Cidr4(address), address);
         }
+
         return allowedNetwork;
     }
 
@@ -170,5 +182,24 @@ public class ProxyHandler implements Handler<RoutingContext> {
      */
     private boolean isOnNetwork(final Ip4 aIpAddress, final Cidr4Trie<String> aNetworkSubnets) {
         return aNetworkSubnets.shortestPrefixOfValue(new Cidr4(aIpAddress), true) != null;
+    }
+
+    /**
+     * Checks if a path and method combination are allowed to skip the IP access check.
+     *
+     * @param aPath A requested path
+     * @param aMethod A type of request
+     * @return True if the path and method combination are allowed; else, false
+     */
+    private boolean isOpenEndpoint(final String aPath, final String aMethod) {
+        boolean isAllowed = false;
+
+        if (HttpMethod.POST.name().equals(aMethod)) {
+            isAllowed = REGISTRATION.matcher(aPath).matches();
+        } else if (HttpMethod.GET.name().equals(aMethod)) {
+            isAllowed = EVENT_FORM.matcher(aPath).matches();
+        }
+
+        return isAllowed;
     }
 }

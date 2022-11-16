@@ -27,28 +27,25 @@
   </issueManagement>
 
   <properties>
-    <vertx.version>4.3.1</vertx.version>
-    <freelib.utils.version>3.0.1</freelib.utils.version>
-    <freelib.maven.version>0.3.1</freelib.maven.version>
-
-    <!-- Security update overrides -->
-    <snakeyaml.version>1.31</snakeyaml.version>
-    <slf4j.ext.version>1.7.36</slf4j.ext.version>
-    <jackson.databind.version>2.13.2.1</jackson.databind.version>
+    <vertx.version>4.3.4</vertx.version>
+    <freelib.utils.version>3.3.0</freelib.utils.version>
+    <freelib.maven.version>0.4.3</freelib.maven.version>
+    <logback.version>1.4.4</logback.version>
 
     <!-- Build plugin versions -->
     <vertx.plugin.version>1.0.27</vertx.plugin.version>
     <clean.plugin.version>3.1.0</clean.plugin.version>
-    <docker.plugin.version>0.39.1</docker.plugin.version>
+    <docker.plugin.version>0.40.2</docker.plugin.version>
     <deploy.plugin.version>2.8.2</deploy.plugin.version>
     <jar.plugin.version>3.2.2</jar.plugin.version>
     <cidr.ip.version>1.0.1</cidr.ip.version>
 
     <!-- Test dependency versions -->
-    <junit.version>5.8.0-M1</junit.version>
+    <junit.version>5.8.0</junit.version>
 
     <!-- Docker component versions -->
-    <docker.alpine.version>3.15.3</docker.alpine.version>
+    <docker.alpine.version>3.16.2</docker.alpine.version>
+    <jdk.version>17</jdk.version>
 
     <!-- Name of the main Vert.x verticle -->
     <vertx.verticle>edu.ucla.library.libcal.verticles.MainVerticle</vertx.verticle>
@@ -57,8 +54,9 @@
     <http.port>8888</http.port>
     <heap.size>2g</heap.size>
 
-    <!-- The default logging level for the application -->
-    <logLevel>ERROR</logLevel>
+    <!-- The default logging levels for the application -->
+    <logLevel>INFO</logLevel>
+    <testLogLevel>INFO</testLogLevel>
 
     <!-- Testing properties -->
     <live.test.reloads>false</live.test.reloads>
@@ -76,10 +74,8 @@
     <libcal.client2.secret>A_CLIENT2_SECRET</libcal.client2.secret>
     <libcal.token.endpoint>A_TOKEN_ENDPOINT</libcal.token.endpoint>
     <libcal.base.url>A_BASE_URL</libcal.base.url>
-    <libcal.auth.retry.count></libcal.auth.retry.count>
-    <libcal.auth.retry.delay></libcal.auth.retry.delay>
-    <libcal.auth.expires_in.padding></libcal.auth.expires_in.padding>
-    <libcal.allowed.ips></libcal.allowed.ips>
+    <libcal.auth.retry.count>3</libcal.auth.retry.count> <!-- Just for testing purposes -->
+    <libcal.allowed.ips>127.0.0.0/16</libcal.allowed.ips> <!-- Default for dev purposes -->
 
     <!-- Helm Maven Plugin -->
     <helm.maven.plugin.version>2.10.0</helm.maven.plugin.version>
@@ -169,23 +165,6 @@
       <version>${cidr.ip.version}</version>
     </dependency>
 
-    <!-- Below is a dependency that needs updating due to security issue (may be able to remove in future) -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-ext</artifactId>
-      <version>${slf4j.ext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.databind.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.yaml</groupId>
-      <artifactId>snakeyaml</artifactId>
-      <version>${snakeyaml.version}</version>
-    </dependency>
-
     <!-- Below dependencies only used for testing -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -200,6 +179,23 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <targetPath>${project.basedir}/target/configs</targetPath>
+        <filtering>true</filtering>
+        <includes>
+          <include>logback.xml</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>logback.xml</exclude>
+        </excludes>
+      </resource>
+    </resources>
     <testResources>
       <testResource>
         <directory>src/test/resources</directory>
@@ -316,10 +312,9 @@
             <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
             <LIBCAL_BASE_URL>${libcal.base.url}</LIBCAL_BASE_URL>
             <LIBCAL_AUTH_RETRY_COUNT>${libcal.auth.retry.count}</LIBCAL_AUTH_RETRY_COUNT>
-            <LIBCAL_AUTH_RETRY_DELAY>${libcal.auth.retry.delay}</LIBCAL_AUTH_RETRY_DELAY>
-            <LIBCAL_AUTH_EXPIRES_IN_PADDING>${libcal.auth.expires_in.padding}</LIBCAL_AUTH_EXPIRES_IN_PADDING>
             <LIBCAL_ALLOWED_IPS>${libcal.allowed.ips}</LIBCAL_ALLOWED_IPS>
           </environmentVariables>
+          <skipAfterFailureCount>1</skipAfterFailureCount>
         </configuration>
       </plugin>
 
@@ -337,13 +332,12 @@
             <LIBCAL_TOKEN_ENDPOINT>${libcal.token.endpoint}</LIBCAL_TOKEN_ENDPOINT>
             <LIBCAL_BASE_URL>${libcal.base.url}</LIBCAL_BASE_URL>
             <LIBCAL_AUTH_RETRY_COUNT>${libcal.auth.retry.count}</LIBCAL_AUTH_RETRY_COUNT>
-            <LIBCAL_AUTH_RETRY_DELAY>${libcal.auth.retry.delay}</LIBCAL_AUTH_RETRY_DELAY>
-            <LIBCAL_AUTH_EXPIRES_IN_PADDING>${libcal.auth.expires_in.padding}</LIBCAL_AUTH_EXPIRES_IN_PADDING>
             <LIBCAL_ALLOWED_IPS>${libcal.allowed.ips}</LIBCAL_ALLOWED_IPS>
           </environmentVariables>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
           </systemPropertyVariables>
+          <skipAfterFailureCount>1</skipAfterFailureCount>
         </configuration>
       </plugin>
 
@@ -363,6 +357,8 @@
         <artifactId>docker-maven-plugin</artifactId>
         <version>${docker.plugin.version}</version>
         <configuration>
+          <logStdout>true</logStdout>
+          <verbose>true</verbose>
           <imagesMap>
             <image>
               <!-- Registry account, if supplied, must end in a slash (e.g. "account/") -->
@@ -371,6 +367,7 @@
               <build>
                 <args>
                   <ALPINE_TAG>${docker.alpine.version}</ALPINE_TAG>
+                  <JDK_VERSION>${jdk.version}</JDK_VERSION>
                 </args>
                 <dockerFile>${project.basedir}/src/main/docker/Dockerfile</dockerFile>
                 <compression>gzip</compression>
@@ -384,6 +381,15 @@
                         <outputDirectory>.</outputDirectory>
                         <includes>
                           <include>${project.artifactId}-${project.version}.jar</include>
+                        </includes>
+                      </fileSet>
+                      <fileSet>
+                        <!-- The directory where we can find our Maven-built artifact -->
+                        <directory>${project.basedir}/target/configs</directory>
+                        <!-- We don't want directory structure on output, just the artifact -->
+                        <outputDirectory>.</outputDirectory>
+                        <includes>
+                          <include>logback.xml</include>
                         </includes>
                       </fileSet>
                     </fileSets>
@@ -615,6 +621,14 @@
                 <!-- Pass system props because the plugin doesn't take ENVs (and the config library doesn't care) -->
                 <jvmArg>-DHTTP_PORT=${http.test.port}</jvmArg>
               </jvmArgs>
+              <runArgs>
+                <runArg>-Dlibcal.client1.id="${libcal.client1.id}"</runArg>
+                <runArg>-Dlibcal.client1.secret="${libcal.client1.secret}"</runArg>
+                <runArg>-Dlibcal.client2.id="${libcal.client2.id}"</runArg>
+                <runArg>-Dlibcal.client2.secret="${libcal.client2.secret}"</runArg>
+                <runArg>-Dlibcal.token.endpoint="${libcal.token.endpoint}"</runArg>
+                <runArg>-Dlibcal.base.url="${libcal.base.url}"</runArg>
+              </runArgs>
             </configuration>
           </plugin>
         </plugins>
@@ -682,7 +696,8 @@
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>7.2.2</version>
+    <version>8.0.0</version>
   </parent>
 
 </project>
+

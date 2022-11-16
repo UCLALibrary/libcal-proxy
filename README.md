@@ -17,11 +17,12 @@ To build the project, which includes running a bunch of tests, type:
         -Dlibcal.client2.secret="0123456789abcdef0123456789abcdef" \
         -Dlibcal.token.endpoint="https://calendar.library.ucla.edu/1.1/oauth/token" \
         -Dlibcal.base.url="https://calendar.library.ucla.edu" \
-        -Dlibcal.auth.retry.count=3 \
-        -Dlibcal.auth.retry.delay=10 \
-        -Dlibcal.auth.expires_in.padding=300 \ 
         -Dlibcal.allowed.ips="127.0.0.0/16" # A comma-separated list of IPv4 CIDR blocks
                                             # Note that single IP addresses must be suffixed with /32
+
+To find the `libcal.client*` values, check your LibCal instance; you may need to create them if they do not exist.
+
+For authenticated UCLA people, these can be found at https://calendar.library.ucla.edu/admin/api/authentication.
 
 ## Running in Development
 
@@ -42,11 +43,14 @@ You can also run the application directly on the host machine by defining enviro
     LIBCAL_CLIENT2_SECRET=0123456789abcdef0123456789abcdef \
     LIBCAL_TOKEN_ENDPOINT=https://calendar.library.ucla.edu/1.1/oauth/token \
     LIBCAL_BASE_URL=https://calendar.library.ucla.edu \
+    LIBCAL_ALLOWED_IPS="127.0.0.0/16" \
+    mvn vertx:run
+
+If you want to fine tune the application's configuration, any of the additional options below can also be supplied:
+
     LIBCAL_AUTH_RETRY_COUNT=3 \
     LIBCAL_AUTH_RETRY_DELAY=10 \
     LIBCAL_AUTH_EXPIRES_IN_PADDING=300 \
-    LIBCAL_ALLOWED_IPS="127.0.0.0/16" \
-    mvn vertx:run
 
 ## Contact
 
