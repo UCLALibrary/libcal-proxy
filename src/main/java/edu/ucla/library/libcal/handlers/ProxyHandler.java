@@ -83,16 +83,24 @@ public class ProxyHandler implements Handler<RoutingContext> {
     private final HttpResponseMapper myMapper = new HttpResponseMapper();
 
     /**
+     * The collection of subnets that contain authorized client IP addresses.
+     */
+    private final Cidr4Trie<String> myAllowedIPs;
+
+    /**
      * Creates a handler that returns a status response.
      *
      * @param aVertx A Vert.x instance
      * @param aConfig Application config stored in JSON
      */
     public ProxyHandler(final Vertx aVertx, final JsonObject aConfig) {
+        final String[] allowedIPsArray = aConfig.getString(Config.ALLOWED_IPS, LOCAL_HOST + "/32").split(COMMA);
+
         myVertx = aVertx;
         myConfig = aConfig;
         myApiProxy = LibCalProxyService.createProxy(myVertx);
         myTokenProxy = OAuthTokenService.createProxy(myVertx);
+        myAllowedIPs = buildAllowedNetwork(allowedIPsArray);
     }
 
     @Override
@@ -102,10 +110,8 @@ public class ProxyHandler implements Handler<RoutingContext> {
         final String method = aContext.request().method().name();
         final RequestBody payload = aContext.body();
         final String originalClientIP = aContext.request().remoteAddress().hostAddress();
-        final String[] allowedIPsArray = myConfig.getString(Config.ALLOWED_IPS, LOCAL_HOST + "/32").split(COMMA);
-        final Cidr4Trie<String> allowedIPs = buildAllowedNetwork(allowedIPsArray);
 
-        if (isOnNetwork(new Ip4(originalClientIP), allowedIPs) || isOpenEndpoint(path, method)) {
+        if (isOnNetwork(new Ip4(originalClientIP), myAllowedIPs) || isOpenEndpoint(path, method)) {
             final String receivedQuery = path.concat(
                     aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
 
