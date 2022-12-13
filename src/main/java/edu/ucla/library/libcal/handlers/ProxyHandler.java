@@ -54,6 +54,9 @@ public class ProxyHandler implements Handler<RoutingContext> {
     /** The LibCal event form endpoint. */
     private static final Pattern EVENT_FORM = Pattern.compile("/api/1.1/events/form/[a-zA-Z0-9]+");
 
+    /** The LibCal event's HTML page. */
+    private static final Pattern EVENT_PAGE = Pattern.compile("/event/[a-zA-Z0-9]+");
+
     /**
      * The handler's copy of the Vert.x instance.
      */
@@ -105,6 +108,7 @@ public class ProxyHandler implements Handler<RoutingContext> {
         if (isOnNetwork(new Ip4(originalClientIP), allowedIPs) || isOpenEndpoint(path, method)) {
             final String receivedQuery = path.concat(
                     aContext.request().query() != null ? QUESTION_MARK.concat(aContext.request().query()) : EMPTY);
+
             myTokenProxy.getBearerToken().compose(token -> {
                 return myApiProxy
                         .getLibCalOutput(token, receivedQuery, method, payload != null ? payload.asString() : null)
@@ -197,7 +201,7 @@ public class ProxyHandler implements Handler<RoutingContext> {
         if (HttpMethod.POST.name().equals(aMethod)) {
             isAllowed = REGISTRATION.matcher(aPath).matches();
         } else if (HttpMethod.GET.name().equals(aMethod)) {
-            isAllowed = EVENT_FORM.matcher(aPath).matches();
+            isAllowed = EVENT_FORM.matcher(aPath).matches() || EVENT_PAGE.matcher(aPath).matches();
         }
 
         return isAllowed;
