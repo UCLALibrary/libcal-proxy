@@ -151,7 +151,7 @@ public class ProxyHandlerIT {
      */
     @Test
     public void testBadRequest(final Vertx aVertx, final VertxTestContext aContext) {
-        final HttpRequest<Buffer> request = myWebClient.get(myPort, INADDR_ANY, "/1.1/hours/2572"); // Bad path
+        final HttpRequest<Buffer> request = myWebClient.get(myPort, INADDR_ANY, "/0.1/hours/2572"); // Bad path
 
         request.putHeader(Constants.X_FORWARDED_FOR, GOOD_FORWARDS).send().onSuccess(response -> {
             final MultiMap headers = response.headers();
