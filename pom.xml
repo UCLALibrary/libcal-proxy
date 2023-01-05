@@ -27,9 +27,9 @@
   </issueManagement>
 
   <properties>
-    <vertx.version>4.3.4</vertx.version>
+    <vertx.version>4.3.7</vertx.version>
     <freelib.utils.version>3.3.0</freelib.utils.version>
-    <freelib.maven.version>0.4.3</freelib.maven.version>
+    <freelib.maven.version>0.4.5</freelib.maven.version>
     <logback.version>1.4.4</logback.version>
 
     <!-- Build plugin versions -->
@@ -44,7 +44,7 @@
     <junit.version>5.8.0</junit.version>
 
     <!-- Docker component versions -->
-    <docker.alpine.version>3.16.2</docker.alpine.version>
+    <docker.alpine.version>3.17.0</docker.alpine.version>
     <jdk.version>17</jdk.version>
 
     <!-- Name of the main Vert.x verticle -->
