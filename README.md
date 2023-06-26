@@ -20,6 +20,16 @@ To build the project, which includes running a bunch of tests, type:
         -Dlibcal.allowed.ips="127.0.0.0/16" # A comma-separated list of IPv4 CIDR blocks
                                             # Note that single IP addresses must be suffixed with /32
 
+To avoid typing these values each time, they can also be stored in a [Maven settings.xml file](https://maven.apache.org/settings.html#properties) using the following properties:
+
+        <libcal.client1.id>123</libcal.client1.id>
+        <libcal.client2.id>456</libcal.client2.id>
+        <libcal.client1.secret>0123456789abcdef0123456789abcdef</libcal.client1.secret>
+        <libcal.client2.secret>0123456789abcdef0123456789abcdef</libcal.client2.secret>
+        <libcal.token.endpoint>https://calendar.library.ucla.edu/1.1/oauth/token</libcal.token.endpoint>
+        <libcal.base.url>https://calendar.library.ucla.edu</libcal.base.url>
+        <libcal.allowed.ips>127.0.0.0/16</libcal.allowed.ips>
+
 To find the `libcal.client*` values, check your LibCal instance; you may need to create them if they do not exist.
 
 For authenticated UCLA people, these can be found at https://calendar.library.ucla.edu/admin/api/authentication.
