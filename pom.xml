@@ -27,24 +27,24 @@
   </issueManagement>
 
   <properties>
-    <vertx.version>4.3.7</vertx.version>
-    <freelib.utils.version>3.3.0</freelib.utils.version>
-    <freelib.maven.version>0.4.5</freelib.maven.version>
-    <logback.version>1.4.4</logback.version>
+    <vertx.version>4.4.4</vertx.version>
+    <freelib.utils.version>4.0.2</freelib.utils.version>
+    <freelib.maven.version>0.4.7</freelib.maven.version>
+    <logback.version>1.4.8</logback.version>
 
     <!-- Build plugin versions -->
-    <vertx.plugin.version>1.0.27</vertx.plugin.version>
-    <clean.plugin.version>3.1.0</clean.plugin.version>
-    <docker.plugin.version>0.40.2</docker.plugin.version>
-    <deploy.plugin.version>2.8.2</deploy.plugin.version>
-    <jar.plugin.version>3.2.2</jar.plugin.version>
+    <vertx.plugin.version>1.0.28</vertx.plugin.version>
+    <clean.plugin.version>3.3.1</clean.plugin.version>
+    <docker.plugin.version>0.43.0</docker.plugin.version>
+    <deploy.plugin.version>3.1.1</deploy.plugin.version>
+    <jar.plugin.version>3.3.0</jar.plugin.version>
     <cidr.ip.version>1.0.1</cidr.ip.version>
 
     <!-- Test dependency versions -->
-    <junit.version>5.8.0</junit.version>
+    <junit.version>5.9.3</junit.version>
 
     <!-- Docker component versions -->
-    <docker.alpine.version>3.17.0</docker.alpine.version>
+    <docker.alpine.version>3.18.2</docker.alpine.version>
     <jdk.version>17</jdk.version>
 
     <!-- Name of the main Vert.x verticle -->
