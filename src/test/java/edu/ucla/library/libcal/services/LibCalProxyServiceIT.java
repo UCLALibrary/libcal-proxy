@@ -30,11 +30,13 @@ import io.vertx.serviceproxy.ServiceBinder;
 @ExtendWith(VertxExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)
 public class LibCalProxyServiceIT {
-
+    /**
+     * The logger for the integration test.
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(LibCalProxyServiceIT.class, MessageCodes.BUNDLE);
 
     /**
-     * The service proxy for getting bearer token for API call
+     * The service proxy for getting bearer token for API call.
      */
     private OAuthTokenService myTokenProxy;
 

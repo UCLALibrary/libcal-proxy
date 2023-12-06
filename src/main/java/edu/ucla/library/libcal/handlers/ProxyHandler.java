@@ -68,12 +68,12 @@ public class ProxyHandler implements Handler<RoutingContext> {
     private final JsonObject myConfig;
 
     /**
-     * A service for LibCal API calls
+     * A service for LibCal API calls.
      */
     private final LibCalProxyService myApiProxy;
 
     /**
-     * A service for LibCal OAuth calls
+     * A service for LibCal OAuth calls.
      */
     private final OAuthTokenService myTokenProxy;
 
