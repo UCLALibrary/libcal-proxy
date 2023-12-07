@@ -46,12 +46,12 @@ public class ProxyHandlerIT {
     private static String GOOD_FORWARDS = "127.0.0.1,123.456.789.0";
 
     /**
-     * A legit LibCal API call
+     * A legit LibCal API call.
      */
     private static String REQUEST_PATH = "/api/1.1/hours/2572";
 
     /**
-     * A legit LibCal API call via POST
+     * A legit LibCal API call via POST.
      */
     private static String POST_PATH = "/api/1.1/events/9353038/register";
 
@@ -144,7 +144,7 @@ public class ProxyHandlerIT {
     }
 
     /**
-     * Tests that a client handles bad input
+     * Tests that a client handles bad input.
      *
      * @param aVertx A Vert.x instance
      * @param aContext A test context

@@ -32,7 +32,9 @@ import io.vertx.serviceproxy.ServiceBinder;
 @ExtendWith(VertxExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)
 public class OAuthTokenServiceIT {
-
+    /**
+     * The logger for the integration test.
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuthTokenServiceIT.class, MessageCodes.BUNDLE);
 
     /**

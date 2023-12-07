@@ -34,6 +34,13 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
      */
     private final HttpResponseMapper myMapper = new HttpResponseMapper();
 
+    /**
+     * Creates a new instance of the LibCalProxyServiceImpl.
+     *
+     * @param aVertx   A Vert.x instance
+     * @param aConfig  A configuration
+     * @throws NullPointerException if either aVertx or aConfig is null.
+     */
     LibCalProxyServiceImpl(final Vertx aVertx, final JsonObject aConfig) {
         myLibCalBaseURL = aConfig.getString(Config.LIBCAL_BASE_URL);
         myWebClient = WebClient.create(aVertx);

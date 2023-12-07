@@ -208,6 +208,8 @@ public class OAuthTokenServiceImpl implements OAuthTokenService {
     }
 
     /**
+     * Creates a JsonObject containing LibCal API credentials based on the provided client ID and client secret.
+     *
      * @param aClientID A client ID
      * @param aClientSecret A client secret
      * @return A JSON payload to send to the access token service

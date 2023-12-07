@@ -9,7 +9,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
 
 /**
- * A service for retrieving config and calling LibCal APIs
+ * A service for retrieving config and calling LibCal APIs.
  */
 @ProxyGen
 @VertxGen
