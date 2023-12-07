@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
+  
+  <groupId>edu.ucla.library</groupId>
   <artifactId>libcal-proxy</artifactId>
   <version>${revision}</version>
   <name>LibCal-Proxy</name>
@@ -30,7 +31,6 @@
     <vertx.version>4.4.6</vertx.version>
     <freelib.utils.version>4.0.2</freelib.utils.version>
     <freelib.maven.version>0.4.7</freelib.maven.version>
-    <logback.version>1.4.8</logback.version>
 
     <!-- Build plugin versions -->
     <vertx.plugin.version>1.0.28</vertx.plugin.version>
