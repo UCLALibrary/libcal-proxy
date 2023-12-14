@@ -37,8 +37,8 @@ public class LibCalProxyServiceImpl implements LibCalProxyService {
     /**
      * Creates a new instance of the LibCalProxyServiceImpl.
      *
-     * @param aVertx   A Vert.x instance
-     * @param aConfig  A configuration
+     * @param aVertx A Vert.x instance
+     * @param aConfig A configuration
      * @throws NullPointerException if either aVertx or aConfig is null.
      */
     LibCalProxyServiceImpl(final Vertx aVertx, final JsonObject aConfig) {

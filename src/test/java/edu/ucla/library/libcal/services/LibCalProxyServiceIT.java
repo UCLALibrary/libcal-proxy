@@ -30,6 +30,7 @@ import io.vertx.serviceproxy.ServiceBinder;
 @ExtendWith(VertxExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)
 public class LibCalProxyServiceIT {
+
     /**
      * The logger for the integration test.
      */
