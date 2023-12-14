@@ -44,7 +44,7 @@
     <junit.version>5.9.3</junit.version>
 
     <!-- Docker component versions -->
-    <docker.alpine.version>3.18.2</docker.alpine.version>
+    <docker.alpine.version>3.19.0</docker.alpine.version>
     <jdk.version>17</jdk.version>
 
     <!-- Name of the main Vert.x verticle -->
