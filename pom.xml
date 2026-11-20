@@ -35,7 +35,7 @@
     <!-- Build plugin versions -->
     <vertx.plugin.version>1.0.28</vertx.plugin.version>
     <clean.plugin.version>3.3.1</clean.plugin.version>
-    <docker.plugin.version>0.43.0</docker.plugin.version>
+    <docker.plugin.version>0.49.0</docker.plugin.version>
     <deploy.plugin.version>3.1.1</deploy.plugin.version>
     <jar.plugin.version>3.3.0</jar.plugin.version>
     <cidr.ip.version>1.0.1</cidr.ip.version>
@@ -44,7 +44,7 @@
     <junit.version>5.9.3</junit.version>
 
     <!-- Docker component versions -->
-    <docker.alpine.version>3.19.0</docker.alpine.version>
+    <docker.alpine.version>3.24.4</docker.alpine.version>
     <jdk.version>17</jdk.version>
 
     <!-- Name of the main Vert.x verticle -->

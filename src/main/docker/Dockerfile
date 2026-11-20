@@ -35,5 +35,6 @@ EXPOSE ${HTTP_PORT}
 ENV JAR_PATH="/opt/${project.artifactId}/${project.artifactId}-${project.version}.jar"
 ENV LOGGING_CONFIG="-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory"
 ENV LOGBACK_CONFIG="-Dlogback.configurationFile=/etc/${project.artifactId}/logback.xml"
+ENV JAVA_OPTS="-XX:+UnlockDiagnosticVMOptions -XX:-UseBASE64Intrinsics"
 
 CMD ["sh", "-c", "exec java ${JAVA_OPTS} ${LOGGING_CONFIG} ${LOGBACK_CONFIG} -jar ${JAR_PATH}"]
